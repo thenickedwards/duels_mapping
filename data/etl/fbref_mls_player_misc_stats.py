@@ -3,6 +3,8 @@ import glob
 import os
 from dependencies.connect_db import connect_db
 from dependencies.get_from_fbref import get_FBref_mls_player_misc_stats
+from data_handler import DataHandler
+data_handler = DataHandler()
 
 # TODO MOVE THESE TO JSON VARS
 database_name = "mls_stats.db"
@@ -36,42 +38,46 @@ dim_schmetzer_score_points = {
   }
 }
 
-
-
-conn = connect_db(database_name, database_path)
-c = conn.cursor()
-### Insert into raw table
-try:
-    df = get_FBref_mls_player_misc_stats(year=year, url=FBref_2024_url)
-    # Once new data obtained, remove existing data, then insert
-    c.execute(f"DELETE FROM {raw_table} WHERE season = ?", (year,))
-    print(f'Deleted from table: {raw_table} where season = {year}')
-    conn.commit()
-    df.to_sql(raw_table, conn, if_exists='append', index=False)
-    print(f'Inserted into table: {raw_table} where season = {year}')
-    conn.commit()
-except sqlite3.Error as e:
-    print(e)
-finally:
-    conn.close()
+# ### Insert into raw table
+data_handler.insert_historical_raw_FBref_mls_players_all_stats_misc(url=FBref_2024_url, year=year)
+#####
+# conn = connect_db(database_name, database_path)
+# c = conn.cursor()
+# try:
+#     df = get_FBref_mls_player_misc_stats(year=year, url=FBref_2024_url)
+#     # Once new data obtained, remove existing data, then insert
+#     c.execute(f"DELETE FROM {raw_table} WHERE season = ?", (year,))
+#     print(f'Deleted from table: {raw_table} where season = {year}')
+#     conn.commit()
+#     df.to_sql(raw_table, conn, if_exists='append', index=False)
+#     print(f'Inserted into table: {raw_table} where season = {year}')
+#     conn.commit()
+# except sqlite3.Error as e:
+#     print(e)
+# finally:
+#     conn.close()
+#####
 
 ### Transform raw data for staging table
-conn = connect_db(database_name, database_path)
-c = conn.cursor()
-try:
-    for sql_file in glob.glob('data/etl/sql/transform/*.sql'):
-        with open(sql_file, 'r') as f:
-            table_name = os.path.splitext(os.path.basename(sql_file))[0].replace('load_', '')
-            sql = f.read()
-            c.executescript(sql)
-            # c.executescript(sql, {'point_value': dim_schmetzer_score_points['point_value'], 'description': dim_schmetzer_score_points['abbrev']})
-            print(f'Inserted into table: {table_name} where season = {year} by player')
-            conn.commit()
-except sqlite3.Error as e:
-    print(e)
-finally:
-    conn.close()
-
+data_handler.insert_stg_FBref_mls_players_all_stats_misc(year=year)
+#####
+# conn = connect_db(database_name, database_path)
+# c = conn.cursor()
+# try:
+#     # for sql_file in glob.glob('data/etl/sql/transform/*.sql'):
+#     sql_file = glob.glob('data/etl/sql/transform/load_stg_FBref_mls_players_all_stats_misc.sql')
+#     with open(sql_file, 'r') as f:
+#         table_name = os.path.splitext(os.path.basename(sql_file))[0].replace('load_', '')
+#         sql = f.read()
+#         c.executescript(sql)
+#         # c.executescript(sql, {'point_value': dim_schmetzer_score_points['point_value'], 'description': dim_schmetzer_score_points['abbrev']})
+#         print(f'Inserted into table: {table_name} where season = {year} by player')
+#         conn.commit()
+# except sqlite3.Error as e:
+#     print(e)
+# finally:
+#     conn.close()
+#####
 
 
 

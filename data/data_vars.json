@@ -1,0 +1,37 @@
+{
+  "database": {
+    "name": "mls_stats.db",
+    "path": "data/database/_DATABASE_NAME_",
+    "inaugural_season": 1996,
+    "misc_raw_table": "raw_FBref_mls_players_all_stats_misc",
+    "misc_stg_table": "stg_FBref_mls_players_all_stats_misc"
+  },
+  "fbref": {
+    "fbref_urls": {
+      "misc_season_current": "https://FBref.com/en/comps/22/misc/Major-League-Soccer-Stats",
+      "misc_season_specific": "https://FBref.com/en/comps/22/_YEAR_/misc/_YEAR_-Major-League-Soccer-Stats"
+    }
+  },
+  "schmetzer_score_points": {
+    "aerial duels won": {
+      "point_value": 1,
+      "abbrev": "adw"
+    },
+    "aerial duels lost": {
+      "point_value": -0.75,
+      "abbrev": "adl"
+    },
+    "tackles won": {
+      "point_value": 1,
+      "abbrev": "tkwon"
+    },
+    "interceptions": {
+      "point_value": 0.75,
+      "abbrev": "inter"
+    },
+    "recoveries": {
+      "point_value": 0.5,
+      "abbrev": "recov"
+    }
+  }
+}
