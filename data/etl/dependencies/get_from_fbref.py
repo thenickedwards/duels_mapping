@@ -1,16 +1,7 @@
-# from selenium import webdriver
-# import requests
-# from bs4 import BeautifulSoup
 from pandas import DataFrame, option_context
 
 from dependencies.selenium_to_beautifulsoup import selenium_to_beautifulsoup, selenium_to_beautifulsoup2
 from dependencies.parse_rows import parse_row_by_element, parse_nations
-
-
-#TODO: stash varaibles elsewhere
-year=2024
-FBref_current_url='https://FBref.com/en/comps/22/misc/Major-League-Soccer-Stats'
-FBref_2024_url=f'https://FBref.com/en/comps/22/{year}/misc/{year}-Major-League-Soccer-Stats'
 
 def get_FBref_mls_player_misc_stats(year, url='https://FBref.com/en/comps/22/misc/Major-League-Soccer-Stats', verbose=1):
     '''
