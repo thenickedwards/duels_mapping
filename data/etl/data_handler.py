@@ -7,9 +7,6 @@ from dependencies.connect_db import connect_db
 from dependencies.get_from_fbref import get_FBref_mls_player_misc_stats
 
 
-
-
-
 class DataHandler:
     def __init__(self, data_vars_path='data/data_vars.json'):
         with open(data_vars_path, 'r') as f:
@@ -41,23 +38,19 @@ class DataHandler:
             conn.close()
             
     def insert_dim_schmetzer_score_points(self):
-        # TODO:
         conn = connect_db(self.database_name, self.database_path)
         c = conn.cursor()
         try:
             for stat_name, stat_info in self.schmetzer_score.items():
                 point_value = stat_info["point_value"]
                 abbrev = stat_info["abbrev"]
-                # c.execute(''' INSERT OR IGNORE INTO dim_schmetzer_score_points (stat_name, point_value, description) VALUES (?, ?, ?)''', (stat_name,point_value, description))
                 c.execute("INSERT INTO dim_schmetzer_score_points VALUES (:stat_name, :point_value, :abbrev)", {'stat_name': stat_name, 'point_value': point_value, 'abbrev': abbrev})
-                # c.execute("INSERT INTO soccer_players VALUES (:name, :team, :position)", {'name': player.name, 'team': player.team, 'position': player.position })
                 conn.commit()
                 print(f'Inserted into table: dim_schmetzer_score_points {stat_name} with point_value: {point_value} and abbrev: {abbrev}')
         except sqlite3.Error as e:
             print(e)
         finally:
             conn.close()
-
         
     def insert_historical_raw_FBref_mls_players_all_stats_misc(self):
         conn = connect_db(self.database_name, self.database_path)
