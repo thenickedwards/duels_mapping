@@ -1,8 +1,3 @@
-import sqlite3
-import glob
-import os
-from dependencies.connect_db import connect_db
-from dependencies.get_from_fbref import get_FBref_mls_player_misc_stats
 from data_handler import DataHandler
 data_handler = DataHandler()
 
