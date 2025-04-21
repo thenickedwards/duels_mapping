@@ -106,3 +106,21 @@ class DataHandler:
             print(e)
         finally:
             conn.close()
+    
+    def insert_schmetzer_scores_players(self):
+        conn = connect_db(self.database_name, self.database_path)
+        c = conn.cursor()
+        try:
+            sql_file = glob.glob('data/etl/sql/z_schmetzer_scores/schmetzer_scores_players.sql')[0]
+            for year in range(2018, self.current_year + 1):            
+                with open(sql_file, 'r') as f:
+                    table_name = f'schmetzer_scores_{year}'
+                    sql = f.read()
+                    sql = sql.format(year=year)
+                    c.executescript(sql)
+                    print(f'Created table: {table_name} and inserted player data from table: {self.stg_table} for season {year}')
+                    conn.commit()
+        except sqlite3.Error as e:
+            print(e)
+        finally:
+            conn.close()
