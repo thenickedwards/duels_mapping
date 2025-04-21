@@ -1,11 +1,11 @@
 import sqlite3
 
 ### CONNECT (OR CREATE) DATABASE
-def connect_db(database_name, database_path):
+def connect_db(database_name, database_path, timeout=10.0):
     try:
-        with sqlite3.connect(database_path) as conn:
+        with sqlite3.connect(database_path, timeout=timeout) as conn:
             print(f"Opened SQLite database {database_name} with SQLite version {sqlite3.sqlite_version} successfully.")
-            return sqlite3.connect(database_path)
+            return sqlite3.connect(database_path, timeout=timeout)
         
     except sqlite3.Error as e:
         print(f"Failed to open database {database_name}:\n", e)
