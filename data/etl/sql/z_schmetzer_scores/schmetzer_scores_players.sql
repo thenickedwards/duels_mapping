@@ -76,20 +76,20 @@ SELECT
     aerial_duels_won * (SELECT point_value FROM dim_schmetzer_score_points WHERE stat_name = 'aerial duels won'),
     aerial_duels_lost,
     aerial_duels_lost * (SELECT point_value FROM dim_schmetzer_score_points WHERE stat_name = 'aerial duels lost'),
-    (aerial_duels_won + aerial_duels_lost),
+    (aerial_duels_won + aerial_duels_lost), -- aerial_duels_total
     (aerial_duels_won * (SELECT point_value FROM dim_schmetzer_score_points WHERE stat_name = 'aerial duels won')) +
-    (aerial_duels_lost * (SELECT point_value FROM dim_schmetzer_score_points WHERE stat_name = 'aerial duels lost')),
+    (aerial_duels_lost * (SELECT point_value FROM dim_schmetzer_score_points WHERE stat_name = 'aerial duels lost')), -- aerial_duels_total_pts
     CASE
         WHEN (aerial_duels_won + aerial_duels_lost) = 0 THEN 0
-        ELSE ROUND(100.0 * aerial_duels_won / (aerial_duels_won + aerial_duels_lost), 1)
+        ELSE ROUND(100.0 * aerial_duels_won / (aerial_duels_won + aerial_duels_lost), 1) -- aerial_duels_won_pct
     END AS aerial_duels_won_pct,
-    -- Total Schmetzer score
+    -- Calculate Schmetzer score
     (interceptions * (SELECT point_value FROM dim_schmetzer_score_points WHERE stat_name = 'interceptions')) +
     (tackles_won * (SELECT point_value FROM dim_schmetzer_score_points WHERE stat_name = 'tackles won')) +
     (recoveries * (SELECT point_value FROM dim_schmetzer_score_points WHERE stat_name = 'recoveries')) +
     (aerial_duels_won * (SELECT point_value FROM dim_schmetzer_score_points WHERE stat_name = 'aerial duels won')) +
     (aerial_duels_lost * (SELECT point_value FROM dim_schmetzer_score_points WHERE stat_name = 'aerial duels lost'))
-    AS schmetzer_score
+    AS schmetzer_score -- schmetzer_score
 FROM stg_FBref_mls_players_all_stats_misc
 WHERE season = {year}
 ORDER BY schmetzer_score DESC;
