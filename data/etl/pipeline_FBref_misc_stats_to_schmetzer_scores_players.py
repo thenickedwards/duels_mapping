@@ -3,7 +3,10 @@ data_handler = DataHandler()
 
 
 def pipeline_FBref_misc_stats_to_schmetzer_scores_players():    
-    ### Insert into dim tables
+    ### Create tables
+    data_handler.create_tables()
+    
+    ### Insert static data into dim tables
     data_handler.insert_dim_schmetzer_score_points()
 
     ### Insert into raw table
