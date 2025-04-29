@@ -1,28 +1,13 @@
-export const runtime = "nodejs";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
 import fs from "fs";
 import path from "path";
+import { getDatabasePath } from "@/utils/db-utils";
 
+// Hold the db instance across requests
 let db = null;
 
-async function getDatabasePath() {
-  const configPath = path.join(
-    process.cwd(),
-    "public",
-    "data",
-    "data_vars.json"
-  );
-  const configData = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-  const databaseName = configData.database.name;
-  const databasePathTemplate = configData.database.path;
-  const resolvedDatabasePath = path.join(
-    "public",
-    databasePathTemplate.replace("_DATABASE_NAME_", databaseName)
-  );
-  return resolvedDatabasePath;
-}
-
+// GET handler for current season Schmetzer scores
 export async function GET() {
   if (!db) {
     const dbPath = await getDatabasePath();
@@ -32,8 +17,25 @@ export async function GET() {
     });
   }
 
+  const sqlPath = path.join(
+    process.cwd(),
+    "utils",
+    "sql",
+    "select",
+    "schmetzer_scores_season.sql"
+  );
+
+  // Get the current year
+  const season = new Date().getFullYear();
+
   try {
-    const scores = await db.all("SELECT * FROM schmetzer_scores_2025");
+    // Read and prepare SQL string
+    let sql = fs.readFileSync(sqlPath, "utf-8");
+    sql = sql.replace("{year}", season); // Replace placeholder
+
+    // Execute SQL
+    const scores = await db.all(sql);
+
     return new Response(JSON.stringify(scores), {
       headers: { "Content-Type": "application/json" },
       status: 200,

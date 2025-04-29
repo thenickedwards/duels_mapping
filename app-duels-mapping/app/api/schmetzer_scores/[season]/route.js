@@ -1,27 +1,11 @@
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
-import fs from "fs";
-import path from "path";
+import { getDatabasePath } from "@/utils/db-utils";
 
+// Hold the db instance across requests
 let db = null;
 
-async function getDatabasePath() {
-  const configPath = path.join(
-    process.cwd(),
-    "public",
-    "data",
-    "data_vars.json"
-  );
-  const configData = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-  const databaseName = configData.database.name;
-  const databasePathTemplate = configData.database.path;
-  const resolvedDatabasePath = path.join(
-    "public",
-    databasePathTemplate.replace("_DATABASE_NAME_", databaseName)
-  );
-  return resolvedDatabasePath;
-}
-
+// GET handler for specific season Schmetzer scores
 export async function GET(req, { params }) {
   const { season } = params;
 
