@@ -3,8 +3,10 @@ import { open } from "sqlite";
 import fs from "fs";
 import path from "path";
 
+// Hold the db instance across requests
 let db = null;
 
+// Reads and resolves the path to the SQLite database
 async function getDatabasePath() {
   const configPath = path.join(
     process.cwd(),
@@ -22,6 +24,7 @@ async function getDatabasePath() {
   return resolvedDatabasePath;
 }
 
+// GET handler for specific season Schmetzer scores
 export async function GET(req, { params }) {
   const { season } = params;
 

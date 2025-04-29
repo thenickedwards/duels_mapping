@@ -1,11 +1,12 @@
-export const runtime = "nodejs";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
 import fs from "fs";
 import path from "path";
 
+// Hold the db instance across requests
 let db = null;
 
+// Reads and resolves the path to the SQLite database
 async function getDatabasePath() {
   const configPath = path.join(
     process.cwd(),
@@ -23,6 +24,7 @@ async function getDatabasePath() {
   return resolvedDatabasePath;
 }
 
+// GET handler for current season Schmetzer scores
 export async function GET() {
   if (!db) {
     const dbPath = await getDatabasePath();
@@ -32,8 +34,11 @@ export async function GET() {
     });
   }
 
+  // Get the current year
+  const season = new Date().getFullYear();
+
   try {
-    const scores = await db.all("SELECT * FROM schmetzer_scores_2025");
+    const scores = await db.all(`SELECT * FROM schmetzer_scores_${season}`);
     return new Response(JSON.stringify(scores), {
       headers: { "Content-Type": "application/json" },
       status: 200,
