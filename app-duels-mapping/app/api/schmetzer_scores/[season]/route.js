@@ -1,5 +1,7 @@
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
+import fs from "fs";
+import path from "path";
 import { getDatabasePath } from "@/utils/db-utils";
 
 // Hold the db instance across requests
@@ -17,8 +19,22 @@ export async function GET(req, { params }) {
     });
   }
 
+  const sqlPath = path.join(
+    process.cwd(),
+    "utils",
+    "sql",
+    "select",
+    "schmetzer_scores_season.sql"
+  );
+
   try {
-    const scores = await db.all(`SELECT * FROM schmetzer_scores_${season}`);
+    // Load and interpolate the SQL with the requested season
+    let sql = fs.readFileSync(sqlPath, "utf-8");
+    sql = sql.replace("{year}", season);
+
+    // Execute SQL
+    const scores = await db.all(sql);
+
     return new Response(JSON.stringify(scores), {
       headers: { "Content-Type": "application/json" },
       status: 200,
