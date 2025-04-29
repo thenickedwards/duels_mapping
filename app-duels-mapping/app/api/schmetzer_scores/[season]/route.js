@@ -6,12 +6,17 @@ import path from "path";
 let db = null;
 
 async function getDatabasePath() {
-  const configPath = path.join(process.cwd(), "..", "data", "data_vars.json");
+  const configPath = path.join(
+    process.cwd(),
+    "public",
+    "data",
+    "data_vars.json"
+  );
   const configData = JSON.parse(fs.readFileSync(configPath, "utf-8"));
   const databaseName = configData.database.name;
   const databasePathTemplate = configData.database.path;
   const resolvedDatabasePath = path.join(
-    "..",
+    "public",
     databasePathTemplate.replace("_DATABASE_NAME_", databaseName)
   );
   return resolvedDatabasePath;
