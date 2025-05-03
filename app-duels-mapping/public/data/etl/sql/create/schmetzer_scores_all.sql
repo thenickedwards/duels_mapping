@@ -25,3 +25,8 @@ CREATE TABLE "schmetzer_scores_all" (
   recoveries INTEGER,
   recoveries_pts REAL
 );
+
+-- Indexes for fast querying
+CREATE INDEX idx_player ON schmetzer_scores_all (player_name);
+CREATE INDEX idx_season ON schmetzer_scores_all (season);
+CREATE INDEX idx_player_season ON schmetzer_scores_all (player_name, season);
