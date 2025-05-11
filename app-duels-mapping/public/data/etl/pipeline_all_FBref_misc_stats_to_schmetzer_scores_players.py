@@ -2,7 +2,7 @@ from data_handler import DataHandler
 data_handler = DataHandler()
 
 
-def pipeline_FBref_misc_stats_to_schmetzer_scores_players():    
+def pipeline_all_FBref_misc_stats_to_schmetzer_scores_players():    
     ### Create tables
     data_handler.create_tables()
     
@@ -18,7 +18,10 @@ def pipeline_FBref_misc_stats_to_schmetzer_scores_players():
     
     ### Create and Insert into schmetzer_scores_players calculated points and scores (each table per season)
     data_handler.insert_schmetzer_scores_players()
+    
+    ### Create and Insert into schmetzer_scores_all calculated points and scores (all seasons, one table)
+    data_handler.insert_schmetzer_scores_all_seasons()
 
 
 if __name__ == "__main__":
-    pipeline_FBref_misc_stats_to_schmetzer_scores_players()
+    pipeline_all_FBref_misc_stats_to_schmetzer_scores_players()

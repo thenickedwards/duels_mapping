@@ -8,7 +8,7 @@ from dependencies.get_from_fbref import get_FBref_mls_player_misc_stats
 
 
 class DataHandler:
-    def __init__(self, data_vars_path='data/data_vars.json'):
+    def __init__(self, data_vars_path='app-duels-mapping/public/data/data_vars.json'):
         with open(data_vars_path, 'r') as f:
             data_vars = json.load(f)
             self.database_name = data_vars["database"]["name"]
@@ -25,7 +25,7 @@ class DataHandler:
         conn = connect_db(self.database_name, self.database_path)
         c = conn.cursor()
         try:
-            for sql_file in glob.glob('data/etl/sql/create/*.sql'):
+            for sql_file in glob.glob('app-duels-mapping/public/data/etl/sql/create/*.sql'):
                 with open(sql_file, 'r') as f:
                     table_name = os.path.splitext(os.path.basename(sql_file))[0]
                     sql = f.read()
@@ -95,7 +95,7 @@ class DataHandler:
         conn = connect_db(self.database_name, self.database_path)
         c = conn.cursor()
         try:
-            sql_file = glob.glob('data/etl/sql/transform/load_stg_FBref_mls_players_all_stats_misc.sql')[0]
+            sql_file = glob.glob('app-duels-mapping/public/data/etl/sql/transform/load_stg_FBref_mls_players_all_stats_misc.sql')[0]
             with open(sql_file, 'r') as f:
                 table_name = os.path.splitext(os.path.basename(sql_file))[0].replace('load_', '')
                 sql = f.read()
@@ -111,7 +111,7 @@ class DataHandler:
         conn = connect_db(self.database_name, self.database_path)
         c = conn.cursor()
         try:
-            sql_file = glob.glob('data/etl/sql/z_schmetzer_scores/schmetzer_scores_players.sql')[0]
+            sql_file = glob.glob('app-duels-mapping/public/data/etl/sql/z_schmetzer_scores/schmetzer_scores_players.sql')[0]
             for year in range(2018, self.current_year + 1):            
                 with open(sql_file, 'r') as f:
                     table_name = f'schmetzer_scores_{year}'
@@ -120,6 +120,37 @@ class DataHandler:
                     c.executescript(sql)
                     print(f'Created table: {table_name} and inserted player data from table: {self.stg_table} for season {year}')
                     conn.commit()
+        except sqlite3.Error as e:
+            print(e)
+        finally:
+            conn.close()
+    
+    def insert_schmetzer_scores_all_seasons(self):
+        conn = connect_db(self.database_name, self.database_path)
+        c = conn.cursor()
+        try:
+             # Find all schmetzer_scores_YYYY tables
+            c.execute("""
+                SELECT name FROM sqlite_master
+                WHERE type='table' AND name LIKE 'schmetzer_scores_20__';
+            """)
+            schmetzer_season_tables = [row[0] for row in c.fetchall()]
+            
+            sql_file = glob.glob('app-duels-mapping/public/data/etl/sql/z_schmetzer_scores/schmetzer_scores_all.sql')[0]
+            with open(sql_file, 'r') as f:
+                sql_template = f.read()
+
+            for table in schmetzer_season_tables:
+                year_match = table[-4:]
+                if not year_match.isdigit():
+                    continue
+                year = int(year_match)
+
+                sql = sql_template.format(year=year)
+                c.executescript(sql)
+                print(f'Inserted player data into schmetzer_scores_all from table: {table} for season {year}')
+                conn.commit()
+
         except sqlite3.Error as e:
             print(e)
         finally:
