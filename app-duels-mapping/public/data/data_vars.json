@@ -1,7 +1,7 @@
 {
   "database": {
     "name": "mls_stats.db",
-    "path": "data/database/_DATABASE_NAME_",
+    "path": "app-duels-mapping/public/data/database/_DATABASE_NAME_",
     "inaugural_season": 1996,
     "misc_raw_table": "raw_FBref_mls_players_all_stats_misc",
     "misc_stg_table": "stg_FBref_mls_players_all_stats_misc"

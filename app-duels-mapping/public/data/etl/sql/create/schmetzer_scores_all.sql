@@ -27,6 +27,6 @@ CREATE TABLE "schmetzer_scores_all" (
 );
 
 -- Indexes for fast querying
-CREATE INDEX idx_player ON schmetzer_scores_all (player_name);
-CREATE INDEX idx_season ON schmetzer_scores_all (season);
-CREATE INDEX idx_player_season ON schmetzer_scores_all (player_name, season);
+CREATE INDEX IF NOT EXISTS idx_schmetzer_scores_all__player ON schmetzer_scores_all (player_name);
+CREATE INDEX IF NOT EXISTS idx_schmetzer_scores_all__season ON schmetzer_scores_all (season);
+CREATE INDEX IF NOT EXISTS idx_schmetzer_scores_all__player_season ON schmetzer_scores_all (player_name, season);

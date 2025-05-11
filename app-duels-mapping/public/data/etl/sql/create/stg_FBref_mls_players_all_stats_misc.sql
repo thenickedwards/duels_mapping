@@ -29,5 +29,5 @@ CREATE TABLE stg_FBref_mls_players_all_stats_misc (
     load_datetime           TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX IF NOT EXISTS idx_stg_season_player
+CREATE INDEX IF NOT EXISTS idx_stg_season__player
     ON stg_FBref_mls_players_all_stats_misc (season, player_name);

@@ -29,8 +29,7 @@ CREATE TABLE "schmetzer_scores_{year}" (
 );
 
 -- Index for quicker lookup
-CREATE INDEX IF NOT EXISTS idx_schmetzer_scores_{year}
-    ON "schmetzer_scores_{year}" (season, player_name);
+CREATE INDEX IF NOT EXISTS idx_schmetzer_scores_{year}__player ON "schmetzer_scores_{year}" (player_name);
 
 -- Insert data from staging table and compute Schmetzer Score
 INSERT INTO "schmetzer_scores_{year}" (
@@ -57,6 +56,37 @@ INSERT INTO "schmetzer_scores_{year}" (
     aerial_duels_won_pct,
     schmetzer_score
 )
+-- Trades create duplicate records for players (one per team).
+-- In order to create one record per player, records are consolidated to the squad at which the player had more minutes (i.e. higher value in nineties)
+WITH ranked_squads AS (
+    SELECT *,
+           RANK() OVER (
+               PARTITION BY player_name
+               ORDER BY nineties DESC
+           ) AS squad_rank
+    FROM stg_FBref_mls_players_all_stats_misc
+    WHERE season = {year}
+),
+squad_agg_by_nineties AS (
+    SELECT
+        {year} AS season,
+        player_name,
+        MAX(player_nationality) AS player_nationality,  -- TODO: check for varinace (i.e. one time switch)
+        MAX(position) AS position,
+        -- Take the squad from row with most nineties
+        MAX(CASE WHEN squad_rank = 1 THEN squad END) AS squad,
+        MAX(player_age) AS player_age,
+        MAX(player_yob) AS player_yob,
+        SUM(nineties) AS nineties,
+        SUM(interceptions) AS interceptions,
+        SUM(tackles_won) AS tackles_won,
+        SUM(recoveries) AS recoveries,
+        SUM(aerial_duels_won) AS aerial_duels_won,
+        SUM(aerial_duels_lost) AS aerial_duels_lost
+    FROM ranked_squads
+    GROUP BY player_name
+)
+-- 
 SELECT
     season,
     player_name,
@@ -90,7 +120,7 @@ SELECT
     (aerial_duels_won * (SELECT point_value FROM dim_schmetzer_score_points WHERE stat_name = 'aerial duels won')) +
     (aerial_duels_lost * (SELECT point_value FROM dim_schmetzer_score_points WHERE stat_name = 'aerial duels lost'))
     AS schmetzer_score -- schmetzer_score
-FROM stg_FBref_mls_players_all_stats_misc
+FROM squad_agg_by_nineties
 WHERE season = {year}
 ORDER BY schmetzer_score DESC;
 
