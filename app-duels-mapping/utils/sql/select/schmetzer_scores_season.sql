@@ -22,4 +22,5 @@ SELECT
     recoveries,
     recoveries_pts
 FROM "schmetzer_scores_{year}"
-ORDER BY schmetzer_score DESC;
+    "${whereClause}"
+    ORDER BY schmetzer_score DESC;
