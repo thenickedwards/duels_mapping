@@ -12,8 +12,16 @@ export async function getDatabasePath() {
   const configData = JSON.parse(fs.readFileSync(configPath, "utf-8"));
   const databaseName = configData.database.name;
   const databasePathTemplate = configData.database.path;
-  return path.join(
-    "public",
-    databasePathTemplate.replace("_DATABASE_NAME_", databaseName)
+  const relativePath = databasePathTemplate.replace(
+    "_DATABASE_NAME_",
+    databaseName
   );
+
+  // Convert to absolute path using process.cwd()
+  const absolutePath = path.join(process.cwd(), relativePath);
+
+  // Optional: debug
+  console.log("Resolved DB absolute path:", absolutePath);
+
+  return absolutePath;
 }

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Box,
@@ -14,13 +14,13 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-} from '@mui/material';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { DataGrid } from '@mui/x-data-grid';
-import useSWR from 'swr';
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+} from "@mui/material";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { DataGrid } from "@mui/x-data-grid";
+import useSWR from "swr";
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const fetcher = (url) => fetch(url).then((r) => r.json());
 
@@ -28,47 +28,49 @@ export default function PlayersPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const tab = searchParams.get('tab') || 'players';
-  const season = searchParams.get('season') || '2024';
+  const tab = searchParams.get("tab") || "players";
+  const season = searchParams.get("season") || "2024";
 
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [filters, setFilters] = useState({
-    position: '',
-    squad: '',
-    minMinutes: '',
+    position: "",
+    squad: "",
+    minMinutes: "",
   });
 
   const [selectedPlayer, setSelectedPlayer] = useState(null);
 
   // Build query string
   const query = new URLSearchParams({ season });
-  if (filters.position) query.set('position', filters.position);
-  if (filters.squad) query.set('squad', filters.squad);
-  if (filters.minMinutes) query.set('minMinutes', filters.minMinutes);
+  if (filters.position) query.set("position", filters.position);
+  if (filters.squad) query.set("squad", filters.squad);
+  if (filters.minMinutes) query.set("minMinutes", filters.minMinutes);
 
-  const { data, isLoading, error } = useSWR(`/api/schmetzer_scores?${query}`, fetcher);
+  // const { data, isLoading, error } = useSWR(`/api/schmetzer_scores?${query}`, fetcher);
   // *** REPLACE previous line when route.js and structure is updated. ***
-  // const { data, error, isLoading } = useSWR(`/api/schmetzer_scores?${query.toString()}`, fetcher); 
-
+  const { data, error, isLoading } = useSWR(
+    `/api/schmetzer_scores?${query.toString()}`,
+    fetcher
+  );
 
   const updateSeason = (year) => {
     const newParams = new URLSearchParams(searchParams.toString());
-    newParams.set('season', year);
+    newParams.set("season", year);
     router.replace(`?${newParams.toString()}`);
   };
 
   const handleTabChange = (_, newTab) => {
     const newParams = new URLSearchParams(searchParams.toString());
-    newParams.set('tab', newTab);
+    newParams.set("tab", newTab);
     router.replace(`?${newParams.toString()}`);
   };
 
   const columns = [
-    { field: 'schmetzer_rk', headerName: 'Rk', width: 70 },
-    { field: 'player_name', headerName: 'Player', width: 150 },
-    { field: 'player_age', headerName: 'Age', width: 110 },
-    { field: 'squad', headerName: 'Squad', flex: 1 },
-    { field: 'position', headerName: 'POS', width: 90 },
+    { field: "schmetzer_rk", headerName: "Rk", width: 70 },
+    { field: "player_name", headerName: "Player", width: 150 },
+    { field: "player_age", headerName: "Age", width: 110 },
+    { field: "squad", headerName: "Squad", flex: 1 },
+    { field: "position", headerName: "POS", width: 90 },
   ];
 
   const rows = data?.map((row, i) => ({ id: i, ...row })) || [];
@@ -80,27 +82,27 @@ export default function PlayersPage() {
         <Tab label="Comparisons" value="comparisons" />
       </Tabs>
 
-      {tab === 'players' && (
+      {tab === "players" && (
         <>
           <Box mt={2} display="flex" gap={2} alignItems="center">
             <Typography variant="h6">Season:</Typography>
 
             <Button
-              variant={season === '2025' ? 'contained' : 'outlined'}
-              onClick={() => updateSeason('2025')}
+              variant={season === "2025" ? "contained" : "outlined"}
+              onClick={() => updateSeason("2025")}
             >
               2025
             </Button>
 
             <Button
-              variant={season === '2024' ? 'contained' : 'outlined'}
-              onClick={() => updateSeason('2024')}
+              variant={season === "2024" ? "contained" : "outlined"}
+              onClick={() => updateSeason("2024")}
             >
               2024
             </Button>
 
             <Select
-              value={['2023', '2022', '2021'].includes(season) ? season : ''}
+              value={["2023", "2022", "2021"].includes(season) ? season : ""}
               onChange={(e) => updateSeason(e.target.value)}
               displayEmpty
               IconComponent={ExpandMoreIcon}
@@ -119,7 +121,7 @@ export default function PlayersPage() {
             </IconButton>
           </Box>
 
-          <Box mt={2} sx={{ height: 450, width: '100%' }}>
+          <Box mt={2} sx={{ height: 450, width: "100%" }}>
             <DataGrid
               rows={rows}
               columns={columns}
@@ -139,7 +141,9 @@ export default function PlayersPage() {
               <Select
                 fullWidth
                 value={filters.position}
-                onChange={(e) => setFilters({ ...filters, position: e.target.value })}
+                onChange={(e) =>
+                  setFilters({ ...filters, position: e.target.value })
+                }
                 displayEmpty
                 sx={{ mt: 2 }}
               >
@@ -154,7 +158,9 @@ export default function PlayersPage() {
                 fullWidth
                 sx={{ mt: 2 }}
                 value={filters.squad}
-                onChange={(e) => setFilters({ ...filters, squad: e.target.value })}
+                onChange={(e) =>
+                  setFilters({ ...filters, squad: e.target.value })
+                }
               />
 
               <TextField
@@ -162,12 +168,18 @@ export default function PlayersPage() {
                 fullWidth
                 sx={{ mt: 2 }}
                 value={filters.minMinutes}
-                onChange={(e) => setFilters({ ...filters, minMinutes: e.target.value })}
+                onChange={(e) =>
+                  setFilters({ ...filters, minMinutes: e.target.value })
+                }
               />
             </Box>
           </Drawer>
 
-          <Dialog open={!!selectedPlayer} onClose={() => setSelectedPlayer(null)} fullWidth>
+          <Dialog
+            open={!!selectedPlayer}
+            onClose={() => setSelectedPlayer(null)}
+            fullWidth
+          >
             <DialogTitle>{selectedPlayer?.player_name}</DialogTitle>
             <DialogContent>
               <Typography>Position: {selectedPlayer?.position}</Typography>
@@ -179,7 +191,7 @@ export default function PlayersPage() {
         </>
       )}
 
-      {tab === 'comparisons' && (
+      {tab === "comparisons" && (
         <Box mt={4}>
           <Typography>Comparison Tab Content (Coming Soon)</Typography>
         </Box>
