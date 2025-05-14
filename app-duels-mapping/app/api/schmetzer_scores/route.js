@@ -2,7 +2,7 @@ import sqlite3 from "sqlite3";
 import { open } from "sqlite";
 import fs from "fs";
 import path from "path";
-import { getDatabasePath } from "@/utils/db-utils";
+import { getDatabasePath, getSqlSelect } from "@/utils/db-utils";
 
 // Hold the db instance across requests
 let db = null;
@@ -54,17 +54,19 @@ export async function GET(req) {
     });
   }
 
-  const sqlPath = path.join(
-    process.cwd(),
-    "utils",
-    "sql",
-    "select",
-    "schmetzer_scores_season.sql"
-  );
+  // const sqlPath = path.join(
+  //   process.cwd(),
+  //   "utils",
+  //   "sql",
+  //   "select",
+  //   "schmetzer_scores_season.sql"
+  // );
+
+  const sql = getSqlSelect("schmetzer_scores_season.sql");
 
   try {
     // Load and interpolate the SQL with the requested season
-    let sql = fs.readFileSync(sqlPath, "utf-8");
+    // let sql = fs.readFileSync(sqlPath, "utf-8");
     sql = sql.replace("{year}", season) + ` ${whereClause}`;
 
     // Execute SQL
