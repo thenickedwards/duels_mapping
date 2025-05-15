@@ -2,7 +2,7 @@ from data_handler import DataHandler
 data_handler = DataHandler()
 
 
-def pipeline_all_FBref_misc_stats_to_schmetzer_scores_players():    
+def pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players():    
     ### Create tables
     data_handler.create_tables()
     
@@ -24,4 +24,6 @@ def pipeline_all_FBref_misc_stats_to_schmetzer_scores_players():
 
 
 if __name__ == "__main__":
-    pipeline_all_FBref_misc_stats_to_schmetzer_scores_players()
+    pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players()
+    
+    

@@ -10,7 +10,7 @@ def connect_db(database_name, database_path, timeout=10.0):
     except sqlite3.Error as e:
         print(f"Failed to open database {database_name}:\n", e)
         
-if __name__ == "__main__":
-    database_name = "mls_stats.db"
-    database_path = f"data/database/{database_name}"
-    connect_db(database_name, database_path)
+# if __name__ == "__main__":
+#     database_name = "mls_stats.db"
+#     database_path = f"data/database/{database_name}"
+#     connect_db(database_name, database_path)

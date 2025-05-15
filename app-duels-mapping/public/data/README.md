@@ -1,22 +1,59 @@
 # duels_mapping Data Environment
 
-Welcome to the duels_mapping Data Environment! Within the [app-duels-mapping/public/data](.) directory is the SQLite database which serves as a data warehouse, ETL pipelines for sourcing and delivery of statistics, and the SQL to set up the data environment, ingest and transform the data, and provides statistics for the Next.js front end dashboard which rates MLS players based on aerial dules won/lost, tackles won, interceptions, and recoveries.
+### tl;dr
 
-If you're this deep in the project, you're my kind of people.
+This data environment powers the custom **Schmetzer Score** composite statistic for MLS players by transforming raw FBref data through a lightweight, extensible SQLite-based ETL pipeline primarily using Python. It is designed for modularity, transparency, and future growth in advanced sports metrics.
 
-## Double Pivot (Reoccuring Data Variables)
+## Overview
 
-There are two pivot points which dictate the flow of data and handle the data traffic.
+Welcome to the duels_mapping Data Environment! Within the [app-duels-mapping/public/data](./) directory is the SQLite database which serves as a data warehouse, ETL pipelines for sourcing and delivery of statistics, and the SQL scripts that set up the data environment, ingest and transform data, and generate the statistics consumed by the Next.js frontend dashboard which rates MLS players based on aerial duels won vs lost, tackles won, interceptions, and recoveries.
 
-The file [app-duels-mapping/public/data/data_vars.json](data_vars.json) is acting as a pivot for the algorithim. This JSON file contains the point values which control the algorithim calculating the `Schmetzer Score` rating. This access point for the individual stat weights was written with an eye toward further development. The raw and staging tables as well as the FBref data sources are named so that additional sources, ETL pipelines, and composite metrics of other advanced soccer statistics.
+If you're this deep in the project, you're my kind of people ⚽️
 
-The `DataHandler` class defined in [app-duels-mapping/public/data/etl/data_handler.py](etl/data_handler.py) utilizes custom methods to extract, parse, load, and transform the data. This architecture was inspired by Apache Airflow DAGs with future development of additional ETL piplines in mind.
+### Double Pivot (Recurring Data Drivers)
 
-### Data Modeling & Table Schema
+As you may have guessed football tactics have been a major driver in this project and in fact part of the architecture was lifted right off the pitch. In soccer, a double pivot refers to a pairing central defensive midfielders who play a key role to both defense and offense--winning possession, progressing the ball up the field, and providing tactical versatility. Similarly, there are two core “pivot” components in the design of this architecture that orchestrate the flow of data.
 
-All tables are created using the SQL in the [app-duels-mapping/public/data/etl/sql/create](etl/sql/create) directory. For simplicity, readability, extendibility the filename matches the name of the table.
+1. [`data_vars.json`](./data_vars.json)  
+   This JSON file stores the values used to calculate the Schmetzer Score metric. The stats can be weighted differently to allow flexible experimentation and tuning of how each individual statistic influences the overall score. This access point supports extension to include more data sources, additional ETL pipelines, and the creation of new composite metrics built off other advanced sports statistics.
 
-`dim_schmetzer_score_points` - This is the only **dim table** leveraged by the Schmetzer Score metric. While the values are static as seen below, they are controlled by the aforementioned [data_vars.json](data_vars.json) and are inserted using Python subsequent to all table creation.
+2. [`DataHandler`](./etl/data_handler.py)
+
+   This class handles and executes the ETL workflow, including extracting, parsing, loading, and transforming the data. Inspired by Apache Airflow DAGs, its modular methods make it easy to plug in additional pipelines and customize workflows.
+
+### Flow of Data
+
+Raw Data (CSV or web) 📒
+
+↓
+
+Python ETL Pipeline Scripts 🪠
+
+↓
+
+`raw_FBref_mls_players_all_stats_misc` 🥩
+
+↓
+
+`stg_FBref_mls_players_all_stats_misc`
+
+↓
+
+Schmetzer Score Algorithm Logic 🧮
+
+↓
+
+`schmetzer_scores_{season}` AND `schmetzer_scores_all` 📊
+
+↓
+
+Next.js Frontend Dashboard 💫
+
+### Data Modeling & ETL Pipeline Development
+
+All tables are created using the SQL in the [app-duels-mapping/public/data/etl/sql/create](./etl/sql/create) directory. For simplicity, readability, extensibility the filename matches the name of the table.
+
+`dim_schmetzer_score_points` - This is the only **dim table** leveraged by the Schmetzer Score metric. While the values are static as seen below, they are controlled by the aforementioned [data_vars.json](./data_vars.json) and are inserted using Python subsequent to all table creation. Below is the table in full for visibility into individual stat values and because it's a pretty small table 🙃
 
 | stat_name         | point_value | abbrev        |
 | ----------------- | ----------- | ------------- |
@@ -51,11 +88,11 @@ All tables are created using the SQL in the [app-duels-mapping/public/data/etl/s
 | pkcon         | Integer   | Number of PKs conceded                                                                             |
 | og            | Integer   | Number of own goals scored                                                                         |
 | recov         | Integer   | Number of recoveries                                                                               |
-| won           | Integer   | Number of aerial duels won (renamed from 'won' as more descriptive alias)                          |
-| lost          | Integer   | Number of aerial duels lost (renamed from 'lost' as more descriptive alias)                        |
+| duels_won     | Integer   | Number of aerial duels won (renamed from 'won' as more descriptive alias)                          |
+| duels_lost    | Integer   | Number of aerial duels lost (renamed from 'lost' as more descriptive alias)                        |
 | load_datetime | Timestamp | Load timestamp with time zone (added for tracking data reliability and ETL performance monitoring) |
 
-`stg_FBref_mls_players_all_stats_misc` - The **staging table** receives all data transformed to correct datatypes, calculates and adds columns for _aerial_duels_total_ (sum of all duels) and _aerial_duels_won_pct_ (duels won realized as a percentage), as well as updates some column names (indicated by a _italicized column name_ below) to be more descriptive in the context of the mls_stats database (i.e. primarily to prevent confusion between player and team stats).
+`stg_FBref_mls_players_all_stats_misc` - The **staging table** receives all data transformed to correct data types, calculates and adds columns for _aerial_duels_total_ (sum of all duels) and _aerial_duels_won_pct_ (duels won realized as a percentage), as well as updates some column names (indicated by a _italicized column name_ below) to be more descriptive in the context of the mls_stats database (i.e. primarily to prevent confusion between player and team stats).
 
 | Column Name          | Data Type | Description                                                                                    |
 | -------------------- | --------- | ---------------------------------------------------------------------------------------------- |
@@ -86,7 +123,7 @@ All tables are created using the SQL in the [app-duels-mapping/public/data/etl/s
 | aerial_duels_won_pct | Real      | Percent of aerial duels won (duels as percentage)                                              |
 | load_datetime        | Timestamp | Load timestamp with time zone (continued tracking of data reliability and ETL pipeline health) |
 
-`schmetzer_scores_{season}` and `schmetzer_scores_all` - serve as the final destination tables, including point tabulations attributed to each individual statistic as well as the composite metric as scored and ranked by the custom algorithim, ready for reporting and visualization.
+`schmetzer_scores_{season}` and `schmetzer_scores_all` - serve as the final destination tables, including point tabulations attributed to each individual statistic as well as the composite metric as scored and ranked by the custom algorithm, ready for reporting and visualization.
 
 | Column Name          | Data Type | Description                                                                                    |
 | -------------------- | --------- | ---------------------------------------------------------------------------------------------- |
@@ -117,6 +154,64 @@ All tables are created using the SQL in the [app-duels-mapping/public/data/etl/s
 | aerial_duels_won_pct | Real      | Percent of aerial duels won (duels as percentage)                                              |
 | load_datetime        | Timestamp | Load timestamp with time zone (continued tracking of data reliability and ETL pipeline health) |
 
-### Data Flow Process & ETL Pipeline Development
+All pipelines are contained within the [app-duels-mapping/public/data/etl](etl/) directory. Again, this architecture supports for extendibility, allowing for the the buildout of additional pipelines, expansion of the project to include other leagues, and development of new composite metrics. The order of the tables as listed above documents the process and flow of the data.
 
-All pipelines are contained within the [app-duels-mapping/public/data/etl](etl/) directory.
+### File Structure & Directory Layout
+
+Below is an outline of the data environment. Initially, this project's goal was a functional data platform for ingesting, processing, and delivering insights on player and team data. Essentially, that is everything contained within the [data](./) directory. As such, this data architecture could be used as a framework for other projects.
+
+```bash
+/app-duels-mapping/public/data/
+├── database
+    └── mls_stats.db                # SQLite database
+├── data_vars.json                  # Config which controls algorithm scoring weights and stores data sources and destination tables
+├── etl/
+    ├── data_handler.py             # Primary ETL orchestration class
+    ├── dependencies/               # Modular functions to support ETL
+    ├── pipeline_cur_FBref_misc_stats_to_schmetzer_scores_players.py    # Pipeline runner script to update current season data
+    ├── pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players.py   # Pipeline runner script for all current and historical data
+    └── sql/
+        ├── create/                 # CREATE TABLE scripts (one per table)
+        ├── transform/              # INSERT scripts for transformation (as needed)
+        ├── z_schmetzer_scores/     # SQL scripts specific to loading tables with final statistical data for Schmetzer Scores
+└── README.md                       # ← You are here
+```
+
+For programmatic use as well as readability, a number of naming conventions have been employed.
+
+- **Pipelines**
+  - Filenames for full pipelines follow a particular procedure for identifation
+  - All filenames for pipelines begin with `pipeline_...`
+  - `pipeline_cur_...` indicates a pipeline to update a current season of data
+  - `pipeline_hist_...` indicates a pipeline to backfill historical seasons of data
+  - This is followed by the data source, the word `to`, and then the destination
+  - Lastly the filename includes the primary subject of the data (e.g. `players`, `teams`, etc.)
+  - Examples:
+    - `pipeline_hist_source_to_destination_subject`
+    - `pipeline_hist_opta_to_superduperrankings_teams`
+    - `pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players.py`
+- **Functions**
+  - Loading functions begin with `insert_...`, followed by the name of the table
+  - The word `historical` or `current` may be infixed between the two above when appropriate
+  - Examples
+    - `insert_dim_schmetzer_score_points`
+    - `insert_historical_raw_FBref_mls_players_all_stats_misc`
+    - `insert_stg_FBref_mls_players_all_stats_misc`
+- **SQL Directory**
+  - `create/` includes all CREATE TABLE SQL statements
+  - `transform/` includes non-stat-specific transformations (e.g. inserting to a staging table from raw)
+  - `z_name_of_stat` specific stat transformations and table loading are stored in the directory of the name of the stat with the prefix `z_...`
+
+### Installation & Setup
+
+Run the bash script at the root.
+
+<!-- TODO: ADD MORE HERE 👇 -->
+
+### Future Development
+
+The source data set only includes league games for Major League Soccer, however most MLS teams are playing in multiple competitions (US Open Cup, Canadian Championship, Concacaf Champions Cup/League, Club World Cup, Leagues Cup, etc.) Ideally we could include game actions from all matches, regardless of the competition.
+
+As previously mentioned, the architecture of this data platform was designed with an eye toward future development and could be implemented for any league, team, or individual player. So long as the data is available, the data flow can be refactored following the nomenclature above.
+
+One possible avenue for future development could be creating a set of composite stats that also group and weight like statistics or stats that can be combined to target specific game actions, tactics, or game strategy. For example, a defensive contribution rating, chance creation rating, set piece efficiency, etc. Altogether these composite statistics can give us insights about how players can utilized in various roles and targeted match-ups.
