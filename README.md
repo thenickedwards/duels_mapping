@@ -1,5 +1,9 @@
 # duels_mapping
 
+Welcome to duels_mapping, a code repository which supports a new composite sports statistic: **`Contested Possession Metric`**. A method for rating a player's ability to win aerial duels and tackles as well as force interceptions and secure recoveries--which effectively tells us about a player's ability to win and keep possession. Since `Contested Possession Metric` is a bit of a mouthful, we've dubbed it the `Schmetzer Score`. As a Sounders supporter, I've watched many press conferences where Coach Schmetzer will tap his pen on the table and reference his preferred statistic: _duels won_. In an effort to create a fuller picture, I have combined aerial duels won as well as aerial duels lost, tackles won, interceptions, and recoveries into a custom algorithm to measure this skill by player, team, and across the league.
+
+<!-- REVISE -->
+
 A data environment designed to extract statistics and rate MLS players based on aerial dules won/lost, tackles won, interceptions, and recoveries
 
 ## Duels Map AKA The Schmetzer Score

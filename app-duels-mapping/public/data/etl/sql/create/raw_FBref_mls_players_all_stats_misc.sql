@@ -6,7 +6,7 @@ CREATE TABLE raw_FBref_mls_players_all_stats_misc (
     nation         TEXT,
     pos            TEXT,
     squad          TEXT,
-    age            TEXT,
+    age            INTEGER,
     born           INTEGER,
     nineties       REAL, -- Renamed from '90s' (column names cannot start with a number)
     crdy           INTEGER DEFAULT 0,

@@ -6,7 +6,7 @@ CREATE TABLE stg_FBref_mls_players_all_stats_misc (
     player_nationality      TEXT,
     position                TEXT,
     squad                   TEXT,
-    player_age              TEXT,
+    player_age              INTEGER,
     player_yob              INTEGER,
     nineties                REAL,
     yellow_cards1           INTEGER DEFAULT 0,
