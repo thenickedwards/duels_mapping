@@ -23,31 +23,7 @@ As you may have guessed football tactics have been a major driver in this projec
 
 ### Flow of Data
 
-Raw Data (CSV or web)
-
-↓
-
-Python ETL Pipeline Scripts
-
-↓
-
-`raw_FBref_mls_players_all_stats_misc`
-
-↓
-
-`stg_FBref_mls_players_all_stats_misc`
-
-↓
-
-Schmetzer Score Algorithm Logic
-
-↓
-
-`schmetzer_scores_{season}` AND `schmetzer_scores_all`
-
-↓
-
-Next.js Frontend Dashboard
+The diagram below illustrates how data flows through the processing pipeline from ingestion of raw data to frontend visualization. This flowchart provides both a high-level and component-level understanding of how raw data becomes actionable insights.
 
 ```mermaid
 flowchart TD
@@ -55,8 +31,7 @@ flowchart TD
     B --> C[(raw_FBref_mls_players_all_stats_misc)]
     C --> D[(stg_FBref_mls_players_all_stats_misc)]
     D --> E[Schmetzer Score Algorithm Logic 🧮]
-    E --> F[(schmetzer_scores_YYYY)]
-    E --> G[(schmetzer_scores_all)]
+    E --> F[(schmetzer_scores_YYYY)] & G[(schmetzer_scores_all)]
     F & G <--> H[Next.js Frontend Dashboard 💫]
 
     %% Supporting pivots
@@ -69,7 +44,7 @@ flowchart TD
     J --> C
     J --> D
     J --> E
-    J <--> F & G
+
 
     %% styling legend
     classDef dataNode fill:#3b5b83,stroke:#333,stroke-width:1px,color:#fff;
