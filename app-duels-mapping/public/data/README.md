@@ -2,7 +2,7 @@
 
 ### tl;dr
 
-This data environment powers the custom **Schmetzer Score** composite statistic for MLS players by transforming raw FBref data through a lightweight, extensible SQLite-based ETL pipeline primarily using Python. It is designed for modularity, transparency, and future growth in advanced sports metrics.
+This data environment powers the custom **Schmetzer Score** — a composite statistic for MLS players — by transforming raw FBref data through a lightweight, extensible SQLite-based ETL pipeline primarily written in Python.
 
 ## Overview
 
@@ -12,7 +12,7 @@ If you're this deep in the project, you're my kind of people ⚽️
 
 ### Double Pivot (Recurring Data Drivers)
 
-As you may have guessed football tactics have been a major driver in this project and in fact part of the architecture was lifted right off the pitch. In soccer, a double pivot refers to a pairing central defensive midfielders who play a key role to both defense and offense--winning possession, progressing the ball up the field, and providing tactical versatility. Similarly, there are two core “pivot” components in the design of this architecture that orchestrate the flow of data.
+As you may have guessed football tactics have been a major driver in this project and in fact part of the architecture was lifted right off the pitch. In soccer, a double pivot refers to a pairing of central defensive midfielders who play a key role to both defense and offense--winning possession, progressing the ball up the field, and providing tactical versatility. This data architecture adopts that same concept. It features two core pivot components that orchestrate the flow of data.
 
 1. [`data_vars.json`](./data_vars.json)  
    This JSON file stores the values used to calculate the Schmetzer Score metric. The stats can be weighted differently to allow flexible experimentation and tuning of how each individual statistic influences the overall score. This access point supports extension to include more data sources, additional ETL pipelines, and the creation of new composite metrics built off other advanced sports statistics.
@@ -23,15 +23,15 @@ As you may have guessed football tactics have been a major driver in this projec
 
 ### Flow of Data
 
-Raw Data (CSV or web) 📒
+Raw Data (CSV or web)
 
 ↓
 
-Python ETL Pipeline Scripts 🪠
+Python ETL Pipeline Scripts
 
 ↓
 
-`raw_FBref_mls_players_all_stats_misc` 🥩
+`raw_FBref_mls_players_all_stats_misc`
 
 ↓
 
@@ -39,15 +39,44 @@ Python ETL Pipeline Scripts 🪠
 
 ↓
 
-Schmetzer Score Algorithm Logic 🧮
+Schmetzer Score Algorithm Logic
 
 ↓
 
-`schmetzer_scores_{season}` AND `schmetzer_scores_all` 📊
+`schmetzer_scores_{season}` AND `schmetzer_scores_all`
 
 ↓
 
-Next.js Frontend Dashboard 💫
+Next.js Frontend Dashboard
+
+```mermaid
+flowchart TD
+    A[Raw Data] <--> B[Python ETL Pipeline Scripts 🪠]
+    B --> C[(raw_FBref_mls_players_all_stats_misc)]
+    C --> D[(stg_FBref_mls_players_all_stats_misc)]
+    D --> E[Schmetzer Score Algorithm Logic 🧮]
+    E --> F[(schmetzer_scores_YYYY)]
+    E --> G[(schmetzer_scores_all)]
+    F & G <--> H[Next.js Frontend Dashboard 💫]
+
+    %% Supporting pivots
+    subgraph PIVOTS [Double Pivot Components]
+        I[data_vars JSON]
+        J[DataHandler Class]
+    end
+    I <--> J
+    J --> B
+    J --> C
+    J --> D
+    J --> E
+    J <--> F & G
+
+    %% styling legend
+    classDef dataNode fill:#3b5b83,stroke:#333,stroke-width:1px,color:#fff;
+    classDef logicNode fill:#b6f18e,stroke:#333,stroke-width:1px,color:#000;
+    class A,C,D,F,G,H dataNode
+    class B,E logicNode
+```
 
 ### Data Modeling & ETL Pipeline Development
 
@@ -92,7 +121,7 @@ All tables are created using the SQL in the [app-duels-mapping/public/data/etl/s
 | duels_lost    | Integer   | Number of aerial duels lost (renamed from 'lost' as more descriptive alias)                        |
 | load_datetime | Timestamp | Load timestamp with time zone (added for tracking data reliability and ETL performance monitoring) |
 
-`stg_FBref_mls_players_all_stats_misc` - The **staging table** receives all data transformed to correct data types, calculates and adds columns for _aerial_duels_total_ (sum of all duels) and _aerial_duels_won_pct_ (duels won realized as a percentage), as well as updates some column names (indicated by a _italicized column name_ below) to be more descriptive in the context of the mls_stats database (i.e. primarily to prevent confusion between player and team stats).
+`stg_FBref_mls_players_all_stats_misc` - The **staging table** receives all data transformed to correct data types, calculates and adds columns for _aerial_duels_total_ (sum of all duels) and _aerial_duels_won_pct_ (duels won realized as a percentage), as well as renames some columns (italicized in the table below) to be more descriptive in the context of the mls_stats database (i.e. primarily to prevent confusion between player and team stats).
 
 | Column Name          | Data Type | Description                                                                                    |
 | -------------------- | --------- | ---------------------------------------------------------------------------------------------- |
@@ -154,7 +183,7 @@ All tables are created using the SQL in the [app-duels-mapping/public/data/etl/s
 | aerial_duels_won_pct | Real      | Percent of aerial duels won (duels as percentage)                                              |
 | load_datetime        | Timestamp | Load timestamp with time zone (continued tracking of data reliability and ETL pipeline health) |
 
-All pipelines are contained within the [app-duels-mapping/public/data/etl](etl/) directory. Again, this architecture supports for extendibility, allowing for the the buildout of additional pipelines, expansion of the project to include other leagues, and development of new composite metrics. The order of the tables as listed above documents the process and flow of the data.
+All pipelines are contained within the [app-duels-mapping/public/data/etl](etl/) directory. Again, this architecture supports for extendibility, allowing for the buildout of additional pipelines, expansion of the project to include other leagues, and development of new composite metrics. The order of the tables as listed above documents the process and flow of the data.
 
 ### File Structure & Directory Layout
 
@@ -180,7 +209,7 @@ Below is an outline of the data environment. Initially, this project's goal was 
 For programmatic use as well as readability, a number of naming conventions have been employed.
 
 - **Pipelines**
-  - Filenames for full pipelines follow a particular procedure for identifation
+  - Filenames for full pipelines follow a particular procedure for identification
   - All filenames for pipelines begin with `pipeline_...`
   - `pipeline_cur_...` indicates a pipeline to update a current season of data
   - `pipeline_hist_...` indicates a pipeline to backfill historical seasons of data
@@ -225,14 +254,14 @@ For convenience I've built out a bash script at the root of the project, [duels_
   - First the virtual environment will be activated.
   - Next the dependencies from the `requirements.txt` file will be installed.
   - The `pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players.py` script will be run to backfill all data.
-  - Finally terminal will navigate to the the Next.js app `cd app-duels-mapping`, run the `npm run dev` command, open a browser at <http://localhost:3000/api/schmetzer_scores/2025>, and send you on your way!
+  - Finally the terminal will navigate to the the Next.js app `cd app-duels-mapping`, run the `npm run dev` command, open a browser at <http://localhost:3000/api/schmetzer_scores/2025>, and send you on your way.
 
 - If the data for the current season needs to be updated, run the "update" command from a terminal at the root of the project.
 
   - `source ./duels_mapping.sh update` OR `. ./duels_mapping.sh update`
   - First the virtual environment will be activated.
   - The `pipeline_cur_FBref_misc_stats_to_schmetzer_scores_players.py` script will be run to update the current season's data.
-  - Finally terminal will navigate to the the Next.js app `cd app-duels-mapping`, run the `npm run dev` command, open a browser at <http://localhost:3000/api/schmetzer_scores/2025>, and send you on your way!
+  - Finally the terminal will navigate to the the Next.js app `cd app-duels-mapping`, run the `npm run dev` command, open a browser at <http://localhost:3000/api/schmetzer_scores/2025>, and send you on your way.
 
 - To start further development, run the "start" command from a terminal at the root of the project.
 
