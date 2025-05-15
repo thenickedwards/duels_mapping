@@ -204,9 +204,44 @@ For programmatic use as well as readability, a number of naming conventions have
 
 ### Installation & Setup
 
+First we will need to build a .env file at the root of the project. Only a few variables are needed. If you'd like to match my process, I typically name my virtual environment to match the repo, for example:
+
+```
+VENV_NAME=duels_mapping
+VENV_PATH=/Users/path_to/.virtualenvs/duels_mapping/bin/activate
+```
+
+_Note: you will need to adjust the path below as appropriate on your machine. I use [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/). You may need to adjust if you use [venv](https://docs.python.org/3/library/venv.html)._
+
 Run the bash script at the root.
 
 <!-- TODO: ADD MORE HERE 👇 -->
+
+For convenience I've built out a bash script at the root of the project, [duels_mapping.sh](../../../../duels_mapping.sh). There are instructions commented out near the top of the file and below is a quick summary.
+
+- If this is the first time you are using this app, run the "setup" command from a terminal at the root of the project.
+
+  - `source ./duels_mapping.sh setup` OR `. ./duels_mapping.sh setup`
+  - First the virtual environment will be activated.
+  - Next the dependencies from the `requirements.txt` file will be installed.
+  - The `pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players.py` script will be run to backfill all data.
+  - Finally terminal will navigate to the the Next.js app `cd app-duels-mapping`, run the `npm run dev` command, open a browser at <http://localhost:3000/api/schmetzer_scores/2025>, and send you on your way!
+
+- If the data for the current season needs to be updated, run the "update" command from a terminal at the root of the project.
+
+  - `source ./duels_mapping.sh update` OR `. ./duels_mapping.sh update`
+  - First the virtual environment will be activated.
+  - The `pipeline_cur_FBref_misc_stats_to_schmetzer_scores_players.py` script will be run to update the current season's data.
+  - Finally terminal will navigate to the the Next.js app `cd app-duels-mapping`, run the `npm run dev` command, open a browser at <http://localhost:3000/api/schmetzer_scores/2025>, and send you on your way!
+
+- To start further development, run the "start" command from a terminal at the root of the project.
+
+  - `source ./duels_mapping.sh start` OR `. ./duels_mapping.sh start`
+  - This command will simply activate the virtual environment and send you on your way.
+
+- Similarly to deactivate the virtual environment, run the "stop" command from a terminal at the root of the project.
+  - `source ./duels_mapping.sh stop` OR `. ./duels_mapping.sh stop`
+  - This command will simply deactivate the virtual environment and send you on your way.
 
 ### Future Development
 
