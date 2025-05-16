@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-// Resolves the SQLite database path from data_vars JSON
+// Resolves SQLite database path from data_vars JSON
 export async function getDatabasePath() {
   const dataVarsPath = path.join(
     process.cwd(),
@@ -23,7 +23,8 @@ export async function getDatabasePath() {
   return absolutePath;
 }
 
-export async function getSqlSelect(sqlFile) {
+// Resolves path to SQL SELECT statements
+export function getSqlSelect(sqlFile) {
   const sqlPath = path.join(process.cwd(), "utils", "sql", "select", sqlFile);
   const sql = fs.readFileSync(sqlPath, "utf-8");
   return sql;
