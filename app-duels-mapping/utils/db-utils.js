@@ -12,7 +12,7 @@ export async function getDatabasePath() {
   const dataVars = JSON.parse(fs.readFileSync(dataVarsPath, "utf-8"));
   const dbName = dataVars.database.name;
   const dbPathTemplate = dataVars.database.path;
-  const relativePath = dbPathTemplate.replace("_DATABASE_NAME_", dbName);
+  const relativePath = path.join(dbPathTemplate, dbName);
 
   // Convert to absolute path using process.cwd()
   const absolutePath = path.join(process.cwd(), relativePath);
