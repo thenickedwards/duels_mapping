@@ -10,7 +10,7 @@ def connect_db(database_name, database_path, timeout=10.0):
         with sqlite3.connect(database_path, timeout=timeout) as conn:
             print(f"✅ Opened SQLite database '{database_name}' at {os.path.abspath(database_path)} (SQLite v{sqlite3.sqlite_version})")
             return sqlite3.connect(database_path, timeout=timeout)
-            return conn
+            # return conn
         
     except sqlite3.Error as e:
         print(f"❌ Failed to open database {database_name}:\n", e)

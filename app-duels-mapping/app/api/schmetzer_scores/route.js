@@ -25,16 +25,16 @@ export async function GET(req) {
   }
 
   const filters = ["season = ?"];
-  const values = [season];
+  const values = [Number(season)];
 
   if (position) {
-    filters.push("position = ?");
-    values.push(position);
+    filters.push("REPLACE(LOWER(position), ' ', '') = ?");
+    values.push(`%${position.toLowerCase().replace(/\s/g, "")}%`);
   }
 
   if (squad) {
-    filters.push("LOWER(squad) LIKE ?");
-    values.push(`%${squad.toLowerCase()}%`);
+    filters.push("REPLACE(LOWER(squad), ' ', '') = ?");
+    values.push(`%${squad.toLowerCase().replace(/\s/g, "")}%`);
   }
 
   if (minMinutes) {
@@ -60,6 +60,10 @@ export async function GET(req) {
       .replace("{year}", season)
       .replace("{where_clause}", whereClause);
 
+    console.log("filters passed: ", filters);
+    console.log("values passed: ", values);
+    console.log("sql passed: ", sql);
+
     const scores = await db.all(sql, values);
 
     return new Response(JSON.stringify(scores), {
@@ -73,5 +77,7 @@ export async function GET(req) {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
+  } finally {
+    await db.close();
   }
 }
