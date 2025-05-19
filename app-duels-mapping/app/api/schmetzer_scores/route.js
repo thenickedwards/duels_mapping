@@ -12,7 +12,7 @@ export async function GET(req) {
   const season = searchParams.get("season");
   const position = searchParams.get("position");
   const squad = searchParams.get("squad");
-  const minMinutes = searchParams.get("minMinutes");
+  const minNineties = searchParams.get("minNineties");
 
   if (!season) {
     return new Response(
@@ -28,18 +28,18 @@ export async function GET(req) {
   const values = [Number(season)];
 
   if (position) {
-    filters.push("REPLACE(LOWER(position), ' ', '') = ?");
+    filters.push("REPLACE(LOWER(position), ' ', '') LIKE ?");
     values.push(`%${position.toLowerCase().replace(/\s/g, "")}%`);
   }
 
   if (squad) {
-    filters.push("REPLACE(LOWER(squad), ' ', '') = ?");
+    filters.push("REPLACE(LOWER(squad), ' ', '') LIKE ?");
     values.push(`%${squad.toLowerCase().replace(/\s/g, "")}%`);
   }
 
-  if (minMinutes) {
-    filters.push("minutes_played >= ?");
-    values.push(Number(minMinutes));
+  if (minNineties) {
+    filters.push("nineties >= ?");
+    values.push(Number(minNineties));
   }
 
   const whereClause = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
@@ -59,10 +59,10 @@ export async function GET(req) {
     const sql = sqlTemplate
       .replace("{year}", season)
       .replace("{where_clause}", whereClause);
-
-    console.log("filters passed: ", filters);
-    console.log("values passed: ", values);
-    console.log("sql passed: ", sql);
+    // TODO: remove logs
+    // console.log("filters passed: ", filters);
+    // console.log("values passed: ", values);
+    // console.log("sql passed: ", sql);
 
     const scores = await db.all(sql, values);
 
@@ -72,12 +72,9 @@ export async function GET(req) {
     });
   } catch (error) {
     console.error("Database query error:", error.message);
-
     return new Response(JSON.stringify({ sql, values, error: error.message }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
-  } finally {
-    await db.close();
   }
 }

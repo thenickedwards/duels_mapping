@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 
 // Resolves SQLite database path from data_vars JSON
-export async function getDatabasePath() {
+export async function getDatabasePath(verbose = 2) {
   const dataVarsPath = path.join(
     process.cwd(),
     "public",
@@ -11,14 +11,24 @@ export async function getDatabasePath() {
   );
   const dataVars = JSON.parse(fs.readFileSync(dataVarsPath, "utf-8"));
   const dbName = dataVars.database.name;
-  const dbPathTemplate = dataVars.database.path;
+  const dbPathTemplate = dataVars.database.path.replace(
+    "app-duels-mapping/",
+    ""
+  );
   const relativePath = path.join(dbPathTemplate, dbName);
 
+  // Log template and resolved relative path
+  if (verbose >= 2) console.log("dbPathTemplate:", dbPathTemplate);
+  if (verbose >= 2) console.log("relativePath:", relativePath);
+
   // Convert to absolute path using process.cwd()
-  const absolutePath = path.join(process.cwd(), relativePath);
+  const absolutePath = path.resolve(relativePath);
 
   // Log the resolved absolute path
-  // console.log("Resolved DB absolute path:", absolutePath);
+  if (!fs.existsSync(absolutePath) && verbose >= 1) {
+    throw new Error(`Database file does not exist at ${absolutePath}`);
+  }
+  if (verbose >= 1) console.log("Resolved DB absolute path:", absolutePath);
 
   return absolutePath;
 }
