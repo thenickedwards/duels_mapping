@@ -66,11 +66,19 @@ export default function PlayersPage() {
   };
 
   const columns = [
-    { field: "schmetzer_rk", headerName: "Rk", width: 70 },
+    { field: "schmetzer_rk", headerName: "rk", width: 70 },
     { field: "player_name", headerName: "Player", width: 150 },
     { field: "player_age", headerName: "Age", width: 110 },
     { field: "squad", headerName: "Squad", flex: 1 },
     { field: "position", headerName: "POS", width: 90 },
+    { field: "nineties", headerName: "90s", width: 90 },
+    { field: "schmetzer_score", headerName: "smetz", width: 90 },
+    { field: "tackles_won", headerName: "tkw", width: 90 },
+    { field: "interceptions", headerName: "int", width: 90 },
+    { field: "recoveries", headerName: "recov", width: 90 },
+    { field: "aerial_duels_won", headerName: "adw", width: 90 },
+    { field: "aerial_duels_lost", headerName: "adl", width: 90 },
+    { field: "aerial_duels_won_pct", headerName: "adw%", width: 90 },
   ];
 
   const rows = data?.map((row, i) => ({ id: i, ...row })) || [];
@@ -152,9 +160,9 @@ export default function PlayersPage() {
                 sx={{ mt: 2 }}
               >
                 <MenuItem value="">All Positions</MenuItem>
-                <MenuItem value="Forward">Forward</MenuItem>
-                <MenuItem value="Midfielder">Midfielder</MenuItem>
-                <MenuItem value="Defender">Defender</MenuItem>
+                <MenuItem value="FW">Forward</MenuItem>
+                <MenuItem value="MF">Midfielder</MenuItem>
+                <MenuItem value="DF">Defender</MenuItem>
               </Select>
 
               <TextField
