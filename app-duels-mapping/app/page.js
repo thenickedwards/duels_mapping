@@ -122,12 +122,16 @@ export default function PlayersPage() {
           </Box>
 
           <Box mt={2} sx={{ height: 450, width: "100%" }}>
-            <DataGrid
-              rows={rows}
-              columns={columns}
-              loading={isLoading}
-              onRowClick={(params) => setSelectedPlayer(params.row)}
-            />
+            {isLoading ? (
+              <Typography>Loading…</Typography>
+            ) : (
+              <DataGrid
+                rows={rows}
+                columns={columns}
+                loading={isLoading}
+                onRowClick={(params) => setSelectedPlayer(params.row)}
+              />
+            )}
           </Box>
 
           <Drawer

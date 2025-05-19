@@ -6,13 +6,21 @@ import sqlite3
 from dependencies.connect_db import connect_db
 from dependencies.get_from_fbref import get_FBref_mls_player_misc_stats
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
+data_vars_path = os.path.join(script_dir, "..", "data_vars.json")
+data_vars_path = os.path.normpath(data_vars_path)
 
 class DataHandler:
-    def __init__(self, data_vars_path='app-duels-mapping/public/data/data_vars.json'):
+    def __init__(self, data_vars_path=data_vars_path):
         with open(data_vars_path, 'r') as f:
             data_vars = json.load(f)
             self.database_name = data_vars["database"]["name"]
-            self.database_path = data_vars["database"]["path"].replace("_DATABASE_NAME_", self.database_name)
+            # self.database_path = data_vars["database"]["path"] + data_vars["database"]["name"]
+            base_dir = os.path.dirname(os.path.abspath(data_vars_path))
+            full_path = os.path.join(base_dir, data_vars["database"]["path"], self.database_name)
+            self.database_path = os.path.normpath(full_path)
+            # TODO: Remove check
+            print(f"📂 Database will be opened from: {self.database_path}")
             self.inaugural_season = data_vars["database"]["inaugural_season"]
             self.current_year = datetime.datetime.now().year
             self.raw_table = data_vars["database"]["misc_raw_table"]
