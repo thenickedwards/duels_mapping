@@ -10,5 +10,5 @@ SELECT
     schmetzer_score, 
     schmetzer_rk
 FROM schmetzer_scores_all
-    WHERE player_name = '{player_name}'
+    WHERE {playerFilter}
     ORDER BY season;
