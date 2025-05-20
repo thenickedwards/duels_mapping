@@ -15,10 +15,10 @@ class DataHandler:
         with open(data_vars_path, 'r') as f:
             data_vars = json.load(f)
             self.database_name = data_vars["database"]["name"]
-            # self.database_path = data_vars["database"]["path"] + data_vars["database"]["name"]
-            base_dir = os.path.dirname(os.path.abspath(data_vars_path))
-            full_path = os.path.join(base_dir, data_vars["database"]["path"], self.database_name)
-            self.database_path = os.path.normpath(full_path)
+            self.database_path = data_vars["database"]["path"] + data_vars["database"]["name"]
+            # base_dir = os.path.dirname(os.path.abspath(data_vars_path))
+            # full_path = os.path.join(base_dir, data_vars["database"]["path"], self.database_name)
+            # self.database_path = os.path.normpath(full_path)
             # TODO: Remove check
             print(f"📂 Database will be opened from: {self.database_path}")
             self.inaugural_season = data_vars["database"]["inaugural_season"]

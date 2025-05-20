@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS "schmetzer_scores_all";
+DROP TABLE IF EXISTS schmetzer_scores_all;
 
-CREATE TABLE "schmetzer_scores_all" (
+CREATE TABLE schmetzer_scores_all (
   season                  INTEGER  NOT NULL, 
   player_name             TEXT     NOT NULL,
   player_nationality      TEXT,
