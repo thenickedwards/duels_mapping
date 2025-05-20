@@ -46,8 +46,6 @@ export default function PlayersPage() {
   if (filters.squad) query.set("squad", filters.squad);
   if (filters.minMinutes) query.set("minMinutes", filters.minMinutes);
 
-  // const { data, isLoading, error } = useSWR(`/api/schmetzer_scores?${query}`, fetcher);
-  // *** REPLACE previous line when route.js and structure is updated. ***
   const { data, error, isLoading } = useSWR(
     `/api/schmetzer_scores?${query.toString()}`,
     fetcher
