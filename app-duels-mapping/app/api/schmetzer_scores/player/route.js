@@ -6,11 +6,16 @@ import { getDatabasePath, getSqlSelect } from "@/utils/db-utils";
 let db = null;
 
 // GET handler for specific season Schmetzer scores
-export async function GET(req) {
+export async function GET(req, verbose = 1) {
   const { searchParams } = new URL(req.url);
-
   const season = searchParams.get("season");
   const playerName = searchParams.get("playerName");
+
+  if (verbose >= 2) console.log("season:", season, "playerName:", playerName);
+  if (verbose >= 2)
+    console.log(
+      `Retrieving data for player ${playerName}; season: ${season} and Schmetzer Scores YOY`
+    );
 
   if (!season) {
     return new Response(
@@ -54,8 +59,6 @@ export async function GET(req) {
   const playerYoySqlTemplate = await getSqlSelect(
     "schmetzer_scores_player_yoy.sql"
   );
-  // console.log("playerSeasonSqlTemplate: ", playerSeasonSqlTemplate);
-  // console.log("playerYoySqlTemplate: ", playerYoySqlTemplate);
 
   try {
     // Load and interpolate the SQL
@@ -63,7 +66,7 @@ export async function GET(req) {
     const playerSeasonSql = playerSeasonSqlTemplate
       .replace("{year}", season)
       .replace("{where_clause}", whereClause);
-    console.log("playerSeasonSql: ", playerSeasonSql);
+    if (verbose >= 2) console.log("playerSeasonSql: ", playerSeasonSql);
     const playerSeasonScores = await db.all(playerSeasonSql, values);
 
     // Individual player scores YOY
@@ -71,11 +74,12 @@ export async function GET(req) {
       "{playerFilter}",
       filters[1]
     );
-    console.log("playerYoySql: ", playerYoySql);
-    const playerYoyScores = await db.all(playerYoySql, [values[1]]);
+    if (verbose >= 2) console.log("playerYoySql: ", playerYoySql);
+    const playerYoyScores = await db.all(playerYoySql, values[1]);
 
     // player scores from requested season and YOU to be returned
     const playerScores = [playerSeasonScores, playerYoyScores];
+    if (verbose >= 2) console.log("playerScores: ", playerScores);
 
     return new Response(JSON.stringify(playerScores), {
       headers: { "Content-Type": "application/json" },
