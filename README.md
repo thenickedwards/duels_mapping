@@ -20,7 +20,7 @@ You can review players raw stats as well as Schmetzer Score and a rank for that 
 
 ### Development Installation & Setup
 
-First we will need to build a .env file at the root of the project. Only a few variables are needed. If you'd like to match my process, I typically name my virtual environment to match the repo, for example:
+For convenience I've built out a bash script at the root of the project, [duels_mapping.sh](./duels_mapping.sh). There are instructions commented out near the top of the file and below is a quick summary. Before running, you'll need to build a .env file at the root of the project. Only a few variables are needed. If you'd like to match my process, I typically name my virtual environment to match the repo, for example:
 
 ```
 VENV_NAME=duels_mapping
@@ -28,8 +28,6 @@ VENV_PATH=/Users/path_to/.virtualenvs/duels_mapping/bin/activate
 ```
 
 _Note: you will need to adjust the path below as appropriate on your machine. I use [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/). You may need to adjust if you use [venv](https://docs.python.org/3/library/venv.html)._
-
-For convenience I've built out a bash script at the root of the project, [duels_mapping.sh](../../../../duels_mapping.sh). There are instructions commented out near the top of the file and below is a quick summary.
 
 - If this is the first time you are using this app, run the "setup" command from a terminal at the root of the project.
 
