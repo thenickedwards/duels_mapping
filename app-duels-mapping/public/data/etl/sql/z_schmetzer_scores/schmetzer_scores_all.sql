@@ -1,3 +1,5 @@
+DELETE FROM schmetzer_scores_all WHERE season = {year};
+
 INSERT INTO schmetzer_scores_all (
     season,
     player_name,
