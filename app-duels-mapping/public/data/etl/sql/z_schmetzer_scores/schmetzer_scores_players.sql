@@ -26,6 +26,7 @@ CREATE TABLE "schmetzer_scores_{year}" (
     recoveries              INTEGER DEFAULT 0,
     recoveries_pts          REAL DEFAULT 0, 
     load_datetime           TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    UNIQUE(season, player_name, player_yob, squad)
 );
 
 -- Index for quicker lookup
