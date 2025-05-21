@@ -16,6 +16,7 @@
 # Load environment variables
 source .env 
 echo -e "Loading \033[3m$VENV_NAME\033[0m environment variables..."
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 action="$1"
 
@@ -39,13 +40,13 @@ run_nextjs_app() {
     echo -e "\n⚙️ Starting Next.js development server (press Ctrl+C to stop)..."
     (cd app-duels-mapping && npm run dev) &
     sleep 5
-    echo -e "\n🌐 Opening browser at http://localhost:3000/api/schmetzer_scores/2025"
+    echo -e "\n🌐 Opening browser at http://localhost:3000/api/schmetzer_scores?season=2025"
     if command -v xdg-open &> /dev/null; then
-        xdg-open "http://localhost:3000/api/schmetzer_scores/2025"
+        xdg-open "http://localhost:3000/api/schmetzer_scores?season=2025"
     elif command -v open &> /dev/null; then
-        open "http://localhost:3000/api/schmetzer_scores/2025"
+        open "http://localhost:3000/api/schmetzer_scores?season=2025"
     else
-        echo -e "🔗 Please open http://localhost:3000/api/schmetzer_scores/2025 in your browser."
+        echo -e "🔗 Please open http://localhost:3000/api/schmetzer_scores?season=2025 in your browser."
     fi
 }
 
@@ -67,6 +68,7 @@ fi
 if [ "$action" = "start" ]; then
     activate_venv
     echo -e "Happy coding you beautiful and strong genius, you 🧑‍💻"
+    run_nextjs_app
     send_off
 
 ## stop
@@ -82,8 +84,11 @@ elif [ "$action" = "setup" ]; then
     echo -e "\n📦 Installing Python dependencies from requirements.txt..."
     pip install -r requirements.txt || { echo "❌ Python dependencies installation failed."; exit 1; }
 
+    echo -e "\n📦 Installing Node Package modules from package.json..."
+    (cd app-duels-mapping && npm install) || { echo "❌ Python dependencies installation failed."; exit 1; }
+
     echo -e "\n🧬 Running ETL pipeline to backfill all historical season data..."
-    python app-duels-mapping/public/data/etl/pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players.py || {
+    python "$SCRIPT_DIR/app-duels-mapping/public/data/etl/pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players.py" || {
         echo -e "❌ ETL pipeline execution failed."; exit 1; }
 
     run_nextjs_app
@@ -95,7 +100,7 @@ elif [ "$action" = "update" ]; then
     activate_venv
 
     echo -e "\n🧬 Running ETL pipeline to update current season data..."
-    python app-duels-mapping/public/data/etl/pipeline_cur_FBref_misc_stats_to_schmetzer_scores_players.py || {
+    python "$SCRIPT_DIR/app-duels-mapping/public/data/etl/pipeline_cur_FBref_misc_stats_to_schmetzer_scores_players.py" || {
         echo "❌ ETL pipeline execution failed."; exit 1; }
 
     run_nextjs_app

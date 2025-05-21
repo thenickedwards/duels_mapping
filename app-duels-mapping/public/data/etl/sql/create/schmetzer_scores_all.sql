@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS "schmetzer_scores_all";
+DROP TABLE IF EXISTS schmetzer_scores_all;
 
-CREATE TABLE "schmetzer_scores_all" (
+CREATE TABLE schmetzer_scores_all (
   season                  INTEGER  NOT NULL, 
   player_name             TEXT     NOT NULL,
   player_nationality      TEXT,
@@ -25,9 +25,14 @@ CREATE TABLE "schmetzer_scores_all" (
   recoveries              INTEGER DEFAULT 0,
   recoveries_pts          REAL DEFAULT 0, 
   load_datetime           TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  UNIQUE(season, player_name, player_yob, squad)
 );
 
 -- Indexes for fast querying
-CREATE INDEX IF NOT EXISTS idx_schmetzer_scores_all__player ON schmetzer_scores_all (player_name);
 CREATE INDEX IF NOT EXISTS idx_schmetzer_scores_all__season ON schmetzer_scores_all (season);
+CREATE INDEX IF NOT EXISTS idx_schmetzer_scores_all__player ON schmetzer_scores_all (player_name);
 CREATE INDEX IF NOT EXISTS idx_schmetzer_scores_all__player_season ON schmetzer_scores_all (player_name, season);
+
+CREATE INDEX IF NOT EXISTS idx_schmetzer_scores_all__position ON schmetzer_scores_all (position);
+
+CREATE INDEX IF NOT EXISTS idx_schmetzer_scores_all__squad ON schmetzer_scores_all (squad);

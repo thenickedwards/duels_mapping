@@ -12,7 +12,7 @@ export async function GET(req) {
   const season = searchParams.get("season");
   const position = searchParams.get("position");
   const squad = searchParams.get("squad");
-  const minMinutes = searchParams.get("minMinutes");
+  const minNineties = searchParams.get("minNineties");
 
   if (!season) {
     return new Response(
@@ -25,21 +25,21 @@ export async function GET(req) {
   }
 
   const filters = ["season = ?"];
-  const values = [season];
+  const values = [Number(season)];
 
   if (position) {
-    filters.push("position = ?");
-    values.push(position);
+    filters.push("REPLACE(LOWER(position), ' ', '') LIKE ?");
+    values.push(`%${position.toLowerCase().replace(/\s/g, "")}%`);
   }
 
   if (squad) {
-    filters.push("LOWER(squad) LIKE ?");
-    values.push(`%${squad.toLowerCase()}%`);
+    filters.push("REPLACE(LOWER(squad), ' ', '') LIKE ?");
+    values.push(`%${squad.toLowerCase().replace(/\s/g, "")}%`);
   }
 
-  if (minMinutes) {
-    filters.push("minutes_played >= ?");
-    values.push(Number(minMinutes));
+  if (minNineties) {
+    filters.push("nineties >= ?");
+    values.push(Number(minNineties));
   }
 
   const whereClause = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
@@ -52,24 +52,29 @@ export async function GET(req) {
     });
   }
 
-  const sql = getSqlSelect("schmetzer_scores_season.sql");
+  const sqlTemplate = await getSqlSelect("schmetzer_scores_season.sql");
 
   try {
-    // Load and interpolate the SQL with the requested season and filters if present
-    sql = sql.replace("{year}", season) + ` ${whereClause}`;
+    // Load and interpolate the SQL with the requested season
+    const sql = sqlTemplate
+      .replace("{year}", season)
+      .replace("{where_clause}", whereClause);
+    // TODO: remove logs
+    // console.log("filters passed: ", filters);
+    // console.log("values passed: ", values);
+    // console.log("sql passed: ", sql);
 
-    // Execute SQL
-    const scores = await db.all(sql);
+    const scores = await db.all(sql, values);
 
     return new Response(JSON.stringify(scores), {
       headers: { "Content-Type": "application/json" },
       status: 200,
     });
   } catch (error) {
-    console.error("Database query error:", error);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-      headers: { "Content-Type": "application/json" },
+    console.error("Database query error:", error.message);
+    return new Response(JSON.stringify({ sql, values, error: error.message }), {
       status: 500,
+      headers: { "Content-Type": "application/json" },
     });
   }
 }
