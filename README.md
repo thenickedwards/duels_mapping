@@ -1,18 +1,26 @@
 # duels_mapping
 
+## Contested Possession Metric AKA The Schmetzer Score
+
+Welcome to **_duels_mapping_**, a code repository which supports a new composite sports statistic: **`Contested Possession Metric`** -- a method for rating a player's ability to win and/or keep possession. Since `Contested Possession Metric` is a bit of a mouthful, we've dubbed it the `Schmetzer Score`. As a Sounders supporter, I've watched many press conferences where Coach Schmetzer will tap his pen on the table and reference his preferred statistic: _duels won_. In an effort to create a fuller picture of how possession is won/maintained, I have weighted aerial duels won, aerial duels lost, tackles won, interceptions, and recoveries using a custom algorithm to measure this skill by player, team, and across the league.
+
 ### tl;dr
 
-This GitHub repo contains the code for a new composite sports statistic: the **`Contested Possession Metric`**. ETL pipelines written in Python feed a lightweight, reliable, and extensible SQLite database. Data visualizations are rendered in an intuitive dashboard UI using Next.js and styled using the Material UI framework.
+This repo powers the custom **Schmetzer Score** — a composite statistic for MLS players — by transforming raw FBref data through a lightweight, extensible SQLite-based ETL pipeline primarily written in Python, then delivers and visualizes this data in an intuitive and interactive Next.js front end dashboard.
 
-## Overview
+## Quick Setup
 
-Welcome to duels_mapping, a code repository and web app which supports a new composite sports statistic, the **`Contested Possession Metric`**. A method for rating a player's ability to win aerial duels and tackles as well as force interceptions and secure recoveries--which effectively tells us about a player's ability to win and/or keep possession.
+If you're looking to get rolling with the application immediately (assuming you have the Node packages installed), you can run the command:
 
-Since `Contested Possession Metric` is a bit of a mouthful, we've dubbed it the `Schmetzer Score`. As a Sounders supporter, I've watched many press conferences where Coach Schmetzer will tap his pen on the table and reference his preferred statistic: _duels won_. In an effort to create a fuller picture of how possession is contested, won, and maintained, I have weighted aerial duels won as well as aerial duels lost, tackles won, interceptions, and recoveries using a custom algorithm.
+`( cd app-duels-mapping ; npm run dev )`
 
-### Installation & Setup
+This will fire up the Next.js app and once it's ready simply navigate to <http://localhost:3001/>
 
-If you want to clone this repo and develop it further, first you will need to build a .env file at the root of the project. Only a few variables are needed. For simplicity you can name the virtual environment to match the repo, for example:
+You can review players raw stats as well as Schmetzer Score and a rank for that season. Clicking on a player will allow for a deep dive into that player's numbers and also present a year-over-year look at that player's Schmetzer Score across all seasons played in MLS going back to 2018 when these statistics first came available. The dashboard also has a `Comparisons` tool, allowing the user to explore 1v1 player match-ups and revealing data that can be critical strategizing in-game tactics, performance analysis, and scouting/recruitment opportunities.
+
+### Development Installation & Setup
+
+For convenience I've built out a bash script at the root of the project, [duels_mapping.sh](./duels_mapping.sh). There are instructions commented out near the top of the file and below is a quick summary. Before running, you'll need to build a .env file at the root of the project. Only a few variables are needed. If you'd like to match my process, I typically name my virtual environment to match the repo, for example:
 
 ```
 VENV_NAME=duels_mapping
@@ -20,8 +28,6 @@ VENV_PATH=/Users/path_to/.virtualenvs/duels_mapping/bin/activate
 ```
 
 _Note: you will need to adjust the path below as appropriate on your machine. I use [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/). You may need to adjust if you use [venv](https://docs.python.org/3/library/venv.html)._
-
-For convenience I've built out a bash script at the root of the project, [duels_mapping.sh](./duels_mapping.sh). There are instructions commented out near the top of the file and below is a quick summary.
 
 - If this is the first time you are using this app, run the "setup" command from a terminal at the root of the project.
 
@@ -47,11 +53,9 @@ For convenience I've built out a bash script at the root of the project, [duels_
   - `source ./duels_mapping.sh stop` OR `. ./duels_mapping.sh stop`
   - This command will simply deactivate the virtual environment and send you on your way.
 
-<!-- REVISE -->
-
 ## Data Environment
 
-Within the [app-duels-mapping/public/data](app-duels-mapping/public/data) directory is the SQLite database which serves as a data warehouse, ETL pipelines for sourcing and delivery of statistics, and the SQL scripts that set up the data environment, ingest and transform data, and generate the statistics consumed by the Next.js frontend dashboard which rates MLS players based on aerial duels won vs lost, tackles won, interceptions, and recoveries.
+The duels_mapping data environment is contained within the [app-duels-mapping/public/data](app-duels-mapping/public/data) directory and includes the SQLite database which serves as a data warehouse, ETL pipelines for sourcing and delivery of statistics, and the SQL scripts that set up the data environment, ingest and transform data, and generate the statistics consumed by the Next.js frontend dashboard which rates MLS players based on aerial duels won vs lost, tackles won, interceptions, and recoveries.
 
 If you're this deep in the project, you're my kind of people ⚽️
 
@@ -59,7 +63,7 @@ If you're this deep in the project, you're my kind of people ⚽️
 
 As you may have guessed football tactics have been a major driver in this project and in fact part of the architecture was lifted right off the pitch. In soccer, a double pivot refers to a pairing of central defensive midfielders who play a key role to both defense and offense--winning possession, progressing the ball up the field, and providing tactical versatility. This data architecture adopts that same concept. It features two core pivot components that orchestrate the flow of data.
 
-1. [`data_vars.json`](app-duels-mapping/public/data/data_vars.json)
+1. [`data_vars.json`](app-duels-mapping/public/data/data_vars.json)  
    This JSON file stores the values used to calculate the Schmetzer Score metric. The stats can be weighted differently to allow flexible experimentation and tuning of how each individual statistic influences the overall score. This access point supports extension to include more data sources, additional ETL pipelines, and the creation of new composite metrics built off other advanced sports statistics.
 
 2. [`DataHandler`](app-duels-mapping/public/data/etl/data_handler.py)
@@ -68,7 +72,7 @@ As you may have guessed football tactics have been a major driver in this projec
 
 ### Flow of Data
 
-The diagram below illustrates how data flows through the processing pipeline from ingestion of raw data to frontend visualization. This flowchart provides both a high-level and component-level understanding of how raw data becomes actionable insights.
+The Mermaid diagram below illustrates how data flows through the processing pipeline from ingestion of raw data to frontend visualization. This flowchart provides both a high-level and component-level understanding of how raw data becomes actionable insights.
 
 ```mermaid
 flowchart TD
@@ -84,12 +88,12 @@ flowchart TD
         I[data_vars JSON]
         J[DataHandler Class]
     end
+
     I <--> J
     J --> B
     J --> C
     J --> D
     J --> E
-
 
     %% styling legend
     classDef dataNode fill:#3b5b83,stroke:#333,stroke-width:1px,color:#fff;
@@ -203,27 +207,41 @@ All tables are created using the SQL in the [app-duels-mapping/public/data/etl/s
 | aerial_duels_won_pct | Real      | Percent of aerial duels won (duels as percentage)                                              |
 | load_datetime        | Timestamp | Load timestamp with time zone (continued tracking of data reliability and ETL pipeline health) |
 
-All pipelines are contained within the [app-duels-mapping/public/data/etl](app-duels-mapping/public/data/etl) directory. Again, this architecture supports for extendibility, allowing for the buildout of additional pipelines, expansion of the project to include other leagues, and development of new composite metrics. The order of the tables as listed above documents the process and flow of the data.
+All pipelines are contained within the [app-duels-mapping/public/data/etl](app-duels-mapping/public/data/etl) directory. Again, this architecture supports for extendibility, allowing for the build out of additional pipelines, expansion of the project to include other leagues, and development of new composite metrics. The order of the tables as listed above documents the process and flow of the data.
 
 ### File Structure & Directory Layout
 
-Below is an outline of the data environment. Initially, this project's goal was a functional data platform for ingesting, processing, and delivering insights on player and team data. Essentially, that is everything contained within the [app-duels-mapping/public/data/](app-duels-mapping/public/data/) directory. As such, this data architecture could be used as a framework for other projects.
+Below is an outline of the data environment. Initially, this project's goal was a functional data platform for ingesting, processing, and delivering insights on player and team data. Essentially, that is everything contained within the [data](app-duels-mapping/public/data) directory. As such, this data architecture could be used as a framework for other projects.
 
 ```bash
-/app-duels-mapping/public/data/
-├── database
-    └── mls_stats.db                # SQLite database
-├── data_vars.json                  # Config which controls algorithm scoring weights and stores data sources and destination tables
-├── etl/
-    ├── data_handler.py             # Primary ETL orchestration class
-    ├── dependencies/               # Modular functions to support ETL
-    ├── pipeline_cur_FBref_misc_stats_to_schmetzer_scores_players.py    # Pipeline runner script to update current season data
-    ├── pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players.py   # Pipeline runner script for all current and historical data
-    └── sql/
-        ├── create/                 # CREATE TABLE scripts (one per table)
-        ├── transform/              # INSERT scripts for transformation (as needed)
-        ├── z_schmetzer_scores/     # SQL scripts specific to loading tables with final statistical data for Schmetzer Scores
-└── README.md                       # ← You are here
+├── app-duels-mapping   # Next.js app and front end components
+│   ├── app
+│   │   ├── api         # API routing to deliver responses
+│   │   ├── globals.css
+│   │   ├── layout.js
+│   │   ├── page.js
+│   │   ├── page.module.css
+│   │   └── theme.js
+│   ├── package.json    # node package modules to install
+│   ├── public
+│   │   ├── data        # data environment
+│   │   │   ├── data_vars.json        # Config which controls algorithm scoring weights and stores data sources and destination tables
+│   │   │   ├── database
+│   │   │   │   └── mls_stats.db      # SQLite database
+│   │   │   ├── etl
+│   │   │   │   ├── data_handler.py   # Primary ETL orchestration class
+│   │   │   │   ├── dependencies      # Modular functions to support ETL
+│   │   │   │   ├── pipeline_cur_FBref_misc_stats_to_schmetzer_scores_players.py    # Pipeline runner script to update current season data
+│   │   │   │   ├── pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players.py   # Pipeline runner script for all current and historical data
+│   │   │   │   └── sql
+│   │   │   │       ├── create        # CREATE TABLE scripts (one per table)
+│   │   │   │       ├── transform     # INSERT scripts for custom and one-off transformations (as needed)
+│   │   │   │       └── z_schmetzer_scores    # SQL scripts specific to loading tables with final statistical data for Schmetzer Scores
+│   └── utils         # Modular functions to data delivery to front end
+├── duels_mapping.sh
+├── planning          # planning documents, wireframes, drafts, tests, POCs, etc
+├── README.md         # ← You are here
+├── requirements.txt  # pip requirements to install
 ```
 
 For programmatic use as well as readability, a number of naming conventions have been employed.
@@ -258,3 +276,7 @@ The source data set only includes league games for Major League Soccer, however 
 As previously mentioned, the architecture of this data platform was designed with an eye toward future development and could be implemented for any league, team, or individual player. So long as the data is available, the data flow can be refactored following the nomenclature above.
 
 One possible avenue for future development could be creating a set of composite stats that also group and weight like statistics or stats that can be combined to target specific game actions, tactics, or game strategy. For example, a defensive contribution rating, chance creation rating, set piece efficiency, etc. Altogether these composite statistics can give us insights about how players can utilized in various roles and targeted match-ups.
+
+### Shout Outs
+
+The amazing folks at [FBref](https://fbref.com/en/) (the source data set for this project) and [Sports Reference](https://www.sports-reference.com/about.html) are doing God's work, democratizing sports data by making it publicly available. Also instrumental as a guide and inspiration for getting this app off the ground, Nathan Braun and his book [Learn to Code with Soccer](https://codesoccer.com/). Huge thanks to my buddy [Kai Curtis](https://github.com/thepelkus-too) who put me on it.

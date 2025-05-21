@@ -23,7 +23,7 @@ As you may have guessed football tactics have been a major driver in this projec
 
 ### Flow of Data
 
-The diagram below illustrates how data flows through the processing pipeline from ingestion of raw data to frontend visualization. This flowchart provides both a high-level and component-level understanding of how raw data becomes actionable insights.
+The Mermaid diagram below illustrates how data flows through the processing pipeline from ingestion of raw data to frontend visualization. This flowchart provides both a high-level and component-level understanding of how raw data becomes actionable insights.
 
 ```mermaid
 flowchart TD
@@ -39,12 +39,12 @@ flowchart TD
         I[data_vars JSON]
         J[DataHandler Class]
     end
+
     I <--> J
     J --> B
     J --> C
     J --> D
     J --> E
-
 
     %% styling legend
     classDef dataNode fill:#3b5b83,stroke:#333,stroke-width:1px,color:#fff;
@@ -216,10 +216,6 @@ VENV_PATH=/Users/path_to/.virtualenvs/duels_mapping/bin/activate
 ```
 
 _Note: you will need to adjust the path below as appropriate on your machine. I use [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/). You may need to adjust if you use [venv](https://docs.python.org/3/library/venv.html)._
-
-Run the bash script at the root.
-
-<!-- TODO: ADD MORE HERE 👇 -->
 
 For convenience I've built out a bash script at the root of the project, [duels_mapping.sh](../../../../duels_mapping.sh). There are instructions commented out near the top of the file and below is a quick summary.
 
