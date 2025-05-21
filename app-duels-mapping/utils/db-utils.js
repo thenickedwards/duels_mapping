@@ -33,9 +33,11 @@ export async function getDatabasePath(verbose = 2) {
   return absolutePath;
 }
 
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 // Resolves path to SQL SELECT statements
 export function getSqlSelect(sqlFile) {
-  const sqlPath = path.join(process.cwd(), "utils", "sql", "select", sqlFile);
+  // const sqlPath = path.join(process.cwd(), "utils", "sql", "select", sqlFile);
+  const sqlPath = path.join(__dirname, "sql", "select", sqlFile); // relative to db-utils.js
   const sql = fs.readFileSync(sqlPath, "utf-8");
   return sql;
 }
