@@ -28,9 +28,9 @@ export default function RootLayout(props) {
     <html lang="en" className={`${bebasNeue.variable} ${nunitoSans.className}`}>
       <body>
         <AppRouterCacheProvider>
-          <AppThemeProvider theme={theme}>
+          <AppThemeProvider>
             <NavBar />
-            {children}+{" "}
+            {children}
           </AppThemeProvider>
         </AppRouterCacheProvider>
       </body>

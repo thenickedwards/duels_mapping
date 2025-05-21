@@ -22,6 +22,11 @@ import useSWR from "swr";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import PlayerComparison from "./components/PlayerComparison";
+import { useRef } from "react";
+import ClickAwayListener from "@mui/material/ClickAwayListener";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import { CSVLink } from "react-csv";
+import { saveAs } from "file-saver";
 
 const fetcher = (url) => fetch(url).then((r) => r.json());
 
@@ -40,6 +45,10 @@ export default function PlayersPage() {
   });
 
   const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [showColumns, setShowColumns] = useState(false);
+  const [hiddenColumns, setHiddenColumns] = useState([]);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Build query string
   const query = new URLSearchParams({ season });
@@ -64,6 +73,12 @@ export default function PlayersPage() {
     router.replace(`?${newParams.toString()}`);
   };
 
+  const toggleColumnVisibility = (field) => {
+    setHiddenColumns((prev) =>
+      prev.includes(field) ? prev.filter((f) => f !== field) : [...prev, field]
+    );
+  };
+
   const columns = [
     { field: "schmetzer_rk", headerName: "rk", width: 70 },
     { field: "player_name", headerName: "Player", width: 150 },
@@ -82,6 +97,22 @@ export default function PlayersPage() {
 
   const rows = data?.map((row, i) => ({ id: i, ...row })) || [];
 
+  const filteredRows = rows.filter((row) =>
+    row.player_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  function exportToCSV(data, filename) {
+    if (!data || data.length === 0) return;
+  
+    const header = ['Index', ...Object.keys(data[0])];
+    const csv = [header.join(',')].concat(
+      data.map((row, i) => [i + 1, ...header.slice(1).map(field => JSON.stringify(row[field] || ''))].join(','))
+    ).join('\n');
+  
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, filename);
+  }  
+
   return (
     <main style={{ padding: 24 }}>
       <Tabs value={tab} onChange={handleTabChange}>
@@ -91,41 +122,170 @@ export default function PlayersPage() {
 
       {tab === "players" && (
         <>
-          <Box mt={2} display="flex" gap={2} alignItems="center">
-            <Typography variant="h6">Season:</Typography>
+          <Box
+            mt={2}
+            display="flex"
+            flexWrap="wrap"
+            justifyContent="space-between"
+            alignItems="center"
+            gap={2}
+          >
+            {/* Left side buttons */}
+            <Box display="flex" gap={1} alignItems="center" flexWrap="wrap">
+              <Button
+                variant="outlined"
+                startIcon={<FilterListIcon />}
+                onClick={() => setFilterDrawerOpen(true)}
+              >
+                Filters
+                {(() => {
+                  const count = [
+                    filters.position,
+                    filters.squad,
+                    filters.minMinutes,
+                  ].filter(Boolean).length;
+                  return count > 0 ? ` (${count})` : "";
+                })()}
+              </Button>
 
-            <Button
-              variant={season === "2025" ? "contained" : "outlined"}
-              onClick={() => updateSeason("2025")}
-            >
-              2025
-            </Button>
+              {/* Columns Dropdown */}
+              <ClickAwayListener onClickAway={() => setShowColumns(false)}>
+                <Box position="relative">
+                  <Button
+                    variant="outlined"
+                    onClick={() => setShowColumns(!showColumns)}
+                  >
+                    Columns
+                  </Button>
+                  {showColumns && (
+                    <Box
+                      position="absolute"
+                      top={40}
+                      left={0}
+                      bgcolor="white"
+                      border="1px solid #ccc"
+                      borderRadius={1}
+                      boxShadow={2}
+                      zIndex={10}
+                      p={1}
+                    >
+                      {columns.map((col) => (
+                        <Box key={col.field}>
+                          <label>
+                            <input
+                              type="checkbox"
+                              checked={!hiddenColumns.includes(col.field)}
+                              onChange={() => toggleColumnVisibility(col.field)}
+                            />{" "}
+                            {col.headerName}
+                          </label>
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
+                </Box>
+              </ClickAwayListener>
 
-            <Button
-              variant={season === "2024" ? "contained" : "outlined"}
-              onClick={() => updateSeason("2024")}
-            >
-              2024
-            </Button>
+              {/* Export Button */}
+              <Button
+                variant="outlined"
+                startIcon={<FileDownloadIcon />}
+                onClick={() =>
+                  exportToCSV(filteredRows, `schmetzer_scores_${season}.csv`)
+                }
+              >
+                Export
+              </Button>
+            </Box>
 
-            <Select
-              value={["2023", "2022", "2021"].includes(season) ? season : ""}
-              onChange={(e) => updateSeason(e.target.value)}
-              displayEmpty
-              IconComponent={ExpandMoreIcon}
-              sx={{ minWidth: 120 }}
-            >
-              <MenuItem value="" disabled>
-                More Years
-              </MenuItem>
-              <MenuItem value="2023">2023</MenuItem>
-              <MenuItem value="2022">2022</MenuItem>
-              <MenuItem value="2021">2021</MenuItem>
-            </Select>
+            {/* Right side controls */}
+            <Box display="flex" gap={1} alignItems="center">
+              {/* Expandable Search */}
+              {showSearch ? (
+                <TextField
+                  variant="outlined"
+                  size="small"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onBlur={() => setShowSearch(false)}
+                  placeholder="Search Player"
+                />
+              ) : (
+                <IconButton onClick={() => setShowSearch(true)}>
+                  <span role="img" aria-label="Search">
+                    🔍
+                  </span>
+                </IconButton>
+              )}
 
-            <IconButton onClick={() => setFilterDrawerOpen(true)}>
-              <FilterListIcon />
-            </IconButton>
+              <Button
+                variant={season === "2025" ? "contained" : "outlined"}
+                onClick={() => updateSeason("2025")}
+              >
+                2025
+              </Button>
+
+              <Button
+                variant={season === "2024" ? "contained" : "outlined"}
+                onClick={() => updateSeason("2024")}
+              >
+                2024
+              </Button>
+
+              <Select
+                value={
+                  ["2023", "2022", "2021", "2020", "2019", "2018"].includes(
+                    season
+                  )
+                    ? season
+                    : ""
+                }
+                onChange={(e) => updateSeason(e.target.value)}
+                displayEmpty
+                IconComponent={ExpandMoreIcon}
+                sx={{ minWidth: 50 }}
+              >
+                <MenuItem value="" disabled>
+                  More
+                </MenuItem>
+                <MenuItem value="2023">2023</MenuItem>
+                <MenuItem value="2022">2022</MenuItem>
+                <MenuItem value="2021">2021</MenuItem>
+                <MenuItem value="2023">2020</MenuItem>
+                <MenuItem value="2022">2019</MenuItem>
+                <MenuItem value="2021">2018</MenuItem>
+              </Select>
+            </Box>
+          </Box>
+
+          {/* Filter Chips Row */}
+          <Box mt={1} display="flex" gap={1} flexWrap="wrap">
+            {filters.squad && (
+              <Button
+                variant="outlined"
+                onClick={() => setFilters({ ...filters, squad: "" })}
+              >
+                ✕ {filters.squad}
+              </Button>
+            )}
+            {filters.position && (
+              <Button
+                variant="outlined"
+                onClick={() => setFilters({ ...filters, position: "" })}
+              >
+                ✕ {filters.position}
+              </Button>
+            )}
+            {(filters.squad || filters.position) && (
+              <Button
+                variant="text"
+                onClick={() =>
+                  setFilters({ position: "", squad: "", minMinutes: "" })
+                }
+              >
+                Clear All
+              </Button>
+            )}
           </Box>
 
           <Box mt={2} sx={{ height: 450, width: "100%" }}>
@@ -133,8 +293,10 @@ export default function PlayersPage() {
               <Typography>Loading…</Typography>
             ) : (
               <DataGrid
-                rows={rows}
-                columns={columns}
+                rows={filteredRows}
+                columns={columns.filter(
+                  (col) => !hiddenColumns.includes(col.field)
+                )}
                 loading={isLoading}
                 onRowClick={(params) => setSelectedPlayer(params.row)}
               />
@@ -205,7 +367,7 @@ export default function PlayersPage() {
       {tab === "comparisons" && (
         <Box mt={4}>
           <Typography>Comparison Tab Content (Coming Soon)</Typography>
-          <PlayerComparison/>
+          <PlayerComparison />
         </Box>
       )}
     </main>
