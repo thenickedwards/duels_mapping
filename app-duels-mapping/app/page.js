@@ -21,6 +21,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import useSWR from "swr";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import PlayerComparison from "./components/PlayerComparison";
 
 const fetcher = (url) => fetch(url).then((r) => r.json());
 
@@ -204,6 +205,7 @@ export default function PlayersPage() {
       {tab === "comparisons" && (
         <Box mt={4}>
           <Typography>Comparison Tab Content (Coming Soon)</Typography>
+          <PlayerComparison/>
         </Box>
       )}
     </main>
