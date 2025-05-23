@@ -26,7 +26,6 @@ export async function getPlayerPic(playerName, verbose = 2) {
   //     },
   //   ],
   // });
-
   // console.log(imgUrl1);
 
   // REVISED, SIMPLIFIED
