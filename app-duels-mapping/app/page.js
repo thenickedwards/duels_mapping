@@ -15,8 +15,6 @@ import {
   DialogTitle,
   DialogContent,
 } from "@mui/material";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { DataGrid } from "@mui/x-data-grid";
 import useSWR from "swr";
 import { useState } from "react";
@@ -27,6 +25,11 @@ import ClickAwayListener from "@mui/material/ClickAwayListener";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { CSVLink } from "react-csv";
 import { saveAs } from "file-saver";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import PlayerDetailDialog from './components/PlayerDetailDialog';
+import CloseIcon from "@mui/icons-material/Close";
+
 
 const fetcher = (url) => fetch(url).then((r) => r.json());
 
@@ -304,49 +307,58 @@ export default function PlayersPage() {
           </Box>
 
           <Drawer
-            anchor="right"
-            open={filterDrawerOpen}
-            onClose={() => setFilterDrawerOpen(false)}
-            sx={{ p: 2 }}
-          >
-            <Box p={2} width={300}>
-              <Typography variant="h6">Filter Players</Typography>
-              <Select
-                fullWidth
-                value={filters.position}
-                onChange={(e) =>
-                  setFilters({ ...filters, position: e.target.value })
-                }
-                displayEmpty
-                sx={{ mt: 2 }}
-              >
-                <MenuItem value="">All Positions</MenuItem>
-                <MenuItem value="FW">Forward</MenuItem>
-                <MenuItem value="MF">Midfielder</MenuItem>
-                <MenuItem value="DF">Defender</MenuItem>
-              </Select>
+  anchor="right"
+  open={filterDrawerOpen}
+  onClose={() => setFilterDrawerOpen(false)}
+>
+  <Box p={2} width={300}>
+    <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+      <Typography variant="h6">Filter Players</Typography>
+      <IconButton
+        onClick={() => setFilterDrawerOpen(false)}
+        aria-label="close drawer"
+        size="small"
+      >
+        <CloseIcon />
+      </IconButton>
+    </Box>
 
-              <TextField
-                label="Squad"
-                fullWidth
-                sx={{ mt: 2 }}
-                value={filters.squad}
-                onChange={(e) =>
-                  setFilters({ ...filters, squad: e.target.value })
-                }
-              />
+    <Select
+      fullWidth
+      value={filters.position}
+      onChange={(e) =>
+        setFilters({ ...filters, position: e.target.value })
+      }
+      displayEmpty
+      sx={{ mt: 2 }}
+    >
+      <MenuItem value="">All Positions</MenuItem>
+      <MenuItem value="FW">Forward</MenuItem>
+      <MenuItem value="MF">Midfielder</MenuItem>
+      <MenuItem value="DF">Defender</MenuItem>
+    </Select>
 
-              <TextField
-                label="Min Minutes"
-                fullWidth
-                sx={{ mt: 2 }}
-                value={filters.minMinutes}
-                onChange={(e) =>
-                  setFilters({ ...filters, minMinutes: e.target.value })
-                }
-              />
-            </Box>
-          </Drawer>
+    <TextField
+      label="Squad"
+      fullWidth
+      sx={{ mt: 2 }}
+      value={filters.squad}
+      onChange={(e) =>
+        setFilters({ ...filters, squad: e.target.value })
+      }
+    />
+
+    <TextField
+      label="Min Minutes"
+      fullWidth
+      sx={{ mt: 2 }}
+      value={filters.minMinutes}
+      onChange={(e) =>
+        setFilters({ ...filters, minMinutes: e.target.value })
+      }
+    />
+  </Box>
+</Drawer>
 
           <Dialog
             open={!!selectedPlayer}
@@ -359,6 +371,8 @@ export default function PlayersPage() {
               <Typography>Squad: {selectedPlayer?.squad}</Typography>
               <Typography>Age: {selectedPlayer?.player_age}</Typography>
               {/* Add more fields here */}
+              <PlayerDetailDialog player={selectedPlayer} open={!!selectedPlayer} onClose={() => setSelectedPlayer(null)} />
+
             </DialogContent>
           </Dialog>
         </>
