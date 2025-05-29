@@ -2,6 +2,15 @@ import sqlite3 from "sqlite3";
 import { open } from "sqlite";
 import { getDatabasePath, getSqlSelect } from "@/utils/db-utils";
 
+/*
+The path for this API route is below.
+Example when hosted locally: 
+http://localhost:3000/api/schmetzer_scores/player?season=2024&playerName=jordanmorris
+Note: the season and playerName query parameters are required.
+
+The API response returned will be an array with two arrays inside. The first array will have one object and will be that players stats for the requested season. The second array will have the year-over-year (YOY) schmetzer score and rank for the season. Both objects will include the player bio info.
+*/
+
 // Hold the db instance across requests
 let db = null;
 
