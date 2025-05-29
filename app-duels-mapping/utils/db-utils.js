@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 
 // Resolves SQLite database path from data_vars JSON
-export async function getDatabasePath(verbose = 2) {
+export async function getDatabasePath(verbose = 1) {
   const dataVarsPath = path.join(
     process.cwd(),
     "public",
@@ -28,15 +28,15 @@ export async function getDatabasePath(verbose = 2) {
   if (!fs.existsSync(absolutePath) && verbose >= 1) {
     throw new Error(`Database file does not exist at ${absolutePath}`);
   }
-  if (verbose >= 1) console.log("Resolved DB absolute path:", absolutePath);
+  if (verbose >= 1) console.log("Found DB at:", relativePath);
+  if (verbose >= 2) console.log("Resolved DB absolute path:", absolutePath);
 
   return absolutePath;
 }
 
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
 // Resolves path to SQL SELECT statements
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 export function getSqlSelect(sqlFile) {
-  // const sqlPath = path.join(process.cwd(), "utils", "sql", "select", sqlFile);
   const sqlPath = path.join(__dirname, "sql", "select", sqlFile); // relative to db-utils.js
   const sql = fs.readFileSync(sqlPath, "utf-8");
   return sql;

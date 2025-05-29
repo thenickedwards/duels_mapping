@@ -24,7 +24,32 @@ function getDefaultSchmetzerScoreConfig(verbose = 1) {
 
 const defaultSchmetzerScoreConfig = getDefaultSchmetzerScoreConfig();
 
-// // // // //
+/*
+The helper function below allows for fine tuning of the Schmetzer Score. Two arguments are accepted: newConfig and playerData.
+
+The newConfig variable should be an object with the values that are sent from the fine tuning controls. For example:
+const newConfig = {
+  "aerial duels won": 3,
+  "aerial duels lost": 0,
+  "tackles won": 2,
+  interceptions: 1,
+  recoveries: 0,
+};
+Note: The newConfig variable is optional. If you don't pass a newConfig value to function, the default values in data_vars.json are used. 
+
+The playerData variable should be similar but include the player_name and the player's raw stats. For example:
+const playerData = {
+  player_name: "Yeimar Gómez Andrade",
+  aerial_duels_won: 25,
+  aerial_duels_lost: 16,
+  tackles_won: 24,
+  interceptions: 20,
+  recoveries: 68,
+};
+
+The return will be an object with two key-value-pairs: player_name and newScore. For example:
+{ player_name: 'Yeimar Gómez Andrade', newScore: 143 }
+*/
 
 export async function tuneSchmetzerScore(
   newConfig = defaultSchmetzerScoreConfig,

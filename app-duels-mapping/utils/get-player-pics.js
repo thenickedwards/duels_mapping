@@ -4,6 +4,12 @@ function removeAccents(str) {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
+/*
+The helper function below retrieves a player's MLS headshot. One argument is required which is the player's name and this value should be passed with accent marks, diacritics, and any other special characters. While the URL requires special characters to be removed, parsing the HTML requires special characters to be maintained.
+
+The return will be an object with two key-value-pairs: imgThumbUrl and imgDesktopUrl.
+*/
+
 export async function getPlayerPic(playerName, verbose = 1) {
   const playerNameSimple = removeAccents(playerName);
   const playerNameUrl = playerNameSimple.toLowerCase().replace(/\s/g, "-");
