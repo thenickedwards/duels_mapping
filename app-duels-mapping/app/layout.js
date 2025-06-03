@@ -2,6 +2,7 @@ import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { AppThemeProvider } from "./theme";
 import { Nunito_Sans, Bebas_Neue } from "next/font/google";
 import NavBar from "./components/NavBar";
+import "./lib/fontawesome";
 import theme from "./theme";
 import "./globals.css";
 

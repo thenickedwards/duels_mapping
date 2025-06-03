@@ -14,6 +14,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  InputAdornment,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import useSWR from "swr";
@@ -27,18 +28,36 @@ import { CSVLink } from "react-csv";
 import { saveAs } from "file-saver";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import PlayerDetailDialog from './components/PlayerDetailDialog';
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import PlayerDetailDialog from "./components/PlayerDetailDialog";
 import CloseIcon from "@mui/icons-material/Close";
-
+import { useTheme } from "@mui/material/styles";
+import { baseButtonStyle } from "./styles/buttonStyles";
+import FilterChip from "./styles/FilterChip";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faSliders,
+  faMagnifyingGlass,
+  faDownload,
+  faEye,
+  faXmark,
+  faChevronDown,
+} from "@fortawesome/free-solid-svg-icons";
+import Image from "next/image";
+import ColumnsBlack from "./images/columns-icon.png";
+import ColumnsWhite from "./images/columns-wh-icon.png";
+import ExportBlack from "./images/export-icon.png";
+import ExportWhite from "./images/export-wh-icon.png";
 
 const fetcher = (url) => fetch(url).then((r) => r.json());
 
 export default function PlayersPage() {
+  const theme = useTheme();
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const tab = searchParams.get("tab") || "players";
-  const season = searchParams.get("season") || "2024";
+  const season = searchParams.get("season") || "2025";
 
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [filters, setFilters] = useState({
@@ -53,7 +72,6 @@ export default function PlayersPage() {
   const [showSearch, setShowSearch] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Build query string
   const query = new URLSearchParams({ season });
   if (filters.position) query.set("position", filters.position);
   if (filters.squad) query.set("squad", filters.squad);
@@ -106,15 +124,25 @@ export default function PlayersPage() {
 
   function exportToCSV(data, filename) {
     if (!data || data.length === 0) return;
-  
-    const header = ['Index', ...Object.keys(data[0])];
-    const csv = [header.join(',')].concat(
-      data.map((row, i) => [i + 1, ...header.slice(1).map(field => JSON.stringify(row[field] || ''))].join(','))
-    ).join('\n');
-  
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+
+    const header = ["Index", ...Object.keys(data[0])];
+    const csv = [header.join(",")]
+      .concat(
+        data.map((row, i) =>
+          [
+            i + 1,
+            ...header.slice(1).map((field) => JSON.stringify(row[field] || "")),
+          ].join(",")
+        )
+      )
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     saveAs(blob, filename);
-  }  
+  }
+
+  const hardcodedYears = ["2025", "2024"];
+  const dropdownYears = ["2023", "2022", "2021", "2020", "2019", "2018"];
 
   return (
     <main style={{ padding: 24 }}>
@@ -137,8 +165,14 @@ export default function PlayersPage() {
             <Box display="flex" gap={1} alignItems="center" flexWrap="wrap">
               <Button
                 variant="outlined"
-                startIcon={<FilterListIcon />}
+                startIcon={
+                  <FontAwesomeIcon
+                    icon={faSliders}
+                    style={{ fontSize: "15px" }}
+                  />
+                }
                 onClick={() => setFilterDrawerOpen(true)}
+                sx={baseButtonStyle(theme)}
               >
                 Filters
                 {(() => {
@@ -157,6 +191,23 @@ export default function PlayersPage() {
                   <Button
                     variant="outlined"
                     onClick={() => setShowColumns(!showColumns)}
+                    startIcon={
+                      <Image
+                        src={
+                          theme.palette.mode === "dark"
+                            ? ColumnsWhite
+                            : ColumnsBlack
+                        }
+                        alt="Columns"
+                        height={14}
+                        style={{
+                          borderRadius: 0,
+                          objectFit: "contain",
+                          imageRendering: "crisp-edges",
+                        }}
+                      />
+                    }
+                    sx={baseButtonStyle(theme)}
                   >
                     Columns
                   </Button>
@@ -192,10 +243,24 @@ export default function PlayersPage() {
               {/* Export Button */}
               <Button
                 variant="outlined"
-                startIcon={<FileDownloadIcon />}
                 onClick={() =>
                   exportToCSV(filteredRows, `schmetzer_scores_${season}.csv`)
                 }
+                startIcon={
+                  <Image
+                    src={
+                      theme.palette.mode === "dark" ? ExportWhite : ExportBlack
+                    }
+                    alt="Columns"
+                    height={14}
+                    style={{
+                      borderRadius: 0,
+                      objectFit: "contain",
+                      imageRendering: "crisp-edges",
+                    }}
+                  />
+                }
+                sx={baseButtonStyle(theme)}
               >
                 Export
               </Button>
@@ -205,79 +270,175 @@ export default function PlayersPage() {
             <Box display="flex" gap={1} alignItems="center">
               {/* Expandable Search */}
               {showSearch ? (
-                <TextField
-                  variant="outlined"
-                  size="small"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onBlur={() => setShowSearch(false)}
-                  placeholder="Search Player"
-                />
+                <ClickAwayListener onClickAway={() => setShowSearch(false)}>
+                  <TextField
+                    variant="standard"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search Player"
+                    sx={{
+                      input: {
+                        fontFamily: "'Nunito Sans', sans-serif",
+                        fontSize: "1rem",
+                        color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                      },
+                      "& .MuiInput-underline:before": {
+                        borderBottomColor:
+                          theme.palette.mode === "dark" ? "#fff" : "#000",
+                      },
+                      "& .MuiInput-underline:hover:before": {
+                        borderBottomColor:
+                          theme.palette.mode === "dark" ? "#fff" : "#000",
+                      },
+                      "& .MuiInput-underline:after": {
+                        borderBottomColor:
+                          theme.palette.mode === "dark" ? "#fff" : "#000",
+                      },
+                      "& input::placeholder": {
+                        color: theme.palette.mode === "dark" ? "#aaa" : "#888",
+                        opacity: 1,
+                      },
+                    }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <FontAwesomeIcon
+                            icon={faMagnifyingGlass}
+                            style={{
+                              fontSize: "18px",
+                              color:
+                                theme.palette.mode === "dark"
+                                  ? "white"
+                                  : "black",
+                            }}
+                          />
+                        </InputAdornment>
+                      ),
+                      endAdornment: searchTerm && (
+                        <InputAdornment position="end">
+                          <IconButton
+                            size="small"
+                            onClick={() => setSearchTerm("")}
+                            sx={{ padding: 0.5 }}
+                          >
+                            <FontAwesomeIcon
+                              icon={faXmark}
+                              style={{
+                                fontSize: "14px",
+                                color:
+                                  theme.palette.mode === "dark"
+                                    ? "white"
+                                    : "black",
+                              }}
+                            />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </ClickAwayListener>
               ) : (
                 <IconButton onClick={() => setShowSearch(true)}>
-                  <span role="img" aria-label="Search">
-                    🔍
-                  </span>
+                  <FontAwesomeIcon
+                    icon={faMagnifyingGlass}
+                    style={{
+                      fontSize: "18px",
+                      color: theme.palette.mode === "dark" ? "white" : "black",
+                    }}
+                  />
                 </IconButton>
               )}
 
-              <Button
-                variant={season === "2025" ? "contained" : "outlined"}
-                onClick={() => updateSeason("2025")}
-              >
-                2025
-              </Button>
+              <>
+                {hardcodedYears.map((year) => (
+                  <Button
+                    key={year}
+                    onClick={() => updateSeason(year)}
+                    sx={baseButtonStyle(theme, season === year, true)}
+                  >
+                    {year}
+                  </Button>
+                ))}
 
-              <Button
-                variant={season === "2024" ? "contained" : "outlined"}
-                onClick={() => updateSeason("2024")}
-              >
-                2024
-              </Button>
+                <Box position="relative" width={44} height={40}>
+                  <Select
+                    value={dropdownYears.includes(season) ? season : ""}
+                    onChange={(e) => updateSeason(e.target.value)}
+                    displayEmpty
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      backgroundColor: dropdownYears.includes(season)
+                        ? theme.palette.mode === "dark"
+                          ? "#000"
+                          : "#fff"
+                        : "transparent",
+                      border: `1px solid ${
+                        theme.palette.mode === "dark" ? "#fff" : "#000"
+                      }`,
+                      borderRadius: 0,
+                      padding: 0,
+                      "& .MuiSelect-select": {
+                        padding: 0,
+                        textIndent: "-9999px", // Hide the selected text
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        border: "none",
+                      },
+                      "&:hover": {
+                        backgroundColor:
+                          theme.palette.mode === "dark"
+                            ? "rgba(255,255,255,0.1)"
+                            : "#f2f2f2",
+                      },
+                    }}
+                    IconComponent={() => null} // Disable default icon
+                  >
+                    <MenuItem value="" disabled>
+                      More
+                    </MenuItem>
+                    {dropdownYears.map((year) => (
+                      <MenuItem key={year} value={year}>
+                        {year}
+                      </MenuItem>
+                    ))}
+                  </Select>
 
-              <Select
-                value={
-                  ["2023", "2022", "2021", "2020", "2019", "2018"].includes(
-                    season
-                  )
-                    ? season
-                    : ""
-                }
-                onChange={(e) => updateSeason(e.target.value)}
-                displayEmpty
-                IconComponent={ExpandMoreIcon}
-                sx={{ minWidth: 50 }}
-              >
-                <MenuItem value="" disabled>
-                  More
-                </MenuItem>
-                <MenuItem value="2023">2023</MenuItem>
-                <MenuItem value="2022">2022</MenuItem>
-                <MenuItem value="2021">2021</MenuItem>
-                <MenuItem value="2023">2020</MenuItem>
-                <MenuItem value="2022">2019</MenuItem>
-                <MenuItem value="2021">2018</MenuItem>
-              </Select>
+                  {/* Custom Positioned Icon */}
+                  <ArrowForwardIosIcon
+                    sx={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%) rotate(90deg)",
+                      width: "1em",
+                      height: "1em",
+                      pointerEvents: "none",
+                      color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                    }}
+                  />
+                </Box>
+              </>
             </Box>
           </Box>
 
           {/* Filter Chips Row */}
           <Box mt={1} display="flex" gap={1} flexWrap="wrap">
             {filters.squad && (
-              <Button
-                variant="outlined"
-                onClick={() => setFilters({ ...filters, squad: "" })}
-              >
-                ✕ {filters.squad}
-              </Button>
+              <FilterChip
+                label={filters.squad}
+                onRemove={() => setFilters({ ...filters, squad: "" })}
+              />
             )}
             {filters.position && (
-              <Button
-                variant="outlined"
-                onClick={() => setFilters({ ...filters, position: "" })}
-              >
-                ✕ {filters.position}
-              </Button>
+              <FilterChip
+                label={filters.position}
+                onRemove={() => setFilters({ ...filters, position: "" })}
+              />
+            )}
+            {/* Dropdown Year Chip */}
+            {dropdownYears.includes(season) && (
+              <FilterChip label={season} onRemove={() => updateSeason("2025")} />
             )}
             {(filters.squad || filters.position) && (
               <Button
@@ -285,6 +446,12 @@ export default function PlayersPage() {
                 onClick={() =>
                   setFilters({ position: "", squad: "", minMinutes: "" })
                 }
+                sx={{
+                  fontSize: "1rem",
+                  fontFamily: "'Bebas Neue', 'sans-serif'",
+                  textTransform: "uppercase",
+                  color: theme.palette.text.primary,
+                }}
               >
                 Clear All
               </Button>
@@ -307,58 +474,63 @@ export default function PlayersPage() {
           </Box>
 
           <Drawer
-  anchor="right"
-  open={filterDrawerOpen}
-  onClose={() => setFilterDrawerOpen(false)}
->
-  <Box p={2} width={300}>
-    <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-      <Typography variant="h6">Filter Players</Typography>
-      <IconButton
-        onClick={() => setFilterDrawerOpen(false)}
-        aria-label="close drawer"
-        size="small"
-      >
-        <CloseIcon />
-      </IconButton>
-    </Box>
+            anchor="right"
+            open={filterDrawerOpen}
+            onClose={() => setFilterDrawerOpen(false)}
+          >
+            <Box p={2} width={300}>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                mb={1}
+              >
+                <Typography variant="h6">Filter Players</Typography>
+                <IconButton
+                  onClick={() => setFilterDrawerOpen(false)}
+                  aria-label="close drawer"
+                  size="small"
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Box>
 
-    <Select
-      fullWidth
-      value={filters.position}
-      onChange={(e) =>
-        setFilters({ ...filters, position: e.target.value })
-      }
-      displayEmpty
-      sx={{ mt: 2 }}
-    >
-      <MenuItem value="">All Positions</MenuItem>
-      <MenuItem value="FW">Forward</MenuItem>
-      <MenuItem value="MF">Midfielder</MenuItem>
-      <MenuItem value="DF">Defender</MenuItem>
-    </Select>
+              <Select
+                fullWidth
+                value={filters.position}
+                onChange={(e) =>
+                  setFilters({ ...filters, position: e.target.value })
+                }
+                displayEmpty
+                sx={{ mt: 2 }}
+              >
+                <MenuItem value="">All Positions</MenuItem>
+                <MenuItem value="FW">Forward</MenuItem>
+                <MenuItem value="MF">Midfielder</MenuItem>
+                <MenuItem value="DF">Defender</MenuItem>
+              </Select>
 
-    <TextField
-      label="Squad"
-      fullWidth
-      sx={{ mt: 2 }}
-      value={filters.squad}
-      onChange={(e) =>
-        setFilters({ ...filters, squad: e.target.value })
-      }
-    />
+              <TextField
+                label="Squad"
+                fullWidth
+                sx={{ mt: 2 }}
+                value={filters.squad}
+                onChange={(e) =>
+                  setFilters({ ...filters, squad: e.target.value })
+                }
+              />
 
-    <TextField
-      label="Min Minutes"
-      fullWidth
-      sx={{ mt: 2 }}
-      value={filters.minMinutes}
-      onChange={(e) =>
-        setFilters({ ...filters, minMinutes: e.target.value })
-      }
-    />
-  </Box>
-</Drawer>
+              <TextField
+                label="Min Minutes"
+                fullWidth
+                sx={{ mt: 2 }}
+                value={filters.minMinutes}
+                onChange={(e) =>
+                  setFilters({ ...filters, minMinutes: e.target.value })
+                }
+              />
+            </Box>
+          </Drawer>
 
           <Dialog
             open={!!selectedPlayer}
@@ -371,8 +543,11 @@ export default function PlayersPage() {
               <Typography>Squad: {selectedPlayer?.squad}</Typography>
               <Typography>Age: {selectedPlayer?.player_age}</Typography>
               {/* Add more fields here */}
-              <PlayerDetailDialog player={selectedPlayer} open={!!selectedPlayer} onClose={() => setSelectedPlayer(null)} />
-
+              <PlayerDetailDialog
+                player={selectedPlayer}
+                open={!!selectedPlayer}
+                onClose={() => setSelectedPlayer(null)}
+              />
             </DialogContent>
           </Dialog>
         </>

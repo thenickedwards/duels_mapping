@@ -15,12 +15,15 @@ import {
   ListItemText,
   Switch,
 } from "@mui/material";
+import Image from "next/image";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useState } from "react";
 import Link from "next/link";
-import Brightness4Icon from "@mui/icons-material/Brightness4";
-import Brightness7Icon from "@mui/icons-material/Brightness7";
-import { useColorMode } from '@/app/theme';
+import { usePathname } from "next/navigation";
+import { useColorMode } from "@/app/theme";
+import DarkMode from "../images/dark_mode.png";
+import LightMode from "../images/light_mode.png";
+
 
 const pages = [
   { label: "Home", href: "/" },
@@ -34,6 +37,7 @@ export default function NavBar() {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [mobileOpen, setMobileOpen] = useState(false);
   const { mode, toggleColorMode } = useColorMode();
+  const pathname = usePathname();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -56,7 +60,15 @@ export default function NavBar() {
 
   return (
     <>
-      <AppBar position="static" color="primary">
+      <AppBar
+        position="static"
+        color="default"
+        elevation={0}
+        sx={{
+          bgcolor: theme.palette.mode === "dark" ? "#000" : "#fff",
+          boxShadow: "none",
+        }}
+      >
         <Toolbar>
           <Typography
             variant="h6"
@@ -79,18 +91,62 @@ export default function NavBar() {
             </>
           ) : (
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              {pages.map((page) => (
-                <Button
-                  key={page.label}
-                  color="inherit"
-                  component={Link}
-                  href={page.href}
-                >
-                  {page.label}
-                </Button>
-              ))}
+              {pages.map((page) => {
+                const isActive = pathname === page.href;
+
+                return (
+                  <Button
+                    key={page.label}
+                    color="inherit"
+                    component={Link}
+                    href={page.href}
+                    sx={{
+                      fontSize: "1.25rem",
+                      fontFamily: "'Bebas Neue', 'sans-serif'",
+                      letterSpacing: 0,
+                      "&:hover": {
+                        backgroundColor: "transparent",
+                      },
+                    }}
+                  >
+                    <Box
+                      component="span"
+                      sx={{
+                        position: "relative",
+                        display: "inline-block",
+                        "&::after": {
+                          content: '""',
+                          position: "absolute",
+                          left: 0,
+                          bottom: 0,
+                          height: "4px",
+                          width: "100%",
+                          backgroundColor: isActive
+                            ? "#B7F08E"
+                            : "#3B5B84",
+                          borderRadius: 0,
+                          transformOrigin: "left",
+                          transform: isActive ? "scaleX(1)" : "scaleX(0)",
+                          transition:
+                            "transform 0.3s ease-in-out, background-color 0.3s ease-in-out",
+                        },
+                        "&:hover::after": {
+                          transform: "scaleX(1)",
+                        },
+                      }}
+                    >
+                      {page.label}
+                    </Box>
+                  </Button>
+                );
+              })}
+
               <IconButton onClick={toggleColorMode} color="inherit">
-                {mode === "light" ? <Brightness4Icon /> : <Brightness7Icon />}
+                <Image
+                  src={mode === "light" ? LightMode : DarkMode}
+                  alt="Toggle theme"
+                  height={24}
+                />
               </IconButton>
             </Box>
           )}
