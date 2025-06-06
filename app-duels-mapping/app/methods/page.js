@@ -4,56 +4,64 @@ export default function MethodsPage() {
   return (
     <main style={{ padding: "2rem" }}>
       <h1>Methods</h1>
-      <p>
-        Our goal with this project was to develop a “Contested Possession
-        Metric” &dash; a composite statistic designed to reflect a player&apos;s
-        in&dash;game contributions that either create turnovers or secure
-        possession.
-      </p>
-      <p>
-        In homage to club legend Brian Schmetzer, we started with a stat he
-        frequently emphasizes: aerial duels won. An aerial duel is defined as a
-        challenge between two players to gain control of the ball above elbow
-        height (typically with the head). We assigned the value for an aerial
-        duel won at +1.
-      </p>
-      <p>
-        A tackle in soccer represents when a player challenges their opponent
-        with their feet for a ball on the ground (or at least below the elbow),
-        a game event markedly similar to an aerial duel won often yielding the
-        same results. As such, we also valued tackles won at +1.
-      </p>
-      <p>
-        To account for aerial duels lost we assigned a value of &dash;0.75. This
-        weighting ensures that players are still credited for actively
-        contesting possession, even when they don&apos;t win the ball.
-        (Unfortunately, tackles lost are unfortunately not available in the
-        source data. More in for below.)
-      </p>
-      <p>
-        After aerial duels and tackles won, the next most valued statistic for
-        this metric is interceptions. An interception occurs when a player gains
-        possession of the ball after an opponent passes, crosses, or shoots
-        before the ball can reach the intended target. While this game event is
-        not a result of a direct physical challenge for the ball, the player
-        creates a turnover through positioning, reading game flow, and
-        anticipating ball movement, as such interceptions were valued at +0.75.
-      </p>
-      <p>
-        The final statistic weighted by the algorithm is recoveries. A recovery
-        represents any action that ends a spell of possession by the opposition
-        and starts possession for the player&apos;s team. Again, while not a
-        direct challenge to win the ball, recoveries were valued at +0.5 because
-        the result of a recovery (whether the product of an error from the
-        opposition or efforts by the player) is a turnover by the opponent and
-        an opportunity in a new phase of play.
-      </p>
-      <p>
-        We chose these weights to prioritize direct challenges (duels and
-        tackles) while still recognizing off&dash;ball efforts (interceptions
-        and recoveries) that affect possession dynamics.
-      </p>
       <div>
+        <p>
+          Our goal with this project was to develop a{" "}
+          <span style={{ fontStyle: "italic" }}>
+            “Contested Possession Metric”
+          </span>{" "}
+          &dash; a composite statistic designed to reflect a player&apos;s
+          in&dash;game contributions that either create turnovers or secure
+          possession.
+        </p>
+        <p>
+          In homage to club legend Brian Schmetzer, we started with a stat he
+          frequently emphasizes: duels won. An aerial duel is defined as a
+          challenge between two players to gain control of the ball above elbow
+          height (typically with the head). We assigned the value for an aerial
+          duel won at +1.
+        </p>
+        <p>
+          A tackle in soccer represents when a player challenges their opponent
+          with their feet for a ball on the ground (or at least below the
+          elbow), a game event markedly similar to an aerial duel won and often
+          yielding the same results. As such, we also valued tackles won at +1.
+        </p>
+        <p>
+          To account for aerial duels lost we assigned a value of &dash;0.75.
+          This weighting ensures that an aerial duel lost does not fully offset
+          an aerial duel won. Players with a 50/50 split are effectively
+          credited for actively contesting possession, even when they don&apos;t
+          win the ball. (Unfortunately, tackles lost are unfortunately not
+          available in the source data. More in for below.)
+        </p>
+        <p>
+          After aerial duels and tackles won, the next most valued statistic for
+          this metric is interceptions. An interception occurs when a player
+          gains possession of the ball after an opponent passes, crosses, or
+          shoots before the ball can reach the intended target. While this game
+          event is not a result of a direct physical challenge for the ball, the
+          player creates a turnover through positioning, reading game flow, and
+          anticipating ball movement, as such interceptions were valued at
+          +0.75.
+        </p>
+        <p>
+          The final statistic weighted by the algorithm is recoveries. A
+          recovery represents any action that ends a spell of possession by the
+          opposition and starts possession for the player&apos;s team. Again,
+          while not a direct challenge to win the ball, recoveries were valued
+          at +0.5 because the result of a recovery (whether the product of an
+          error from the opposition or efforts by the player) is a turnover by
+          the opponent and an opportunity in a new phase of play.
+        </p>
+        <p>
+          We chose these weights to prioritize direct challenges (duels and
+          tackles) while still recognizing off&dash;ball efforts (interceptions
+          and recoveries) that affect possession dynamics.
+        </p>
+      </div>
+      <div>
+        <h2>Data Source, Limitations, & Further Development</h2>
         <p>
           Our source data came from the amazing folks at
           <Link href={"https://fbref.com/en/"}>FBref</Link> (the source data set
