@@ -1,30 +1,30 @@
-"use client";
+'use client';
 
-import { createTheme } from "@mui/material/styles";
-import { useMemo, useState, createContext, useContext } from "react";
-import { ThemeProvider, CssBaseline } from "@mui/material";
+import { createTheme } from '@mui/material/styles';
+import { useEffect, useMemo, useState, createContext, useContext } from 'react';
+import { ThemeProvider, CssBaseline } from '@mui/material';
 
-// Define light and dark color schemes
+// Function to generate design tokens
 const getDesignTokens = (mode) => ({
   palette: {
     mode,
-    ...(mode === "light"
+    ...(mode === 'light'
       ? {
           background: {
-            default: "#ffffff",
-            paper: "#f5f5f5",
+            default: '#ffffff',
+            paper: '#f5f5f5',
           },
           text: {
-            primary: "#000000",
+            primary: '#000000',
           },
         }
       : {
           background: {
-            default: "#121212",
-            paper: "#1e1e1e",
+            default: '#121212',
+            paper: '#1e1e1e',
           },
           text: {
-            primary: "#ffffff",
+            primary: '#ffffff',
           },
         }),
   },
@@ -44,16 +44,33 @@ const getDesignTokens = (mode) => ({
     body1: {
       fontFamily: "Nunito Sans, sans-serif",
       fontWeight: 400,
-      fontSize: "1.375rem",
-      lineHeight: "1.8em",
+      fontSize: "1rem",
+      lineHeight: "1.5em",
+    },
+  },
+  MuiPaper: {
+    styleOverrides: {
+      root: {
+        '&.MuiDataGrid-paper': {
+          marginTop: '10px',
+          backgroundColor: '#fff',
+          border: '1px solid #000',
+          borderRadius: 0,
+          boxShadow: 'none',
+        },
+        '&.MuiDataGrid-paper[data-mui-color-scheme="dark"]': {
+          backgroundColor: '#000',
+          border: '1px solid #fff',
+        },
+      },
     },
   },
 });
 
-// Create context to toggle mode from NavBar
+// Context to provide mode + toggle
 const ColorModeContext = createContext({
   toggleColorMode: () => {},
-  mode: "light",
+  mode: 'light',
 });
 
 export function useColorMode() {
@@ -61,21 +78,34 @@ export function useColorMode() {
 }
 
 export function AppThemeProvider({ children }) {
-  const [mode, setMode] = useState("light");
+  const [mode, setMode] = useState('light');
 
-  const colorMode = useMemo(
-    () => ({
-      toggleColorMode: () =>
-        setMode((prev) => (prev === "light" ? "dark" : "light")),
-      mode,
-    }),
-    [mode]
-  );
+  // On mount, set mode based on localStorage or system preference
+  useEffect(() => {
+    const stored = localStorage.getItem('preferred-mode');
+    if (stored) {
+      setMode(stored);
+    } else {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setMode(prefersDark ? 'dark' : 'light');
+    }
+  }, []);
+
+  const colorMode = useMemo(() => ({
+    toggleColorMode: () => {
+      setMode((prev) => {
+        const next = prev === 'light' ? 'dark' : 'light';
+        localStorage.setItem('preferred-mode', next);
+        return next;
+      });
+    },
+    mode,
+  }), []);
 
   const theme = useMemo(() => createTheme(getDesignTokens(mode)), [mode]);
 
   return (
-    <ColorModeContext.Provider value={colorMode}>
+    <ColorModeContext.Provider value={{ ...colorMode, mode }}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         {children}
