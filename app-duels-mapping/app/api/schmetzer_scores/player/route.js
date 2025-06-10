@@ -1,4 +1,4 @@
-export const runtime = "nodejs";
+// export const runtime = "nodejs";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
 import { getDatabasePath, getSqlSelect } from "@/utils/db-utils";
