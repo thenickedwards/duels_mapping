@@ -16,7 +16,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+lib/*
+!lib/fontawesome.js
 lib64/
 parts/
 sdist/
