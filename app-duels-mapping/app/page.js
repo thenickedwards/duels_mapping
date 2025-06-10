@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import useSWR from "swr";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import PlayerComparison from "./components/PlayerComparison";
 import { useRef } from "react";
@@ -222,33 +222,35 @@ export default function PlayersPage() {
 
   return (
     <main style={{ padding: 24 }}>
-      <Tabs
-        value={tab}
-        onChange={handleTabChange}
-        sx={{
-          minHeight: 48,
-          "& .MuiTab-root": {
-            fontFamily: "'Bebas Neue', sans-serif",
-            fontSize: "1.25rem",
-            textTransform: "uppercase",
+      <Suspense fallback={<div>Loading...</div>}>
+        <Tabs
+          value={tab}
+          onChange={handleTabChange}
+          sx={{
             minHeight: 48,
-            padding: "20px 48px",
-            color: theme.palette.mode === "dark" ? "#fff" : "#000",
-          },
-          "& .MuiTab-root.Mui-selected": {
-            backgroundColor:
-              theme.palette.mode === "dark" ? "#B7F08E" : "#3B5B84",
-            color: theme.palette.mode === "dark" ? "#000" : "#fff",
-          },
-          "& .MuiTabs-indicator": {
-            backgroundColor: "#B7F08E",
-            height: "4px",
-          },
-        }}
-      >
-        <Tab label="Players" value="players" />
-        <Tab label="Comparisons" value="comparisons" />
-      </Tabs>
+            "& .MuiTab-root": {
+              fontFamily: "'Bebas Neue', sans-serif",
+              fontSize: "1.25rem",
+              textTransform: "uppercase",
+              minHeight: 48,
+              padding: "20px 48px",
+              color: theme.palette.mode === "dark" ? "#fff" : "#000",
+            },
+            "& .MuiTab-root.Mui-selected": {
+              backgroundColor:
+                theme.palette.mode === "dark" ? "#B7F08E" : "#3B5B84",
+              color: theme.palette.mode === "dark" ? "#000" : "#fff",
+            },
+            "& .MuiTabs-indicator": {
+              backgroundColor: "#B7F08E",
+              height: "4px",
+            },
+          }}
+        >
+          <Tab label="Players" value="players" />
+          <Tab label="Comparisons" value="comparisons" />
+        </Tabs>
+      </Suspense>
       <Box
         sx={{
           height: "2px",
@@ -562,90 +564,94 @@ export default function PlayersPage() {
               )}
 
               <>
-                {hardcodedYears.map((year) => (
-                  <Button
-                    key={year}
-                    onClick={() => updateSeason(year)}
-                    sx={baseButtonStyle(theme, season === year, true)}
-                  >
-                    {year}
-                  </Button>
-                ))}
+                <Suspense fallback={<div>Loading...</div>}>
+                  {hardcodedYears.map((year) => (
+                    <Button
+                      key={year}
+                      onClick={() => updateSeason(year)}
+                      sx={baseButtonStyle(theme, season === year, true)}
+                    >
+                      {year}
+                    </Button>
+                  ))}
+                </Suspense>
 
-                <Box position="relative" width={44} height={40}>
-                  <Select
-                    value={dropdownYears.includes(season) ? season : ""}
-                    onChange={(e) => updateSeason(e.target.value)}
-                    displayEmpty
-                    IconComponent={() => null}
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          mt: "10px",
-                          ml: "-8px",
-                          maxHeight: 300,
-                          width: 100,
-                          borderRadius: 0,
-                          boxShadow: "none",
-                          backgroundColor:
-                            theme.palette.mode === "dark" ? "#000" : "#fff",
-                          border: `1px solid ${
-                            theme.palette.mode === "dark" ? "#fff" : "#000"
-                          }`,
-                          fontFamily: "'Nunito Sans', sans-serif",
-                          fontSize: "0.875rem",
+                <Suspense fallback={<div>Loading...</div>}>
+                  <Box position="relative" width={44} height={40}>
+                    <Select
+                      value={dropdownYears.includes(season) ? season : ""}
+                      onChange={(e) => updateSeason(e.target.value)}
+                      displayEmpty
+                      IconComponent={() => null}
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            mt: "10px",
+                            ml: "-8px",
+                            maxHeight: 300,
+                            width: 100,
+                            borderRadius: 0,
+                            boxShadow: "none",
+                            backgroundColor:
+                              theme.palette.mode === "dark" ? "#000" : "#fff",
+                            border: `1px solid ${
+                              theme.palette.mode === "dark" ? "#fff" : "#000"
+                            }`,
+                            fontFamily: "'Nunito Sans', sans-serif",
+                            fontSize: "0.875rem",
+                          },
                         },
-                      },
-                    }}
-                    sx={{
-                      width: 44,
-                      height: 40,
-                      backgroundColor: "transparent",
-                      border: `1px solid ${
-                        theme.palette.mode === "dark" ? "#fff" : "#000"
-                      }`,
-                      borderRadius: 0,
-                      padding: 0,
-                      "& .MuiSelect-select": {
+                      }}
+                      sx={{
+                        width: 44,
+                        height: 40,
+                        backgroundColor: "transparent",
+                        border: `1px solid ${
+                          theme.palette.mode === "dark" ? "#fff" : "#000"
+                        }`,
+                        borderRadius: 0,
                         padding: 0,
-                        textIndent: "-9999px",
-                      },
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        border: "none",
-                      },
-                    }}
-                  >
-                    <MenuItem value="" disabled sx={{ display: "none" }}>
-                      More
-                    </MenuItem>
-                    {dropdownYears.map((year) => (
-                      <MenuItem
-                        key={year}
-                        value={year}
-                        sx={{
-                          fontFamily: "'Nunito Sans', sans-serif",
-                          fontSize: "0.875rem",
-                        }}
-                      >
-                        {year}
+                        "& .MuiSelect-select": {
+                          padding: 0,
+                          textIndent: "-9999px",
+                        },
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          border: "none",
+                        },
+                      }}
+                    >
+                      <MenuItem value="" disabled sx={{ display: "none" }}>
+                        More
                       </MenuItem>
-                    ))}
-                  </Select>
+                      {dropdownYears.map((year) => (
+                        <MenuItem
+                          key={year}
+                          value={year}
+                          sx={{
+                            fontFamily: "'Nunito Sans', sans-serif",
+                            fontSize: "0.875rem",
+                          }}
+                        >
+                          {year}
+                        </MenuItem>
+                      ))}
+                    </Select>
 
-                  {/* Custom Positioned Icon */}
-                  <ArrowForwardIosIcon
-                    sx={{
-                      position: "absolute",
-                      top: "50%",
-                      left: "50%",
-                      transform: "translate(-50%, -50%) rotate(90deg)",
-                      width: "1em",
-                      height: "1em",
-                      pointerEvents: "none",
-                      color: theme.palette.mode === "dark" ? "#fff" : "#000",
-                    }}
-                  />
-                </Box>
+                    {/* Custom Positioned Icon */}
+                    <ArrowForwardIosIcon
+                      sx={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%) rotate(90deg)",
+                        width: "1em",
+                        height: "1em",
+                        pointerEvents: "none",
+                        color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                      }}
+                    />
+                  </Box>
+                </Suspense>
               </>
             </Box>
           </Box>
