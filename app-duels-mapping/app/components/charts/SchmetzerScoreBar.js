@@ -12,16 +12,16 @@ export default function SchmetzerScoreBar({ value, average = 150, darkMode = fal
   const avgPosition = (average / max) * 100;
 
   const background = darkMode
-    ? "linear-gradient(to right, #B7F08E, #3B5B84)"
-    : "#1976d2";
+    ? "linear-gradient(to right, #3B5B84, #B7F08E)"
+    : "#3B5B84";
 
   return (
     <Tooltip title={`Score: ${value}`} arrow>
-      <Box sx={{ height: 15, position: 'relative' }}>
+      <Box sx={{ height: 16, position: 'relative' }}>
         <Box
           sx={{
             width: `${percentage}%`,
-            height: 15,
+            height: 16,
             background: background,
             borderRadius: 4,
             position: 'absolute',
@@ -33,13 +33,13 @@ export default function SchmetzerScoreBar({ value, average = 150, darkMode = fal
         <Box
           sx={{
             width: '100%',
-            height: 15,
-            border: '2px solid #1976d2',
+            height: 16,
+            border: darkMode ? "1px solid #646464" : '1px solid #3B5B84',
             position: 'absolute',
             top: 0,
             left: 0,
             borderRadius: 4,
-            backgroundColor: 'white',
+            backgroundColor: darkMode ? '#646464' : '#fff',
             pointerEvents: 'none',
             zIndex: 0,
           }}
@@ -50,10 +50,11 @@ export default function SchmetzerScoreBar({ value, average = 150, darkMode = fal
             top: '50%',
             left: `${avgPosition}%`,
             transform: 'translate(-50%, -50%)',
-            width: 10,
-            height: 10,
+            width: 12,
+            height: 12,
             borderRadius: '50%',
-            backgroundColor: darkMode ? 'white' : 'limegreen',
+            border: darkMode ? "#fff" : "1px solid #3B5B84",
+            backgroundColor: darkMode ? '#fff' : '#B7F08E',
             zIndex: 2,
           }}
         />

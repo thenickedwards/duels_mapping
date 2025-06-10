@@ -42,12 +42,17 @@ import {
   faEye,
   faXmark,
   faChevronDown,
+  faSquare,
+  faSquareCheck,
+  faSquareMinus,
 } from "@fortawesome/free-solid-svg-icons";
 import Image from "next/image";
 import ColumnsBlack from "./images/columns-icon.png";
 import ColumnsWhite from "./images/columns-wh-icon.png";
 import ExportBlack from "./images/export-icon.png";
 import ExportWhite from "./images/export-wh-icon.png";
+import RightAlignedCenterCell from "./components/RightAlignedCenterCell";
+import CustomColumnMenu from "./components/CustomColumnMenu";
 
 const fetcher = (url) => fetch(url).then((r) => r.json());
 
@@ -101,19 +106,90 @@ export default function PlayersPage() {
   };
 
   const columns = [
-    { field: "schmetzer_rk", headerName: "rk", width: 70 },
-    { field: "player_name", headerName: "Player", width: 150 },
-    { field: "player_age", headerName: "Age", width: 110 },
-    { field: "squad", headerName: "Squad", flex: 1 },
-    { field: "position", headerName: "POS", width: 90 },
-    { field: "nineties", headerName: "90s", width: 90 },
-    { field: "schmetzer_score", headerName: "smetz", width: 90 },
-    { field: "tackles_won", headerName: "tkw", width: 90 },
-    { field: "interceptions", headerName: "int", width: 90 },
-    { field: "recoveries", headerName: "recov", width: 90 },
-    { field: "aerial_duels_won", headerName: "adw", width: 90 },
-    { field: "aerial_duels_lost", headerName: "adl", width: 90 },
-    { field: "aerial_duels_won_pct", headerName: "adw%", width: 90 },
+    {
+      field: "schmetzer_rk",
+      headerName: "rk",
+      displayName: "Schmetzer Rank",
+      width: 70,
+    },
+    {
+      field: "player_name",
+      headerName: "Player",
+      displayName: "Player",
+      width: 180,
+    },
+    { field: "player_age", headerName: "Age", displayName: "Age", width: 100 },
+    { field: "squad", headerName: "Squad", displayName: "Squad", width: 160 },
+    {
+      field: "position",
+      headerName: "POS",
+      displayName: "Position",
+      width: 100,
+    },
+    {
+      field: "nineties",
+      headerName: "90s",
+      displayName: "90s",
+      width: 100,
+      headerAlign: "center",
+      renderCell: (params) => <RightAlignedCenterCell value={params.value} />,
+    },
+    {
+      field: "schmetzer_score",
+      headerName: "smetz",
+      displayName: "Schmetzer Score",
+      width: 100,
+      headerAlign: "center",
+      renderCell: (params) => <RightAlignedCenterCell value={params.value} />,
+    },
+    {
+      field: "tackles_won",
+      headerName: "tkw",
+      displayName: "Tackles Won",
+      width: 100,
+      headerAlign: "center",
+      renderCell: (params) => <RightAlignedCenterCell value={params.value} />,
+    },
+    {
+      field: "interceptions",
+      headerName: "int",
+      displayName: "Interceptions",
+      width: 100,
+      headerAlign: "center",
+      renderCell: (params) => <RightAlignedCenterCell value={params.value} />,
+    },
+    {
+      field: "recoveries",
+      headerName: "recov",
+      displayName: "Recoveries",
+      width: 100,
+      headerAlign: "center",
+      renderCell: (params) => <RightAlignedCenterCell value={params.value} />,
+    },
+    {
+      field: "aerial_duels_won",
+      headerName: "adw",
+      displayName: "Aerial Duels Won",
+      width: 100,
+      headerAlign: "center",
+      renderCell: (params) => <RightAlignedCenterCell value={params.value} />,
+    },
+    {
+      field: "aerial_duels_lost",
+      headerName: "adl",
+      displayName: "Aerial Duels Lost",
+      width: 100,
+      headerAlign: "center",
+      renderCell: (params) => <RightAlignedCenterCell value={params.value} />,
+    },
+    {
+      field: "aerial_duels_won_pct",
+      headerName: "adw%",
+      displayName: "Aerial Duels Won %",
+      width: 100,
+      headerAlign: "center",
+      renderCell: (params) => <RightAlignedCenterCell value={params.value} />,
+    },
   ];
 
   const rows = data?.map((row, i) => ({ id: i, ...row })) || [];
@@ -146,15 +222,46 @@ export default function PlayersPage() {
 
   return (
     <main style={{ padding: 24 }}>
-      <Tabs value={tab} onChange={handleTabChange}>
+      <Tabs
+        value={tab}
+        onChange={handleTabChange}
+        sx={{
+          minHeight: 48,
+          "& .MuiTab-root": {
+            fontFamily: "'Bebas Neue', sans-serif",
+            fontSize: "1.25rem",
+            textTransform: "uppercase",
+            minHeight: 48,
+            padding: "20px 48px",
+            color: theme.palette.mode === "dark" ? "#fff" : "#000",
+          },
+          "& .MuiTab-root.Mui-selected": {
+            backgroundColor:
+              theme.palette.mode === "dark" ? "#B7F08E" : "#3B5B84",
+            color: theme.palette.mode === "dark" ? "#000" : "#fff",
+          },
+          "& .MuiTabs-indicator": {
+            backgroundColor: "#B7F08E",
+            height: "4px",
+          },
+        }}
+      >
         <Tab label="Players" value="players" />
         <Tab label="Comparisons" value="comparisons" />
       </Tabs>
+      <Box
+        sx={{
+          height: "2px",
+          backgroundColor: theme.palette.mode === "dark" ? "#fff" : "#000",
+          width: "100%",
+          mt: "-2px",
+        }}
+      />
 
       {tab === "players" && (
         <>
           <Box
-            mt={2}
+            mt={3}
             display="flex"
             flexWrap="wrap"
             justifyContent="space-between"
@@ -211,30 +318,135 @@ export default function PlayersPage() {
                   >
                     Columns
                   </Button>
+
                   {showColumns && (
                     <Box
                       position="absolute"
-                      top={40}
+                      top={50}
                       left={0}
-                      bgcolor="white"
-                      border="1px solid #ccc"
-                      borderRadius={1}
-                      boxShadow={2}
+                      width={220}
+                      height={250}
+                      overflow="auto"
+                      display="flex"
+                      flexDirection="column"
+                      justifyContent="space-between"
+                      border={`1px solid ${
+                        theme.palette.mode === "dark" ? "#fff" : "#000"
+                      }`}
+                      bgcolor={theme.palette.mode === "dark" ? "#000" : "#fff"}
+                      borderRadius={0}
                       zIndex={10}
-                      p={1}
                     >
-                      {columns.map((col) => (
-                        <Box key={col.field}>
-                          <label>
-                            <input
-                              type="checkbox"
-                              checked={!hiddenColumns.includes(col.field)}
-                              onChange={() => toggleColumnVisibility(col.field)}
-                            />{" "}
-                            {col.headerName}
-                          </label>
-                        </Box>
-                      ))}
+                      <Box p={2} overflow="auto">
+                        {columns.map((col) => (
+                          <Box
+                            key={col.field}
+                            display="flex"
+                            alignItems="center"
+                            mb={1.5}
+                            sx={{ cursor: "pointer" }}
+                            onClick={() => toggleColumnVisibility(col.field)}
+                          >
+                            {hiddenColumns.includes(col.field) ? (
+                              // Unchecked: custom box with border
+                              <Box
+                                sx={{
+                                  width: 16,
+                                  height: 16,
+                                  borderRadius: "3px",
+                                  border: `1px solid ${
+                                    theme.palette.mode === "dark"
+                                      ? "#fff"
+                                      : "#000"
+                                  }`,
+                                  marginRight: 1,
+                                }}
+                              />
+                            ) : (
+                              // Checked: FontAwesome icon
+                              <FontAwesomeIcon
+                                icon={faSquareCheck}
+                                style={{
+                                  fontSize: "1.2rem",
+                                  marginRight: 8,
+                                  color:
+                                    theme.palette.mode === "dark"
+                                      ? "#fff"
+                                      : "#000",
+                                }}
+                              />
+                            )}
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontFamily: "'Nunito Sans', sans-serif",
+                                fontSize: "0.875rem",
+                              }}
+                            >
+                              {col.displayName}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Box>
+
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        px={1.5}
+                        py={0.4}
+                        borderTop={`1px solid ${
+                          theme.palette.mode === "dark" ? "#fff" : "#000"
+                        }`}
+                        bgcolor={
+                          theme.palette.mode === "dark" ? "#1a1a1a" : "#f2f2f2"
+                        }
+                      >
+                        <Button
+                          variant="text"
+                          onClick={() => {
+                            const areAllVisible = columns.every(
+                              (col) => !hiddenColumns.includes(col.field)
+                            );
+                            setHiddenColumns(
+                              areAllVisible
+                                ? columns.map((col) => col.field)
+                                : []
+                            );
+                          }}
+                          startIcon={
+                            <FontAwesomeIcon
+                              icon={faSquareMinus}
+                              style={{
+                                fontSize: "1.2rem",
+                                marginRight: 6,
+                                color:
+                                  theme.palette.mode === "dark"
+                                    ? "#fff"
+                                    : "#000",
+                              }}
+                            />
+                          }
+                          sx={{
+                            fontSize: "0.875rem",
+                            fontFamily: "'Bebas Neue', sans-serif",
+                            color: theme.palette.text.primary,
+                          }}
+                        >
+                          SHOW/HIDE ALL
+                        </Button>
+                        <Button
+                          variant="text"
+                          onClick={() => setHiddenColumns([])}
+                          sx={{
+                            fontSize: "0.875rem",
+                            fontFamily: "'Bebas Neue', sans-serif",
+                            color: theme.palette.text.primary,
+                          }}
+                        >
+                          RESET
+                        </Button>
+                      </Box>
                     </Box>
                   )}
                 </Box>
@@ -365,14 +577,30 @@ export default function PlayersPage() {
                     value={dropdownYears.includes(season) ? season : ""}
                     onChange={(e) => updateSeason(e.target.value)}
                     displayEmpty
+                    IconComponent={() => null}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          mt: "10px",
+                          ml: "-8px",
+                          maxHeight: 300,
+                          width: 100,
+                          borderRadius: 0,
+                          boxShadow: "none",
+                          backgroundColor:
+                            theme.palette.mode === "dark" ? "#000" : "#fff",
+                          border: `1px solid ${
+                            theme.palette.mode === "dark" ? "#fff" : "#000"
+                          }`,
+                          fontFamily: "'Nunito Sans', sans-serif",
+                          fontSize: "0.875rem",
+                        },
+                      },
+                    }}
                     sx={{
-                      width: "100%",
-                      height: "100%",
-                      backgroundColor: dropdownYears.includes(season)
-                        ? theme.palette.mode === "dark"
-                          ? "#000"
-                          : "#fff"
-                        : "transparent",
+                      width: 44,
+                      height: 40,
+                      backgroundColor: "transparent",
                       border: `1px solid ${
                         theme.palette.mode === "dark" ? "#fff" : "#000"
                       }`,
@@ -380,25 +608,25 @@ export default function PlayersPage() {
                       padding: 0,
                       "& .MuiSelect-select": {
                         padding: 0,
-                        textIndent: "-9999px", // Hide the selected text
+                        textIndent: "-9999px",
                       },
                       "& .MuiOutlinedInput-notchedOutline": {
                         border: "none",
                       },
-                      "&:hover": {
-                        backgroundColor:
-                          theme.palette.mode === "dark"
-                            ? "rgba(255,255,255,0.1)"
-                            : "#f2f2f2",
-                      },
                     }}
-                    IconComponent={() => null} // Disable default icon
                   >
-                    <MenuItem value="" disabled>
+                    <MenuItem value="" disabled sx={{ display: "none" }}>
                       More
                     </MenuItem>
                     {dropdownYears.map((year) => (
-                      <MenuItem key={year} value={year}>
+                      <MenuItem
+                        key={year}
+                        value={year}
+                        sx={{
+                          fontFamily: "'Nunito Sans', sans-serif",
+                          fontSize: "0.875rem",
+                        }}
+                      >
                         {year}
                       </MenuItem>
                     ))}
@@ -438,7 +666,10 @@ export default function PlayersPage() {
             )}
             {/* Dropdown Year Chip */}
             {dropdownYears.includes(season) && (
-              <FilterChip label={season} onRemove={() => updateSeason("2025")} />
+              <FilterChip
+                label={season}
+                onRemove={() => updateSeason("2025")}
+              />
             )}
             {(filters.squad || filters.position) && (
               <Button
@@ -469,6 +700,109 @@ export default function PlayersPage() {
                 )}
                 loading={isLoading}
                 onRowClick={(params) => setSelectedPlayer(params.row)}
+                components={{
+                  ColumnMenu: CustomColumnMenu,
+                }}
+                sx={{
+                  border: "none",
+
+                  // HEADERS
+                  "& .MuiDataGrid-columnHeaders": {
+                    backgroundColor:
+                      theme.palette.mode === "dark" ? "#26262A" : "#FAFAFA",
+                    borderBottom: `2px solid ${
+                      theme.palette.mode === "dark" ? "#fff" : "#000"
+                    }`,
+                  },
+                  "& .MuiDataGrid-columnHeader": {
+                    "&:hover .MuiDataGrid-columnHeaderTitle": {
+                      textDecoration: "underline 1px dashed",
+                      textUnderlineOffset: "4px",
+                      textDecorationColor:
+                        theme.palette.mode === "dark" ? "#fff" : "#000",
+                    },
+                  },
+                  "& .MuiDataGrid-columnHeaderTitleContainer": {
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    gap: "2px",
+                    width: "100%",
+                  },
+                  "& .MuiDataGrid-sortIcon": {
+                    backgroundColor: "#B7F08E",
+                    borderRadius: "50%",
+                    width: "18px",
+                    height: "18px",
+                    color: "#000!important",
+                    padding: "1px",
+                    opacity: "1",
+                  },
+
+                  // TITLE TEXT
+                  "& .MuiDataGrid-columnHeaderTitle": {
+                    fontFamily: "'Bebas Neue', sans-serif",
+                    fontSize: "1.125rem",
+                    textTransform: "uppercase",
+                    color: theme.palette.text.primary,
+                  },
+
+                  // CELLS
+                  "& .MuiDataGrid-cell": {
+                    border: "none",
+                  },
+                  "& .MuiDataGrid-row": {
+                    borderBottom: `1px solid ${
+                      theme.palette.mode === "dark" ? "#444" : "#D9D9D9"
+                    }`,
+                  },
+
+                  // ROW HOVER
+                  "& .MuiDataGrid-row:hover": {
+                    backgroundColor:
+                      theme.palette.mode === "dark" ? "#17171B" : "#F2F2F2",
+                  },
+                  "& .MuiDataGrid-columnHeader": {
+                    "& .MuiDataGrid-iconButtonContainer": {
+                      opacity: 1,
+                      visibility: "visible",
+                    },
+                  },
+                  "& .MuiDataGrid-columnSeparator": {
+                    display: "none",
+                  },
+                  // Sort button (contains arrow)
+                  "& .MuiDataGrid-columnHeader .MuiDataGrid-sortButton": {
+                    opacity: 0,
+                    transition: "opacity 0.2s ease-in-out",
+                  },
+                  "& .MuiDataGrid-columnHeader:hover .MuiDataGrid-sortButton": {
+                    opacity: "1!important",
+                  },
+                  "& .MuiDataGrid-columnHeader--sorted .MuiDataGrid-sortButton":
+                    {
+                      opacity: 1,
+                    },
+
+                  "& .MuiDataGrid-columnHeader .MuiDataGrid-iconButtonContainer":
+                    {
+                      opacity: 0,
+                      visibility: "hidden",
+                      transition:
+                        "opacity 0.2s ease-in-out, visibility 0.2s ease-in-out",
+                    },
+                  "& .MuiDataGrid-columnHeader:hover .MuiDataGrid-iconButtonContainer":
+                    {
+                      opacity: 1,
+                      visibility: "visible",
+                    },
+                  "& .MuiDataGrid-columnHeader--sorted .MuiDataGrid-iconButtonContainer":
+                    {
+                      opacity: 1,
+                      visibility: "visible",
+                    },
+                }}
               />
             )}
           </Box>

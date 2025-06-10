@@ -44,8 +44,25 @@ const getDesignTokens = (mode) => ({
     body1: {
       fontFamily: "Nunito Sans, sans-serif",
       fontWeight: 400,
-      fontSize: "1.375rem",
-      lineHeight: "1.8em",
+      fontSize: "1rem",
+      lineHeight: "1.5em",
+    },
+  },
+  MuiPaper: {
+    styleOverrides: {
+      root: {
+        '&.MuiDataGrid-paper': {
+          marginTop: '10px',
+          backgroundColor: '#fff',
+          border: '1px solid #000',
+          borderRadius: 0,
+          boxShadow: 'none',
+        },
+        '&.MuiDataGrid-paper[data-mui-color-scheme="dark"]': {
+          backgroundColor: '#000',
+          border: '1px solid #fff',
+        },
+      },
     },
   },
 });
