@@ -1,3 +1,5 @@
+'use client';
+
 export const baseButtonStyle = (theme, isActive = false, isYear = false) => {
   const isDark = theme.palette.mode === "dark";
 
