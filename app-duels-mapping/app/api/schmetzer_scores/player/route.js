@@ -69,20 +69,20 @@ export async function GET(req, verbose = 1) {
     "schmetzer_scores_player_yoy.sql"
   );
 
+  let playerSeasonSql = "";
+  let playerYoySql = "";
+
   try {
     // Load and interpolate the SQL
     // Individual player scores from requested season
-    const playerSeasonSql = playerSeasonSqlTemplate
+    playerSeasonSql = playerSeasonSqlTemplate
       .replace("{year}", season)
       .replace("{where_clause}", whereClause);
     if (verbose >= 2) console.log("playerSeasonSql: ", playerSeasonSql);
     const playerSeasonScores = await db.all(playerSeasonSql, values);
 
     // Individual player scores YOY
-    const playerYoySql = playerYoySqlTemplate.replace(
-      "{playerFilter}",
-      filters[1]
-    );
+    playerYoySql = playerYoySqlTemplate.replace("{playerFilter}", filters[1]);
     if (verbose >= 2) console.log("playerYoySql: ", playerYoySql);
     const playerYoyScores = await db.all(playerYoySql, values[1]);
 

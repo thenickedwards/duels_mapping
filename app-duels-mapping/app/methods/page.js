@@ -57,7 +57,26 @@ export default function MethodsPage() {
         <p>
           We chose these weights to prioritize direct challenges (duels and
           tackles) while still recognizing off&dash;ball efforts (interceptions
-          and recoveries) that affect possession dynamics.
+          and recoveries) that affect possession dynamics. The final Schmetzer
+          Score is the sum of the weighted values for each statistic.
+        </p>
+        <p>
+          In the source data a player was listed twice if they played for
+          multiple teams in a season (this could be the result a number of
+          scenarios including contract terms, inter-league trades or loans
+          within the league). This could effectively lower the rank of a player
+          as their statistics would be distributed across multiple teams. To
+          capture the full picture of a player&apos;s performance over the
+          season, a player&apos;s statistics are consolidated to the squad with
+          which the player played more minutes (i.e. higher value in nineties.)
+        </p>
+        <p>
+          When tabulating the season average of any given statistic, we decided
+          to exclude players with less than 90 minutes in the season. Though all
+          players are ranked, regardless of how many minutes they played. This
+          decision was made to ensure that the season average is a more accurate
+          reflection of a the average for players who played in a particular
+          season.
         </p>
       </div>
       <div>
