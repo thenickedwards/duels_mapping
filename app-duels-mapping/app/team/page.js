@@ -13,7 +13,7 @@ export default function TeamPage() {
         {/* Image div */}
         <div>
           <Image
-            src="/nick-edwards.jpeg"
+            src="/images/nick-edwards.jpeg"
             alt="Nick Edwards"
             width={400}
             height={400}
@@ -53,7 +53,7 @@ export default function TeamPage() {
         {/* Image div */}
         <div>
           <Image
-            src="/juanita-samborski.jpeg"
+            src="/images/juanita-samborski.jpeg"
             alt="Juanita Samborski"
             width={400}
             height={400}
