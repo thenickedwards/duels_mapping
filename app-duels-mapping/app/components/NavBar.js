@@ -21,8 +21,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useColorMode } from "@/app/theme";
-import DarkMode from "/images/dark_mode.png";
-import LightMode from "/images/light_mode.png";
+import DarkMode from "../../public/images/dark_mode.png";
+import LightMode from "../../public/images/light_mode.png";
 
 const pages = [
   { label: "Home", href: "/" },
