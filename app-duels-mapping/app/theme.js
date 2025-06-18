@@ -100,7 +100,7 @@ export function AppThemeProvider({ children }) {
       });
     },
     mode,
-  }), []);
+  }), [mode]);
 
   const theme = useMemo(() => createTheme(getDesignTokens(mode)), [mode]);
 
