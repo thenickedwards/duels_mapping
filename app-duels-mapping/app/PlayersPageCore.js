@@ -47,10 +47,10 @@ import {
   faSquareMinus,
 } from "@fortawesome/free-solid-svg-icons";
 import Image from "next/image";
-import ColumnsBlack from "./images/columns-icon.png";
-import ColumnsWhite from "./images/columns-wh-icon.png";
-import ExportBlack from "./images/export-icon.png";
-import ExportWhite from "./images/export-wh-icon.png";
+import ColumnsBlack from "/images/columns-icon.png";
+import ColumnsWhite from "/images/columns-wh-icon.png";
+import ExportBlack from "/images/export-icon.png";
+import ExportWhite from "/images/export-wh-icon.png";
 import RightAlignedCenterCell from "./components/RightAlignedCenterCell";
 import CustomColumnMenu from "./components/CustomColumnMenu";
 
