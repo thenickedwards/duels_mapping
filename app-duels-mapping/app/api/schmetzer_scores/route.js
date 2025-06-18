@@ -68,9 +68,11 @@ export async function GET(req) {
 
   const sqlTemplate = await getSqlSelect("schmetzer_scores_season.sql");
 
+  let sql = "";
+
   try {
     // Load and interpolate the SQL with the requested season
-    const sql = sqlTemplate
+    sql = sqlTemplate
       .replace("{year}", season)
       .replace("{where_clause}", whereClause);
     // TODO: remove logs

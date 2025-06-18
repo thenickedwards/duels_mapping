@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useSearchParams } from 'next/navigation';
-import PlayersPageCore from './PlayersPageCore';
+import { useSearchParams } from "next/navigation";
+import PlayersPageCore from "./PlayersPageCore";
 
 export default function PlayersPageClient() {
   const searchParams = useSearchParams();
