@@ -10,11 +10,19 @@ This repo powers the custom **Schmetzer Score** — a composite statistic for ML
 
 ## Quick Setup
 
-If you're looking to get rolling with the application immediately (assuming you have the Node packages installed), you can run the command:
+The Next.js app are within a subdirectory, so to install the node package modules, run the command:
+
+`( cd app-duels-mapping ; npm install )`
+
+If you want to run the application in developer mode (assuming you have the Node packages installed), run the command:
 
 `( cd app-duels-mapping ; npm run dev )`
 
-This will fire up the Next.js app and once it's ready simply navigate to <http://localhost:3001/>
+If you're looking to get rolling with the application immediately (assuming you have the Node packages installed), run the command:
+
+`( cd app-duels-mapping ; npm run build ; npm run start )`
+
+Either run command will fire up the Next.js app (you can also change directories and run the commands individually). Once it's ready simply navigate to <http://localhost:3000/>
 
 You can review players raw stats as well as Schmetzer Score and a rank for that season. Clicking on a player will allow for a deep dive into that player's numbers and also present a year-over-year look at that player's Schmetzer Score across all seasons played in MLS going back to 2018 when these statistics first came available. The dashboard also has a `Comparisons` tool, allowing the user to explore 1v1 player match-ups and revealing data that can be critical strategizing in-game tactics, performance analysis, and scouting/recruitment opportunities.
 
