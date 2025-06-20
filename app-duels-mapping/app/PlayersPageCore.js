@@ -53,6 +53,9 @@ import ExportBlack from "../public/images/export-icon.png";
 import ExportWhite from "../public/images/export-wh-icon.png";
 import RightAlignedCenterCell from "./components/RightAlignedCenterCell";
 import CustomColumnMenu from "./components/CustomColumnMenu";
+import StyledMenuItem from "./components/StyledMenuItem";
+import { inputStyle } from "./styles/inputStyles";
+import CustomSelect from "./components/CustomSelect";
 
 const fetcher = (url) => fetch(url).then((r) => r.json());
 
@@ -219,6 +222,17 @@ export default function PlayersPage() {
 
   const hardcodedYears = ["2025", "2024"];
   const dropdownYears = ["2023", "2022", "2021", "2020", "2019", "2018"];
+
+  const CustomArrowIcon = () => (
+    <ArrowForwardIosIcon
+      sx={{
+        transform: "rotate(90deg)", // points down
+        width: "1em",
+        height: "1em",
+        color: (theme) => (theme.palette.mode === "dark" ? "#fff" : "#000"),
+      }}
+    />
+  );
 
   return (
     <main style={{ padding: 24 }}>
@@ -818,57 +832,135 @@ export default function PlayersPage() {
             open={filterDrawerOpen}
             onClose={() => setFilterDrawerOpen(false)}
           >
-            <Box p={2} width={300}>
+            <Box
+              sx={(theme) => ({
+                width: 400,
+                height: "100%",
+                backgroundColor:
+                  theme.palette.mode === "dark" ? "#000" : "#FAFAFA",
+                borderLeft: "4px solid #B7F08E",
+                paddingTop: "50px",
+                paddingX: "40px",
+              })}
+            >
               <Box
                 display="flex"
                 justifyContent="space-between"
                 alignItems="center"
-                mb={1}
+                mb={3}
               >
-                <Typography variant="h6">Filter Players</Typography>
+                <Typography
+                  variant="h3"
+                  fontSize="1.25rem"
+                  sx={{ fontFamily: "'Bebas Neue', sans-serif" }}
+                >
+                  Filter Players
+                </Typography>
                 <IconButton
                   onClick={() => setFilterDrawerOpen(false)}
                   aria-label="close drawer"
                   size="small"
                 >
-                  <CloseIcon />
+                  <CloseIcon
+                    sx={{
+                      color: (theme) =>
+                        theme.palette.mode === "dark" ? "#fff" : "#000",
+                    }}
+                  />
                 </IconButton>
               </Box>
 
-              <Select
-                fullWidth
+              {/* Position */}
+              <Typography variant="h4" fontSize="1rem" mb={-0.5}>
+                Position
+              </Typography>
+
+              <CustomSelect
                 value={filters.position}
                 onChange={(e) =>
                   setFilters({ ...filters, position: e.target.value })
                 }
-                displayEmpty
-                sx={{ mt: 2 }}
-              >
-                <MenuItem value="">All Positions</MenuItem>
-                <MenuItem value="FW">Forward</MenuItem>
-                <MenuItem value="MF">Midfielder</MenuItem>
-                <MenuItem value="DF">Defender</MenuItem>
-              </Select>
+                placeholder="Select Position"
+                options={[
+                  { value: "", label: "All Positions" },
+                  { value: "FW", label: "Forward" },
+                  { value: "MF", label: "Midfielder" },
+                  { value: "DF", label: "Defender" },
+                ]}
+              />
 
+              {/* Squad */}
+              <Typography variant="h4" fontSize="1rem" mb={-0.5}>
+                Squad
+              </Typography>
               <TextField
-                label="Squad"
                 fullWidth
-                sx={{ mt: 2 }}
                 value={filters.squad}
                 onChange={(e) =>
                   setFilters({ ...filters, squad: e.target.value })
                 }
+                placeholder="Search for Squad"
+                sx={(theme) => inputStyle(theme)}
               />
 
+              {/* Minutes */}
+              <Typography variant="h4" fontSize="1rem" mb={-0.5}>
+                Minimum Minutes Played
+              </Typography>
               <TextField
-                label="Min Minutes"
                 fullWidth
-                sx={{ mt: 2 }}
                 value={filters.minMinutes}
                 onChange={(e) =>
                   setFilters({ ...filters, minMinutes: e.target.value })
                 }
+                placeholder="0"
+                sx={(theme) => inputStyle(theme)}
               />
+
+              {/* Buttons */}
+              <Box mt={4} display="flex" justifyContent="space-between">
+                <Button
+                  variant="outlined"
+                  onClick={() =>
+                    setFilters({ position: "", squad: "", minMinutes: "" })
+                  }
+                  sx={(theme) => ({
+                    fontFamily: "'Bebas Neue', sans-serif",
+                    fontSize: "1rem",
+                    color: theme.palette.text.primary,
+                    border: "none",
+                    p: 0,
+                    borderRadius: 0,
+                  })}
+                >
+                  Clear All
+                </Button>
+
+                <Button
+                  variant="contained"
+                  sx={(theme) => ({
+                    fontFamily: "'Bebas Neue', sans-serif",
+                    fontSize: "1rem",
+                    backgroundColor:
+                      theme.palette.mode === "dark" ? "#B7F08E" : "#3B5B84",
+                    color: theme.palette.mode === "dark" ? "#000" : "#fff",
+                    px: "40px",
+                    py: "10px",
+                    borderRadius: 0,
+                    boxShadow: "none",
+                    "&:hover": {
+                      backgroundColor:
+                        theme.palette.mode === "dark" ? "#A3DB79" : "#2F4D6E",
+                    },
+                  })}
+                  onClick={() => {
+                    // optional no-op since filter updates on change
+                    setFilterDrawerOpen(false);
+                  }}
+                >
+                  Update
+                </Button>
+              </Box>
             </Box>
           </Drawer>
 
