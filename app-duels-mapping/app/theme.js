@@ -41,6 +41,10 @@ const getDesignTokens = (mode) => ({
       fontFamily: "'Bebas Neue', sans-serif",
       fontWeight: 400,
     },
+    h4: {
+      fontFamily: "'Bebas Neue', sans-serif",
+      fontWeight: 400,
+    },
     body1: {
       fontFamily: "Nunito Sans, sans-serif",
       fontWeight: 400,
