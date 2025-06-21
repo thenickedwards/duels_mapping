@@ -880,7 +880,7 @@ export default function PlayersPage() {
                 onChange={(e) =>
                   setFilters({ ...filters, position: e.target.value })
                 }
-                placeholder="Select Position"
+                showPlaceholder={false}
                 options={[
                   { value: "", label: "All Positions" },
                   { value: "FW", label: "Forward" },
@@ -987,7 +987,6 @@ export default function PlayersPage() {
 
       {tab === "comparisons" && (
         <Box mt={4}>
-          <Typography>Comparison Tab Content (Coming Soon)</Typography>
           <PlayerComparison />
         </Box>
       )}
