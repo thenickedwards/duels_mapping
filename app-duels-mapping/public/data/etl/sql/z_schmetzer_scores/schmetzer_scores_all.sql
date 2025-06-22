@@ -1,6 +1,7 @@
 DELETE FROM schmetzer_scores_all WHERE season = {year};
 
 INSERT INTO schmetzer_scores_all (
+    id,
     season,
     player_name,
     player_nationality,
@@ -26,6 +27,7 @@ INSERT INTO schmetzer_scores_all (
     recoveries_pts
 )
 SELECT
+    id,
     {year} AS season,
     player_name,
     player_nationality,

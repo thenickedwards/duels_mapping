@@ -37,18 +37,30 @@ deactivate_venv() {
 
 # Function: Run Next.js app and open browser
 run_nextjs_app() {
-    echo -e "\n⚙️ Starting Next.js development server (press Ctrl+C to stop)..."
-    (cd app-duels-mapping && npm run dev) &
-    sleep 5
-    echo -e "\n🌐 Opening browser at http://localhost:3000/"
-    if command -v xdg-open &> /dev/null; then
-        xdg-open "http://localhost:3000/"
-    elif command -v open &> /dev/null; then
-        open "http://localhost:3000/"
-    else
-        echo -e "🔗 Please open http://localhost:3000/ in your browser."
-    fi
+    read -p "Do you want to run the Next.js app in development mode? (y/n): " response
+    case "$response" in
+        [yY][eE][sS]|[yY])
+            echo -e "\n⚙️ Starting Next.js development server (press Ctrl+C to stop)..."
+            (cd app-duels-mapping && npm run dev) &
+            sleep 5
+            echo -e "\n🌐 Opening browser at http://localhost:3000/"
+            if command -v xdg-open &> /dev/null; then
+                xdg-open "http://localhost:3000/"
+            elif command -v open &> /dev/null; then
+                open "http://localhost:3000/"
+            else
+                echo -e "🔗 Please open http://localhost:3000/ in your browser."
+            fi
+            ;;
+        [nN][oO]|[nN])
+            echo "❌ Skipping Next.js app startup."
+            ;;
+        *)
+            echo "⚠️ Invalid input. Please answer 'y' or 'n'."
+            ;;
+    esac
 }
+
 
 # Function: Bonne chance et bon courage! 🔥💪🧑‍💻
 send_off() {
