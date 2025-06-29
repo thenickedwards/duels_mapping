@@ -18,6 +18,7 @@ export default function TeamPage() {
   const theme = useTheme();
   const dividerColor = theme.palette.mode === "dark" ? "#fff" : "#000";
   const rectColor = theme.palette.mode === "dark" ? "#3B5B84" : "#B7F08E";
+  const roleColor = theme.palette.mode === "dark" ? "#b2b2b2" : "#505050"; 
 
   return (
     <main style={{ padding: "2rem" }}>
@@ -66,9 +67,9 @@ export default function TeamPage() {
         <Box my={"60px"}>
           {/* Nick div */}
 
-          <Grid container mb={"80px"}>
+          <Grid container mb={"80px"} gap={4}>
             {/* Image div */}
-            <Grid item size={{ xs: 4, sm: 2, md: 1.6 }}>
+            <Grid item size={{ xs: 3, sm: 2, md: 1.6 }}>
               <Box
                 sx={{
                   width: 100,
@@ -87,14 +88,14 @@ export default function TeamPage() {
             </Grid>
 
             {/* Info div */}
-            <Grid item size={{ xs: 8, sm: 10, md: 3.4 }}>
+            <Grid item size={{ xs: 8, sm: 9, md: 3.4 }}>
               <Typography variant="h2" fontSize="1.25rem">
                 Nick Edwards
               </Typography>
-              <Typography variant="body1" color="#505050">
+              <Typography variant="body1" color={roleColor}>
                 Backend Software Developer
               </Typography>
-              <Typography variant="body1" color="#505050">
+              <Typography variant="body1" color={roleColor}>
                 Data Engineer
               </Typography>
               <Stack direction="row" spacing={1.8} mt={"16px"}>
@@ -112,9 +113,9 @@ export default function TeamPage() {
             {/* Bio div */}
             <Grid
               item
-              size={{ xs: 12, md: 7 }}
+              size={{ xs: 12, md: 6 }}
               sx={{
-                pt: { xs: 4, sm: 4, md: 0 },
+                pt: { xs: 2, sm: 2, md: 0 },
               }}
             >
               <Typography variant="body1">
@@ -129,9 +130,9 @@ export default function TeamPage() {
           </Grid>
 
           {/* Juanita div */}
-          <Grid container>
+          <Grid container gap={4}>
             {/* Image div */}
-            <Grid item size={{ xs: 4, sm: 2, md: 1.6 }}>
+            <Grid item size={{ xs: 3, sm: 2, md: 1.6 }}>
               <Box
                 sx={{
                   width: 100,
@@ -150,14 +151,14 @@ export default function TeamPage() {
             </Grid>
 
             {/* Info div */}
-            <Grid item size={{ xs: 8, sm: 10, md: 3.4 }}>
+            <Grid item size={{ xs: 8, sm: 9, md: 3.4 }}>
               <Typography variant="h2" fontSize="1.25rem">
                 Juanita Samborski
               </Typography>
-              <Typography variant="body1" color="#505050">
+              <Typography variant="body1" color={roleColor}>
                 UX/UI Designer &
               </Typography>
-              <Typography variant="body1" color="#505050">
+              <Typography variant="body1" color={roleColor}>
                 Front End Developer
               </Typography>
 
@@ -176,9 +177,9 @@ export default function TeamPage() {
             {/* Bio div */}
             <Grid
               item
-              size={{ xs: 12, md: 7 }}
+              size={{ xs: 12, md: 6 }}
               sx={{
-                pt: { xs: 4, sm: 4, md: 0 },
+                pt: { xs: 2, sm: 2, md: 0 },
               }}
             >
               <Typography variant="body1">

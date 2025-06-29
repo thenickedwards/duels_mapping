@@ -15,6 +15,7 @@ import {
   DialogTitle,
   DialogContent,
   InputAdornment,
+  Avatar,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import useSWR from "swr";
@@ -56,6 +57,7 @@ import CustomColumnMenu from "./components/CustomColumnMenu";
 import StyledMenuItem from "./components/StyledMenuItem";
 import { inputStyle } from "./styles/inputStyles";
 import CustomSelect from "./components/CustomSelect";
+import PlayerNameCell from "./components/PlayerNameCell";
 
 const fetcher = (url) => fetch(url).then((r) => r.json());
 
@@ -119,7 +121,8 @@ export default function PlayersPage() {
       field: "player_name",
       headerName: "Player",
       displayName: "Player",
-      width: 180,
+      width: 200,
+      renderCell: (params) => <PlayerNameCell name={params.value} />,
     },
     { field: "player_age", headerName: "Age", displayName: "Age", width: 100 },
     { field: "squad", headerName: "Squad", displayName: "Squad", width: 160 },
