@@ -85,7 +85,7 @@ class DataHandler:
         c = conn.cursor()
         ### Insert into raw table
         try:
-            url = self.misc_season_current.replace('_YEAR_',str(self.current_year))
+            url = self.misc_season_current
             df = get_FBref_mls_player_misc_stats(year=self.current_year, url=url)
             # Once new data obtained, remove existing data, then insert
             c.execute(f"DELETE FROM {self.raw_table} WHERE season = ?", (self.current_year,))

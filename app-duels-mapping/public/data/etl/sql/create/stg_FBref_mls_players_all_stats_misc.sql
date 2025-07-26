@@ -26,7 +26,7 @@ CREATE TABLE stg_FBref_mls_players_all_stats_misc (
     aerial_duels_lost       INTEGER DEFAULT 0,
     aerial_duels_total      INTEGER DEFAULT 0, -- New column since raw
     aerial_duels_won_pct    REAL DEFAULT 0.0, -- New column since raw
-    load_datetime           TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    load_datetime           TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(season, player_name, player_yob, squad)
 );
 
