@@ -302,3 +302,7 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# supabase
+supabase/.branches/*
+supabase/.temp/*

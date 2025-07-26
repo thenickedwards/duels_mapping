@@ -1,0 +1,29 @@
+# Define sync rules to control which data is synced to each user
+# See the docs: https://docs.powersync.com/usage/sync-rules
+bucket_definitions:
+  global:
+    data:
+      #   # Sync rows all
+      - SELECT id, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk, aerial_duels_won, aerial_duels_lost, aerial_duels_total, aerial_duels_won_pct, tackles_won, interceptions, recoveries FROM schmetzer_scores_all;
+      #   # Sync rows 2018
+      - SELECT id, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk, aerial_duels_won, aerial_duels_lost, aerial_duels_total, aerial_duels_won_pct, tackles_won, interceptions, recoveries FROM schmetzer_scores_2018;
+      #   # Sync rows 2019
+      - SELECT id, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk, aerial_duels_won, aerial_duels_lost, aerial_duels_total, aerial_duels_won_pct, tackles_won, interceptions, recoveries FROM schmetzer_scores_2019;
+      #   # Sync rows 2020
+      - SELECT id, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk, aerial_duels_won, aerial_duels_lost, aerial_duels_total, aerial_duels_won_pct, tackles_won, interceptions, recoveries FROM schmetzer_scores_2020;
+      #   # Sync rows 2021
+      - SELECT id, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk, aerial_duels_won, aerial_duels_lost, aerial_duels_total, aerial_duels_won_pct, tackles_won, interceptions, recoveries FROM schmetzer_scores_2021;
+      #   # Sync rows 2022
+      - SELECT id, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk, aerial_duels_won, aerial_duels_lost, aerial_duels_total, aerial_duels_won_pct, tackles_won, interceptions, recoveries FROM schmetzer_scores_2022;
+      #   # Sync rows 2023
+      - SELECT id, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk, aerial_duels_won, aerial_duels_lost, aerial_duels_total, aerial_duels_won_pct, tackles_won, interceptions, recoveries FROM schmetzer_scores_2023;
+      #   # Sync rows 2024
+      - SELECT id, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk, aerial_duels_won, aerial_duels_lost, aerial_duels_total, aerial_duels_won_pct, tackles_won, interceptions, recoveries FROM schmetzer_scores_2024;
+      #   # Sync rows 2025
+      - SELECT id, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk, aerial_duels_won, aerial_duels_lost, aerial_duels_total, aerial_duels_won_pct, tackles_won, interceptions, recoveries FROM schmetzer_scores_2025;
+# DEMO FROM PowerSync
+#   by_user:
+#     # Only sync rows belonging to the user
+#     parameters: SELECT request.user_id() as user_id
+#     data:
+#     - SELECT * FROM mytable WHERE mytable.user_id = bucket.user_id
