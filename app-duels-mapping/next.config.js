@@ -1,13 +1,23 @@
+// /** @type {import('next').NextConfig} */
+
+// const supabaseUrl = process.env.SUPABASE_URL;
+// const supabaseAnonKey = process.env.SUPABASSE_ANON_KEY;
+// const powersyncUrl = process.env.NEXT_PUBLIC_POWERSYNC_URL;
+
+// const nextConfig = {
+//   supabaseUrl: supabaseUrl,
+//   supabaseAnonKey: supabaseAnonKey,
+//   powersyncUrl: powersyncUrl,
+// };
+
+// export default nextConfig;
+
 /** @type {import('next').NextConfig} */
-
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseAnonKey = process.env.SUPABASSE_ANON_KEY;
-const powersyncUrl = process.env.NEXT_PUBLIC_POWERSYNC_URL;
-
 const nextConfig = {
-  supabaseUrl: supabaseUrl,
-  supabaseAnonKey: supabaseAnonKey,
-  powersyncUrl: powersyncUrl,
+  reactStrictMode: true,
+  experimental: {
+    serverActions: true,
+  },
 };
 
 export default nextConfig;

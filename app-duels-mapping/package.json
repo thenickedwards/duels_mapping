@@ -20,6 +20,7 @@
     "@mui/material": "^7.0.2",
     "@mui/material-nextjs": "^7.0.2",
     "@mui/x-data-grid": "^8.3.0",
+    "@powersync/react": "^1.5.3",
     "@powersync/web": "^1.23.0",
     "chart.js": "^4.4.9",
     "cheerio": "^1.0.0",
