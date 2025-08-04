@@ -51,7 +51,7 @@ import { createClient } from "@supabase/supabase-js";
 export async function getDbClient(origin) {
   let sqliteDb = null;
   const isLocal = origin.includes("localhost") || origin.includes("127.0.0.1");
-  // // if origin localhost or 127.0.0.1, use SQLite db
+  // if origin localhost or 127.0.0.1, use SQLite db
   if (isLocal) {
     if (!sqliteDb) {
       const dbPath = await getDatabasePath();
