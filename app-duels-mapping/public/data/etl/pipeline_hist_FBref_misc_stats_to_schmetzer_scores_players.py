@@ -4,6 +4,7 @@ data_handler = DataHandler()
 
 def pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players():    
     ### Create tables
+    # TODO: Abstract to data_handler? setup pipeline?
     data_handler.create_tables()
     
     ### Insert static data into dim tables
