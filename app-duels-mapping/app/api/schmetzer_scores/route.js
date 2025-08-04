@@ -1,7 +1,5 @@
 // export const runtime = "nodejs";
-import sqlite3 from "sqlite3";
-import { open } from "sqlite";
-import { getDatabasePath, getSqlSelect } from "@/utils/db-utils";
+import { getDatabasePath, getSqlSelect, getDbClient } from "@/utils/db-utils";
 
 /*
 The path for this API route is below.
@@ -21,7 +19,7 @@ let db = null;
 
 // GET handler for specific season Schmetzer scores
 export async function GET(req) {
-  const { searchParams } = new URL(req.url);
+  const { searchParams, host } = new URL(req.url);
 
   const season = searchParams.get("season");
   const position = searchParams.get("position");
@@ -58,34 +56,50 @@ export async function GET(req) {
 
   const whereClause = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
 
-  if (!db) {
-    const dbPath = await getDatabasePath();
-    db = await open({
-      filename: dbPath,
-      driver: sqlite3.Database,
-    });
-  }
-
   const sqlTemplate = await getSqlSelect("schmetzer_scores_season.sql");
-
   let sql = "";
+  // Load and interpolate the SQL with the requested season
+  sql = sqlTemplate
+    .replace("{year}", season)
+    .replace("{where_clause}", whereClause);
+  // TODO: add verbose check for logs below
+  // console.log("filters passed: ", filters);
+  // console.log("values passed: ", values);
+  // console.log("sql passed: ", sql);
 
   try {
-    // Load and interpolate the SQL with the requested season
-    sql = sqlTemplate
-      .replace("{year}", season)
-      .replace("{where_clause}", whereClause);
-    // TODO: remove logs
-    // console.log("filters passed: ", filters);
-    // console.log("values passed: ", values);
-    // console.log("sql passed: ", sql);
+    // Check if (!db) and running locally, open SQLite db, else use Supabase
+    const { type, client } = await getDbClient(host);
 
-    const scores = await db.all(sql, values);
+    if (type === "sqlite") {
+      const scores = await client.all(sql, values);
+      return new Response(JSON.stringify(scores), {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      });
+    } else if (type === "supabase") {
+      const table = `schmetzer_scores_${season}`;
+      let query = client.from(table).select("*");
 
-    return new Response(JSON.stringify(scores), {
-      headers: { "Content-Type": "application/json" },
-      status: 200,
-    });
+      if (position) {
+        query = query.ilike("position", `%${position}%`);
+      }
+      if (squad) {
+        query = query.ilike("squad", `%${squad}%`);
+      }
+      if (minNineties) {
+        query = query.gte("nineties", Number(minNineties));
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      return new Response(JSON.stringify(data), {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
   } catch (error) {
     console.error("Database query error:", error.message);
     return new Response(JSON.stringify({ sql, values, error: error.message }), {
