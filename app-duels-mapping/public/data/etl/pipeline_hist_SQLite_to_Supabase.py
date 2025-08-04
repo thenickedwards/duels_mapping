@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 load_dotenv()
 from data_handler import DataHandler
 data_handler = DataHandler()
-import sqlite3
 
 
 # Supabase credentials
