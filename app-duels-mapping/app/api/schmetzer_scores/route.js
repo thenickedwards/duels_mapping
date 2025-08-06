@@ -69,41 +69,41 @@ export async function GET(req) {
   try {
     // Check if (!db) and running locally, open SQLite db, else use Supabase
     // SQLite connection
-    // if (isLocal) {
-    //   console.log("Running locally, using SQLite DB");
-    //   const dbPath = await getDatabasePath();
-    //   db = await open({
-    //     filename: dbPath,
-    //     driver: sqlite3.Database,
-    //   });
+    if (isLocal) {
+      console.log("Running locally, using SQLite DB");
+      const dbPath = await getDatabasePath();
+      db = await open({
+        filename: dbPath,
+        driver: sqlite3.Database,
+      });
 
-    //   const scores = await db.all(sql, values);
+      const data = await db.all(sql, values);
 
-    //   return new Response(JSON.stringify(scores), {
-    //     headers: { "Content-Type": "application/json" },
-    //     status: 200,
-    //   });
-    //   // Supabase connection
-    // } else {
-    console.log("In deployment, using Supabase DB");
-    const supabase = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_ANON_KEY
-    );
-    if (!supabase) console.log("Could NOT create Supabase client!");
-    if (
-      supabase.supabaseUrl == process.env.SUPABASE_URL &&
-      supabase.supabaseKey == process.env.SUPABASE_ANON_KEY
-    )
-      console.log(
-        "Created Supabase client matches SUPABASE_URL && SUPABASE_ANON_KEY!"
+      return new Response(JSON.stringify(data), {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      });
+      // Supabase connection
+    } else {
+      console.log("In deployment, using Supabase DB");
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_ANON_KEY
       );
-    const table = `schmetzer_scores_${season}`;
+      if (!supabase) console.log("Could NOT create Supabase client!");
+      if (
+        supabase.supabaseUrl == process.env.SUPABASE_URL &&
+        supabase.supabaseKey == process.env.SUPABASE_ANON_KEY
+      )
+        console.log(
+          "Created Supabase client matches SUPABASE_URL && SUPABASE_ANON_KEY!"
+        );
+      const table = `schmetzer_scores_${season}`;
 
-    const { data, error } = await supabase
-      .from(table)
-      .select(
-        `
+      const { data, error } = await supabase
+        .from(table)
+        .select(
+          `
       id,
       player_name,
       player_nationality,
@@ -122,24 +122,24 @@ export async function GET(req) {
       interceptions,
       recoveries
       `
-      )
-      .ilike("position", position ? `%${position}%` : "%")
-      .ilike("squad", squad ? `%${squad}%` : "%")
-      .gte("nineties", Number(minNineties) || 1)
-      .order("schmetzer_score", { ascending: false });
+        )
+        .ilike("position", position ? `%${position}%` : "%")
+        .ilike("squad", squad ? `%${squad}%` : "%")
+        .gte("nineties", Number(minNineties) || 1)
+        .order("schmetzer_score", { ascending: false });
 
-    if (data) {
-      console.log("Querying Supabase table:", table);
-      console.log("Sample record: ", data[0]);
+      if (data) {
+        console.log("Querying Supabase table:", table);
+        console.log("Sample record: ", data[0]);
+      }
+
+      if (error) console.error(error);
+
+      return new Response(JSON.stringify(data), {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      });
     }
-
-    if (error) console.error(error);
-
-    return new Response(JSON.stringify(data), {
-      headers: { "Content-Type": "application/json" },
-      status: 200,
-    });
-    // }
   } catch (error) {
     console.error("Database query error:", error, error.message);
     return new Response(JSON.stringify({ error: error.message }), {
