@@ -1,4 +1,4 @@
-// export const runtime = "nodejs";
+export const runtime = "nodejs";
 import { getDatabasePath, getSqlSelect } from "@/utils/db-utils";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
@@ -127,12 +127,11 @@ export async function GET(req, verbose = 2) {
           )
           .ilike("id", `${playerNameNormalized}%`);
 
+      if (playerSeasonScoresErr) console.error(playerSeasonScoresErr);
       if (playerSeasonScores) {
         console.log("Querying Supabase table:", table);
         console.log("Record: ", playerSeasonScores);
       }
-
-      if (playerSeasonScoresErr) console.error(playerSeasonScoresErr);
 
       // Query for player YOY scores
       const { data: playerYoyScores, error: playerYoyScoresErr } =
@@ -144,12 +143,11 @@ export async function GET(req, verbose = 2) {
           .ilike("id", `${playerNameNormalized}%`)
           .order("season", { ascending: true });
 
+      if (playerYoyScoresErr) console.error(playerYoyScoresErr);
       if (playerYoyScores) {
         console.log("Querying Supabase table:", table);
         console.log("Record: ", playerYoyScores);
       }
-
-      if (playerYoyScoresErr) console.error(playerYoyScoresErr);
 
       // player scores from requested season and YOY to be returned
       const playerScores = [playerSeasonScores, playerYoyScores];

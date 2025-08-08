@@ -1,3 +1,4 @@
+export const runtime = "nodejs";
 import { getDatabasePath, getSqlSelect } from "@/utils/db-utils";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
@@ -91,12 +92,12 @@ export async function GET(req) {
           `
         )
         .gte("nineties", 1);
+
+      if (error) console.error(error);
       if (data) {
         console.log("Querying Supabase table:", table);
         console.log("Sample record: ", data[0]);
       }
-
-      if (error) console.error(error);
 
       return new Response(JSON.stringify(data), {
         headers: { "Content-Type": "application/json" },

@@ -1,4 +1,4 @@
-// export const runtime = "nodejs";
+export const runtime = "nodejs";
 import { getDatabasePath, getSqlSelect } from "@/utils/db-utils";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
@@ -90,50 +90,30 @@ export async function GET(req) {
         process.env.SUPABASE_URL,
         process.env.SUPABASE_ANON_KEY
       );
-      if (!supabase) console.log("Could NOT create Supabase client!");
+      if (!supabase) console.error("Could NOT create Supabase client!");
       if (
         supabase.supabaseUrl == process.env.SUPABASE_URL &&
         supabase.supabaseKey == process.env.SUPABASE_ANON_KEY
       )
-        console.log(
-          "Created Supabase client matches SUPABASE_URL && SUPABASE_ANON_KEY!"
-        );
+        console.log("Created Supabase client successfully");
       const table = `schmetzer_scores_${season}`;
 
       const { data, error } = await supabase
         .from(table)
         .select(
-          `
-      id,
-      player_name,
-      player_nationality,
-      position,
-      squad,
-      player_age,
-      player_yob,
-      nineties,
-      schmetzer_score,
-      schmetzer_rk,
-      aerial_duels_won,
-      aerial_duels_lost,
-      aerial_duels_total,
-      aerial_duels_won_pct,
-      tackles_won,
-      interceptions,
-      recoveries
-      `
+          `id, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk, aerial_duels_won, aerial_duels_lost, aerial_duels_total, aerial_duels_won_pct, tackles_won, interceptions, recoveries `
         )
         .ilike("position", position ? `%${position}%` : "%")
         .ilike("squad", squad ? `%${squad}%` : "%")
         .gte("nineties", Number(minNineties) || 1)
         .order("schmetzer_score", { ascending: false });
 
+      if (error) console.error("Supabase error:", error);
+
       if (data) {
         console.log("Querying Supabase table:", table);
         console.log("Sample record: ", data[0]);
       }
-
-      if (error) console.error(error);
 
       return new Response(JSON.stringify(data), {
         headers: { "Content-Type": "application/json" },
