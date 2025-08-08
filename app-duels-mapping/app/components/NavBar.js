@@ -14,10 +14,8 @@ import {
   ListItemButton,
   ListItemText,
   Switch,
-  Divider,
 } from "@mui/material";
 import Image from "next/image";
-import CloseIcon from "@mui/icons-material/Close";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useState } from "react";
 import Link from "next/link";
@@ -45,58 +43,17 @@ export default function NavBar() {
   };
 
   const drawer = (
-    <Box sx={{ textAlign: "left" }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-end",
-          mb: 4,
-        }}
-      >
-        <IconButton
-          onClick={handleDrawerToggle}
-          aria-label="close drawer"
-          size="small"
-        >
-          <CloseIcon
-            sx={{
-              color: (theme) =>
-                theme.palette.mode === "dark" ? "#fff" : "#000",
-            }}
-          />
-        </IconButton>
-      </Box>
-
+    <Box onClick={handleDrawerToggle} sx={{ textAlign: "center" }}>
+      <Typography variant="h6" sx={{ my: 2 }}>
+        Duels Mapping
+      </Typography>
       <List>
         {pages.map((page) => (
           <ListItemButton key={page.label} component={Link} href={page.href}>
-            <ListItemText
-              primary={page.label}
-              primaryTypographyProps={{
-                fontSize: "1.25rem",
-                fontFamily: "'Bebas Neue', sans-serif",
-                textAlign: "left",
-              }}
-            />
+            <ListItemText primary={page.label} />
           </ListItemButton>
         ))}
       </List>
-
-      <Divider
-        sx={{
-          my: 2,
-          borderColor: theme.palette.mode === "dark" ? "#fff" : "#000",
-        }}
-      />
-      <Box sx={{ mt: 4, pl: "8px" }}>
-        <IconButton onClick={toggleColorMode} color="inherit">
-          <Image
-            src={mode === "light" ? LightMode : DarkMode}
-            alt="Toggle theme"
-            height={24}
-          />
-        </IconButton>
-      </Box>
     </Box>
   );
 
@@ -199,18 +156,7 @@ export default function NavBar() {
         onClose={handleDrawerToggle}
         ModalProps={{ keepMounted: true }}
       >
-        <Box
-          sx={(theme) => ({
-            width: 300,
-            height: "100%",
-            backgroundColor: theme.palette.mode === "dark" ? "#000" : "#FAFAFA",
-            borderLeft: "4px solid #B7F08E",
-            paddingTop: "50px",
-            paddingX: "40px",
-          })}
-        >
-          {drawer}
-        </Box>
+        {drawer}
       </Drawer>
     </>
   );
