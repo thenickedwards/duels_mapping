@@ -1,4 +1,5 @@
 "use client";
+import { forwardRef } from "react";
 import { Select, MenuItem } from "@mui/material";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useTheme } from "@mui/material/styles";
@@ -10,9 +11,28 @@ export default function CustomSelect({
   onChange,
   options = [],
   placeholder = "Select an option",
+  showPlaceholder = true,
   ...props
 }) {
   const theme = useTheme();
+
+  const CustomDropdownIcon = forwardRef(function CustomDropdownIcon(props, ref) {
+    return (
+      <ArrowForwardIosIcon
+        {...props}
+        ref={ref}
+        sx={{
+          transform: "rotate(90deg)",
+          fontSize: "1.25rem",
+          color: (theme) =>
+            theme.palette.mode === "dark" ? "#fff" : "#000",
+          pointerEvents: "auto", 
+          cursor: "pointer",
+          mr: 1,
+        }}
+      />
+    );
+  });
 
   return (
     <Select
@@ -21,34 +41,38 @@ export default function CustomSelect({
       displayEmpty
       fullWidth
       {...props}
-      IconComponent={() => (
-        <Box
-          sx={{
-            position: "absolute",
-            right: 16,
-            top: "50%",
-            transform: "translateY(-50%) rotate(90deg)",
-            pointerEvents: "none",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <ArrowForwardIosIcon
-            sx={{
-              color: theme.palette.mode === "dark" ? "#fff" : "#000",
-              fontSize: "1.5rem",
-            }}
-          />
-        </Box>
-      )}
-      renderValue={(selected) =>
-        selected ? (
-          selected
-        ) : (
-          <span style={{ color: "#888" }}>{placeholder}</span>
-        )
-      }
+    //   IconComponent={() => (
+    //     <Box
+    //       sx={{
+    //         position: "absolute",
+    //         right: 16,
+    //         top: "50%",
+    //         transform: "translateY(-50%) rotate(90deg)",
+    //         pointerEvents: "none",
+    //         display: "flex",
+    //         alignItems: "center",
+    //         justifyContent: "center",
+    //       }}
+    //     >
+    //       <ArrowForwardIosIcon
+    //         sx={{
+    //           color: theme.palette.mode === "dark" ? "#fff" : "#000",
+    //           fontSize: "1.5rem",
+    //         }}
+    //       />
+    //     </Box>
+    //   )}
+    IconComponent={CustomDropdownIcon}
+      renderValue={(selected) => {
+        const selectedOption = options.find((opt) => opt.value === selected);
+        if (selectedOption) {
+          return selectedOption.label;
+        }
+        if (showPlaceholder) {
+          return <span style={{ color: "#888" }}>{placeholder}</span>;
+        }
+        return "";
+      }}
       MenuProps={{
         PaperProps: {
           sx: {
@@ -77,9 +101,11 @@ export default function CustomSelect({
         },
       }}
     >
-      <MenuItem value="" disabled sx={{ display: "none" }}>
-        {placeholder}
-      </MenuItem>
+      {showPlaceholder && (
+        <MenuItem value="" disabled sx={{ display: "none" }}>
+          {placeholder}
+        </MenuItem>
+      )}
       {options.map((opt) => (
         <MenuItem key={opt.value} value={opt.value}>
           {opt.label}
