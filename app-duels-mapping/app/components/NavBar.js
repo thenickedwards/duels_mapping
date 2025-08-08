@@ -118,7 +118,7 @@ export default function NavBar() {
             href="/"
             sx={{ flexGrow: 1, textDecoration: "none", color: "inherit" }}
           >
-            🏠 Site Name
+            ⚽️ Duels Mapping
           </Typography>
 
           {isMobile ? (
