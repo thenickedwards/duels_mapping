@@ -45,7 +45,7 @@ export default function NavBar() {
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: "center" }}>
       <Typography variant="h6" sx={{ my: 2 }}>
-        Site Name
+        Duels Mapping
       </Typography>
       <List>
         {pages.map((page) => (
@@ -75,7 +75,7 @@ export default function NavBar() {
             href="/"
             sx={{ flexGrow: 1, textDecoration: "none", color: "inherit" }}
           >
-            🏠 Site Name
+            ⚽️ Duels Mapping
           </Typography>
 
           {isMobile ? (
