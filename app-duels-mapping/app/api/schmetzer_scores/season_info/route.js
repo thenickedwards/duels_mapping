@@ -31,11 +31,6 @@ export async function GET(req) {
     );
   }
 
-  const sqlTemplate = await getSqlSelect("schmetzer_scores_season_info.sql");
-  let sql = "";
-  // Load and interpolate the SQL with the requested season
-  sql = sqlTemplate.replace("{year}", season);
-
   try {
     // Check if (!db) and running locally, open SQLite db, else use Supabase
     // SQLite connection
@@ -46,6 +41,13 @@ export async function GET(req) {
         filename: dbPath,
         driver: sqlite3.Database,
       });
+
+      const sqlTemplate = await getSqlSelect(
+        "schmetzer_scores_season_info.sql"
+      );
+      let sql = "";
+      // Load and interpolate the SQL with the requested season
+      sql = sqlTemplate.replace("{year}", season);
 
       const data = await db.all(sql);
 

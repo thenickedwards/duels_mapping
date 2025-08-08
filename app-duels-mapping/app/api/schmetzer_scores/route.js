@@ -57,15 +57,6 @@ export async function GET(req) {
     values.push(Number(minNineties));
   }
 
-  const whereClause = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
-
-  const sqlTemplate = await getSqlSelect("schmetzer_scores_season.sql");
-  let sql = "";
-  // Load and interpolate the SQL with the requested season
-  sql = sqlTemplate
-    .replace("{year}", season)
-    .replace("{where_clause}", whereClause);
-
   try {
     // Check if (!db) and running locally, open SQLite db, else use Supabase
     // SQLite connection
@@ -76,6 +67,16 @@ export async function GET(req) {
         filename: dbPath,
         driver: sqlite3.Database,
       });
+
+      const sqlTemplate = await getSqlSelect("schmetzer_scores_season.sql");
+      const whereClause = filters.length
+        ? `WHERE ${filters.join(" AND ")}`
+        : "";
+      let sql = "";
+      // Load and interpolate the SQL with the requested season
+      sql = sqlTemplate
+        .replace("{year}", season)
+        .replace("{where_clause}", whereClause);
 
       const data = await db.all(sql, values);
 
