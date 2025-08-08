@@ -17,15 +17,7 @@ export async function getPlayerPic(playerName, verbose = 1) {
   if (verbose >= 1) console.log(`Getting player headshot of ${playerName}...`);
   if (verbose >= 2) console.log(`Sourcing picture from ${playerUrl}`);
 
-  // const $ = await cheerio.fromURL(testUrl);
-
-  //Fetch HTML manually
-  const res = await fetch(playerUrl);
-  const html = await res.text();
-
-  // Load HTML using cheerio
-  const $ = cheerio.load(html);
-
+  const $ = await cheerio.fromURL(testUrl);
 
   // FIRST PASS
   // const imgUrl1 = $.extract({
@@ -48,7 +40,7 @@ export async function getPlayerPic(playerName, verbose = 1) {
     .filter((_, el) => $(el).attr("alt") === playerName)
     .attr("src");
 
-  const imgDesktopUrl = imgThumbUrl?.replace(
+  const imgDesktopUrl = imgThumbUrl.replace(
     "t_thumb_squared",
     "t_editorial_squared_6_desktop_2x"
   );
