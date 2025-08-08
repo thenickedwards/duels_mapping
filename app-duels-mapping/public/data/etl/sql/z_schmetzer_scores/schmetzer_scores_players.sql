@@ -27,7 +27,7 @@ CREATE TABLE "schmetzer_scores_{year}" (
     recoveries              INTEGER DEFAULT 0,
     recoveries_pts          REAL DEFAULT 0, 
     load_datetime           TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(season, player_name, player_yob, squad)
+    UNIQUE(player_name, player_yob, season, squad)
 );
 
 -- Index for quicker lookup
@@ -92,7 +92,7 @@ squad_agg_by_nineties AS (
 -- 
 SELECT
     -- Construct id manually with SQLite syntax
-    season || '-' || REPLACE(player_name, ' ', '') || '-' || player_yob || '-' || REPLACE(squad, ' ', '') AS id,
+    LOWER(REPLACE(player_name, ' ', '')) || '-' || player_yob || '-' || season || '-' || LOWER(REPLACE(squad, ' ', '')) AS id,
     season,
     player_name,
     player_nationality,

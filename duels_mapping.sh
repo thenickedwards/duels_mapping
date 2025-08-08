@@ -53,6 +53,7 @@ run_nextjs_app() {
 # Function: Bonne chance et bon courage! 🔥💪🧑‍💻
 send_off() {
     echo -e "\n༼ つ ◕◕ ༽つ SENDING THE GOODEST OF VIBES ༼ つ ◕◕ ༽つ\n\n"
+    return 0
 }
 
 #####   #####   #####   #####   #####
@@ -82,14 +83,14 @@ elif [ "$action" = "setup" ]; then
     activate_venv
     
     echo -e "\n📦 Installing Python dependencies from requirements.txt..."
-    pip install -r requirements.txt || { echo "❌ Python dependencies installation failed."; exit 1; }
+    pip install -r requirements.txt || { echo "❌ Python dependencies installation failed."; return 1; }
 
     echo -e "\n📦 Installing Node Package modules from package.json..."
-    (cd app-duels-mapping && npm install) || { echo "❌ Python dependencies installation failed."; exit 1; }
+    (cd app-duels-mapping && npm install) || { echo "❌ Python dependencies installation failed."; return 1; }
 
     echo -e "\n🧬 Running ETL pipeline to backfill all historical season data..."
     python "$SCRIPT_DIR/app-duels-mapping/public/data/etl/pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players.py" || {
-        echo -e "❌ ETL pipeline execution failed."; exit 1; }
+        echo -e "❌ ETL pipeline execution failed."; return 1; }
 
     run_nextjs_app
 
@@ -101,7 +102,7 @@ elif [ "$action" = "update" ]; then
 
     echo -e "\n🧬 Running ETL pipeline to update current season data..."
     python "$SCRIPT_DIR/app-duels-mapping/public/data/etl/pipeline_cur_FBref_misc_stats_to_schmetzer_scores_players.py" || {
-        echo "❌ ETL pipeline execution failed."; exit 1; }
+        echo "❌ ETL pipeline execution failed."; return 1; }
 
     run_nextjs_app
     
@@ -110,6 +111,6 @@ elif [ "$action" = "update" ]; then
 ## Unrecognized argument
 else
     echo -e "⚠️  Unknown action: '$action'. Use 'start', 'stop','setup', or 'update'."
-    exit 1
+    return 1
 fi
 

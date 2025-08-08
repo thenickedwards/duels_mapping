@@ -1,5 +1,7 @@
 import { getDatabasePath, getSqlSelect } from "@/utils/db-utils";
-
+import sqlite3 from "sqlite3";
+import { open } from "sqlite";
+import { createClient } from "@supabase/supabase-js";
 /*
 The path for this API route is below.
 Example when hosted locally: 
@@ -16,6 +18,7 @@ let db = null;
 export async function GET(req) {
   const { searchParams, host } = new URL(req.url);
 
+  const isLocal = host.includes("localhost") || host.includes("127.0.0.1");
   const season = searchParams.get("season");
 
   if (!season) {
@@ -28,53 +31,72 @@ export async function GET(req) {
     );
   }
 
-  const filters = ["season = ?"];
-  const values = [Number(season)];
   const sqlTemplate = await getSqlSelect("schmetzer_scores_season_info.sql");
   let sql = "";
   // Load and interpolate the SQL with the requested season
   sql = sqlTemplate.replace("{year}", season);
-  // TODO: remove logs
-  // console.log("filters passed: ", filters);
-  // console.log("values passed: ", values);
-  // console.log("sql passed: ", sql);
 
   try {
     // Check if (!db) and running locally, open SQLite db, else use Supabase
-    const { type, client } = await getDbClient(host);
+    // SQLite connection
+    if (isLocal) {
+      console.log("Running locally, using SQLite DB");
+      const dbPath = await getDatabasePath();
+      db = await open({
+        filename: dbPath,
+        driver: sqlite3.Database,
+      });
 
-    if (type === "sqlite") {
-      const result = await client.all(sql);
-      return new Response(JSON.stringify(result), {
+      const data = await db.all(sql);
+
+      return new Response(JSON.stringify(data), {
         headers: { "Content-Type": "application/json" },
         status: 200,
       });
-    } else if (type === "supabase") {
+      // Supabase connection
+    } else {
+      console.log("In deployment, using Supabase DB");
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_ANON_KEY
+      );
+      if (!supabase) console.log("Could NOT create Supabase client!");
+      if (
+        supabase.supabaseUrl == process.env.SUPABASE_URL &&
+        supabase.supabaseKey == process.env.SUPABASE_ANON_KEY
+      )
+        console.log(
+          "Created Supabase client matches SUPABASE_URL && SUPABASE_ANON_KEY!"
+        );
       const table = `schmetzer_scores_${season}`;
-      const { data, error } = await client
+
+      const { data, error } = await supabase
         .from(table)
         .select(
           `
-          total_players:count(player_name),
-          total_ranks:count.distinct(schmetzer_rk),
-          adw_max:max(aerial_duels_won),
-          adw_avg:avg(aerial_duels_won),
-          tkw_max:max(tackles_won),
-          tkw_avg:avg(tackles_won),
-          int_max:max(interceptions),
-          int_avg:avg(interceptions),
-          recov_max:max(recoveries),
-          recov_avg:avg(recoveries),
-          adl_max:max(aerial_duels_lost),
-          adl_avg:avg(aerial_duels_lost),
-          smetz_max:max(schmetzer_score),
-          smetz_avg:avg(schmetzer_score)  
-        `
+          total_players:player_name.count(),
+          total_ranks:schmetzer_rk.count(),
+          adw_max:aerial_duels_won.max(),
+          adw_avg:aerial_duels_won.avg(),
+          tkw_max:tackles_won.max(),
+          tkw_avg:tackles_won.avg(),
+          int_max:interceptions.max(),
+          int_avg:interceptions.avg(),
+          recov_max:recoveries.max(),
+          recov_avg:recoveries.avg(),
+          adl_max:aerial_duels_lost.max(),
+          adl_avg:aerial_duels_lost.avg(),
+          smetz_max:schmetzer_score.max(),
+          smetz_avg:schmetzer_score.avg()
+          `
         )
-        .gte("nineties", 1)
-        .limit(1);
+        .gte("nineties", 1);
+      if (data) {
+        console.log("Querying Supabase table:", table);
+        console.log("Sample record: ", data[0]);
+      }
 
-      if (error) throw error;
+      if (error) console.error(error);
 
       return new Response(JSON.stringify(data), {
         headers: { "Content-Type": "application/json" },
@@ -83,7 +105,7 @@ export async function GET(req) {
     }
   } catch (error) {
     console.error("Database query error:", error.message);
-    return new Response(JSON.stringify({ sql, values, error: error.message }), {
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
