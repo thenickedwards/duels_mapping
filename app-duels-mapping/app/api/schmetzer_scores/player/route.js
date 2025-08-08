@@ -56,26 +56,6 @@ export async function GET(req, verbose = 2) {
     `${playerName.toLowerCase().replace(/\s/g, "")}`,
   ];
 
-  const whereClause = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
-  const playerSeasonSqlTemplate = await getSqlSelect(
-    "schmetzer_scores_season.sql"
-  );
-  const playerYoySqlTemplate = await getSqlSelect(
-    "schmetzer_scores_player_yoy.sql"
-  );
-
-  let playerSeasonSql = "";
-  let playerYoySql = "";
-  // Load and interpolate the SQL
-  // Individual player scores from requested season
-  playerSeasonSql = playerSeasonSqlTemplate
-    .replace("{year}", season)
-    .replace("{where_clause}", whereClause);
-  if (verbose >= 2) console.log("playerSeasonSql: ", playerSeasonSql);
-  // Individual player scores YOY
-  playerYoySql = playerYoySqlTemplate.replace("{playerFilter}", filters[1]);
-  if (verbose >= 2) console.log("playerYoySql: ", playerYoySql);
-
   try {
     // Check if (!db) and running locally, open SQLite db, else use Supabase
     // SQLite connection
@@ -86,6 +66,28 @@ export async function GET(req, verbose = 2) {
         filename: dbPath,
         driver: sqlite3.Database,
       });
+
+      const playerSeasonSqlTemplate = await getSqlSelect(
+        "schmetzer_scores_season.sql"
+      );
+      const playerYoySqlTemplate = await getSqlSelect(
+        "schmetzer_scores_player_yoy.sql"
+      );
+      const whereClause = filters.length
+        ? `WHERE ${filters.join(" AND ")}`
+        : "";
+
+      let playerSeasonSql = "";
+      let playerYoySql = "";
+      // Load and interpolate the SQL
+      // Individual player scores from requested season
+      playerSeasonSql = playerSeasonSqlTemplate
+        .replace("{year}", season)
+        .replace("{where_clause}", whereClause);
+      if (verbose >= 2) console.log("playerSeasonSql: ", playerSeasonSql);
+      // Individual player scores YOY
+      playerYoySql = playerYoySqlTemplate.replace("{playerFilter}", filters[1]);
+      if (verbose >= 2) console.log("playerYoySql: ", playerYoySql);
 
       const playerSeasonScores = await db.all(playerSeasonSql, values);
       const playerYoyScores = await db.all(playerYoySql, values[1]);
