@@ -69,7 +69,7 @@ fi
 if [ "$action" = "start" ]; then
     activate_venv
     echo -e "Happy coding you beautiful and strong genius, you 🧑‍💻"
-    # run_nextjs_app
+    run_nextjs_app
     send_off
 
 ## stop
