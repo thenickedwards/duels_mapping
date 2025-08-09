@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS "schmetzer_scores_{year}";
 
 -- Create new table
 CREATE TABLE "schmetzer_scores_{year}" (
+    id                      TEXT PRIMARY KEY,
     season                  INTEGER  NOT NULL, 
     player_name             TEXT     NOT NULL,
     player_nationality      TEXT,
@@ -25,8 +26,8 @@ CREATE TABLE "schmetzer_scores_{year}" (
     interceptions_pts       REAL DEFAULT 0, 
     recoveries              INTEGER DEFAULT 0,
     recoveries_pts          REAL DEFAULT 0, 
-    load_datetime           TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    UNIQUE(season, player_name, player_yob, squad)
+    load_datetime           TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(player_name, player_yob, season, squad)
 );
 
 -- Index for quicker lookup
@@ -34,6 +35,7 @@ CREATE INDEX IF NOT EXISTS idx_schmetzer_scores_{year}__player ON "schmetzer_sco
 
 -- Insert data from staging table and compute Schmetzer Score
 INSERT INTO "schmetzer_scores_{year}" (
+    id,
     season,
     player_name,
     player_nationality,
@@ -89,6 +91,8 @@ squad_agg_by_nineties AS (
 )
 -- 
 SELECT
+    -- Construct id manually with SQLite syntax
+    LOWER(REPLACE(player_name, ' ', '')) || '-' || player_yob || '-' || season || '-' || LOWER(REPLACE(squad, ' ', '')) AS id,
     season,
     player_name,
     player_nationality,
@@ -125,6 +129,7 @@ FROM squad_agg_by_nineties
 WHERE season = {year}
 ORDER BY schmetzer_score DESC;
 
+-- Add ranking to final table
 WITH ranked AS (
     SELECT
         rowid AS original_rowid,

@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS schmetzer_scores_all;
 
 CREATE TABLE schmetzer_scores_all (
+  id                      TEXT PRIMARY KEY,
   season                  INTEGER  NOT NULL, 
   player_name             TEXT     NOT NULL,
   player_nationality      TEXT,
@@ -24,8 +25,8 @@ CREATE TABLE schmetzer_scores_all (
   interceptions_pts       REAL DEFAULT 0, 
   recoveries              INTEGER DEFAULT 0,
   recoveries_pts          REAL DEFAULT 0, 
-  load_datetime           TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  UNIQUE(season, player_name, player_yob, squad)
+  load_datetime           TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(player_name, player_yob, season, squad)
 );
 
 -- Indexes for fast querying

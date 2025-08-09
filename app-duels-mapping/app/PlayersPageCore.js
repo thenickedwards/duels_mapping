@@ -15,7 +15,6 @@ import {
   DialogTitle,
   DialogContent,
   InputAdornment,
-  Avatar,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import useSWR from "swr";
@@ -57,8 +56,6 @@ import CustomColumnMenu from "./components/CustomColumnMenu";
 import StyledMenuItem from "./components/StyledMenuItem";
 import { inputStyle } from "./styles/inputStyles";
 import CustomSelect from "./components/CustomSelect";
-import PlayerNameCell from "./components/PlayerNameCell";
-import TeamBadgeCell from "./components/TeamBadgeCell";
 
 const fetcher = (url) => fetch(url).then((r) => r.json());
 
@@ -111,8 +108,6 @@ export default function PlayersPage() {
     );
   };
 
-  
-
   const columns = [
     {
       field: "schmetzer_rk",
@@ -124,30 +119,10 @@ export default function PlayersPage() {
       field: "player_name",
       headerName: "Player",
       displayName: "Player",
-      width: 220,
-      renderCell: (params) => <PlayerNameCell name={params.value} />,
+      width: 180,
     },
-    {
-      field: "player_age",
-      headerName: "Age",
-      displayName: "Age",
-      width: 100,
-      renderCell: (params) => {
-        const age = params.value?.split("-")[0] || "";
-        return (
-          <Box display="flex" alignItems="center" height="100%">
-            <Typography fontSize="0.9rem">{age}</Typography>
-          </Box>
-        );
-      }
-    },
-    {
-      field: "squad",
-      headerName: "Squad",
-      displayName: "Squad",
-      width: 200,
-      renderCell: (params) => <TeamBadgeCell squad={params.value} />,
-    },
+    { field: "player_age", headerName: "Age", displayName: "Age", width: 100 },
+    { field: "squad", headerName: "Squad", displayName: "Squad", width: 160 },
     {
       field: "position",
       headerName: "POS",
@@ -168,22 +143,7 @@ export default function PlayersPage() {
       displayName: "Schmetzer Score",
       width: 100,
       headerAlign: "center",
-      renderCell: (params) => (
-        <Box
-          sx={{
-            width: "100%",
-            height: "100%",
-            bgcolor: theme.palette.mode === "dark" ? "#26262A" : "#FAFAFA",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            px: 1,
-            borderBottom: `1px solid ${theme.palette.divider}`,
-          }}
-        >
-          <Typography fontSize="0.9rem">{params.value}</Typography>
-        </Box>
-      ),
+      renderCell: (params) => <RightAlignedCenterCell value={params.value} />,
     },
     {
       field: "tackles_won",
@@ -920,7 +880,7 @@ export default function PlayersPage() {
                 onChange={(e) =>
                   setFilters({ ...filters, position: e.target.value })
                 }
-                showPlaceholder={false}
+                placeholder="Select Position"
                 options={[
                   { value: "", label: "All Positions" },
                   { value: "FW", label: "Forward" },
@@ -1027,6 +987,7 @@ export default function PlayersPage() {
 
       {tab === "comparisons" && (
         <Box mt={4}>
+          <Typography>Comparison Tab Content (Coming Soon)</Typography>
           <PlayerComparison />
         </Box>
       )}

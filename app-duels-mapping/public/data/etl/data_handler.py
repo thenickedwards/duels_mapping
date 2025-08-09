@@ -3,8 +3,11 @@ import glob
 import os
 import datetime
 import sqlite3
+from supabase import create_client, Client
+from supafunc.errors import FunctionsRelayError, FunctionsHttpError
 from dependencies.connect_db import connect_db
 from dependencies.get_from_fbref import get_FBref_mls_player_misc_stats
+from dependencies.normalize_data import find_none, normalize_none_to_null, normalize_row
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 data_vars_path = os.path.join(script_dir, "..", "data_vars.json")
@@ -28,6 +31,7 @@ class DataHandler:
             self.misc_season_current  = data_vars["fbref"]["fbref_urls"]["misc_season_current"]
             self.misc_season_specific  = data_vars["fbref"]["fbref_urls"]["misc_season_specific"]
             self.schmetzer_score = data_vars["schmetzer_score_points"]
+            self.schmetzer_scores_tables = data_vars["database"]["schmetzer_scores_tables"] 
 
     def create_tables(self):
         conn = connect_db(self.database_name, self.database_path)
@@ -85,7 +89,7 @@ class DataHandler:
         c = conn.cursor()
         ### Insert into raw table
         try:
-            url = self.misc_season_current.replace('_YEAR_',str(self.current_year))
+            url = self.misc_season_current
             df = get_FBref_mls_player_misc_stats(year=self.current_year, url=url)
             # Once new data obtained, remove existing data, then insert
             c.execute(f"DELETE FROM {self.raw_table} WHERE season = ?", (self.current_year,))
@@ -158,8 +162,44 @@ class DataHandler:
                 c.executescript(sql)
                 print(f'Inserted player data into schmetzer_scores_all from table: {table} for season {year}')
                 conn.commit()
-
         except sqlite3.Error as e:
             print(e)
         finally:
             conn.close()
+            
+            
+    def insert_hist_SQLite_to_Supabase(self, supabase_url, supabase_key):
+        tables = [
+            self.schmetzer_scores_tables["all"]] + [
+            self.schmetzer_scores_tables["season"].replace("YEAR", str(year)) for year in range(2018, self.current_year + 1)
+        ]
+        # Supabase client
+        supabase: Client = create_client(supabase_url, supabase_key)
+        # SQLite connection
+        conn = connect_db(self.database_name, self.database_path)
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        try: 
+            for t in tables:
+                print(f"Extracting data from SQLite table: {t}")
+                c.execute(f"SELECT id, season, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk, aerial_duels_won, aerial_duels_lost, aerial_duels_total, aerial_duels_won_pct, tackles_won, interceptions, recoveries FROM {t}")
+                rows = c.fetchall()
+                # normalize data
+                data = [
+                    normalize_row(r) for r in rows
+                    if r['season'] is not None and isinstance(r['season'], int)
+                ]
+                response = supabase.table(t).upsert(data, default_to_null=True).execute()
+                print(f'Inserted data into Supbase table: {t}')
+        except sqlite3.Error as e:
+            print(e)
+        except FunctionsHttpError as exception:
+            err = exception.to_dict()
+            print(f'Function returned an error {err.get("message")}')
+        except FunctionsRelayError as exception:
+            err = exception.to_dict()
+            print(f'Relay error: {err.get("message")}')
+        finally:
+            conn.close()
+        
+
