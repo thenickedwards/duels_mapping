@@ -94,34 +94,59 @@ As you may have guessed football tactics have been a major driver in this projec
 
 The Mermaid diagram below illustrates how data flows through the processing pipeline from ingestion of raw data to frontend visualization. This flowchart provides both a high-level and component-level understanding of how raw data becomes actionable insights.
 
-<!-- TODO: add SQLite and Supabase + Vercel -->
-
 ```mermaid
 flowchart TD
+    %% Main pipeline
     A[Raw Data] <--> B[Python ETL Pipeline Scripts 🪠]
     B --> C[(raw_FBref_mls_players_all_stats_misc)]
     C --> D[(stg_FBref_mls_players_all_stats_misc)]
     D --> E[Schmetzer Score Algorithm Logic 🧮]
-    E --> F[(schmetzer_scores_YYYY)] & G[(schmetzer_scores_all)]
-    F & G <--> H[Next.js Frontend Dashboard 💫]
 
-    %% Supporting pivots
+    %% SQLite group
+    subgraph SQLITE [SQLite db 🗄️]
+        F[(schmetzer_scores_YYYY)]
+        G[(schmetzer_scores_all)]
+    end
+
+    %% Supabase group
+    subgraph SUPABASE [Supabase db ☁️]
+        F2[(schmetzer_scores_YYYY)]
+        G2[(schmetzer_scores_all)]
+    end
+
+    %% Frontend and deployment
+    H[Next.js Frontend Dashboard 💫]
+    V[Vercel Deployment 🚀]
+
+    E --> SQLITE
+    SQLITE <--> H
+    SQLITE --> SUPABASE
+    SUPABASE <--> V
+    V <--> H
+
+    %% Supporting pivots (vertical layout, side-by-side with main flow)
     subgraph PIVOTS [Double Pivot Components]
+        direction TB
         I[data_vars JSON]
         J[DataHandler Class]
     end
 
+    %% Connections from pivots
     I <--> J
     J --> B
     J --> C
     J --> D
     J --> E
+    J --> SQLITE
+    J --> SUPABASE
+    I --> SQLITE
+    I --> SUPABASE
 
     %% styling legend
     classDef dataNode fill:#3b5b83,stroke:#333,stroke-width:1px,color:#fff;
     classDef logicNode fill:#b6f18e,stroke:#333,stroke-width:1px,color:#000;
-    class A,C,D,F,G,H dataNode
-    class B,E logicNode
+    class A,C,D,F,G,F2,G2,H dataNode
+    class B,E,SQLITE,SUPABASE,V logicNode
 ```
 
 ### Data Modeling & ETL Pipeline Development
@@ -204,6 +229,7 @@ In the source data a player may be listed twice if they played for multiple team
 
 | Column Name          | Data Type | Description                                                                                    |
 | -------------------- | --------- | ---------------------------------------------------------------------------------------------- |
+| id                   | Text      | Normalized name (lowercase, whitespace removed, snakecase, i.e. playername-yob-season-squad)   |
 | season               | Integer   | Year of Season                                                                                 |
 | player_name          | Text      | Player's name                                                                                  |
 | player_nationality   | Text      | Player's nationality                                                                           |
@@ -235,19 +261,13 @@ All pipelines are contained within the [app-duels-mapping/public/data/etl](app-d
 
 ### File Structure & Directory Layout
 
-<!-- TODO: review and update -->
-
 Below is an outline of the data environment. Initially, this project's goal was a functional data platform for ingesting, processing, and delivering insights on player and team data. Essentially, that is everything contained within the [data](app-duels-mapping/public/data) directory. As such, this data architecture could be used as a framework for other projects.
 
 ```bash
 ├── app-duels-mapping   # Next.js app and front end components
-│   ├── app
+│   ├── app             # pages, components, styling
 │   │   ├── api         # API routing to deliver responses
-│   │   ├── globals.css
-│   │   ├── layout.js
-│   │   ├── page.js
-│   │   ├── page.module.css
-│   │   └── theme.js
+│   │   ├── components
 │   ├── package.json    # node package modules to install
 │   ├── public
 │   │   ├── data        # data environment
@@ -263,6 +283,7 @@ Below is an outline of the data environment. Initially, this project's goal was 
 │   │   │   │       ├── create        # CREATE TABLE scripts (one per table)
 │   │   │   │       ├── transform     # INSERT scripts for custom and one-off transformations (as needed)
 │   │   │   │       └── z_schmetzer_scores    # SQL scripts specific to loading tables with final statistical data for Schmetzer Scores
+│   │   ├── images    # images and other assets
 │   └── utils         # Modular functions to data delivery to front end
 ├── duels_mapping.sh
 ├── planning          # planning documents, wireframes, drafts, tests, POCs, etc
@@ -271,8 +292,6 @@ Below is an outline of the data environment. Initially, this project's goal was 
 ```
 
 For programmatic use as well as readability, a number of naming conventions have been employed.
-
-<!-- TODO: review and update -->
 
 - **Pipelines**
   - Filenames for full pipelines follow a particular procedure for identification
@@ -307,4 +326,6 @@ One possible avenue for future development could be creating a set of composite 
 
 ### Shout Outs
 
-The amazing folks at [FBref](https://fbref.com/en/) (the source data set for this project) and [Sports Reference](https://www.sports-reference.com/about.html) are doing God's work, democratizing sports data by making it publicly available. Also instrumental as a guide and inspiration for getting this app off the ground, Nathan Braun and his book [Learn to Code with Soccer](https://codesoccer.com/). Huge thanks to my buddy [Kai Curtis](https://github.com/thepelkus-too) who put me on it. And in no particular order thanks to: Alan Graham, Jeff Pendleton, Bide Alabi, Henry Tremblay, Tyler Cox, Nathan Cox (no relation), and Jesse Smith. Thanks and love to Mboligikpelani Nako who makes the sun rise and set every day.
+The amazing folks at [FBref](https://fbref.com/en/) (the source data set for this project) and [Sports Reference](https://www.sports-reference.com/about.html) are doing God's work, democratizing sports data by making it publicly available. Also instrumental as a guide and inspiration for getting this app off the ground, Nathan Braun and his book [Learn to Code with Soccer](https://codesoccer.com/). Huge thanks to my buddy [Kai Curtis](https://github.com/thepelkus-too) who put me on it. More thanks in no particular order: Alan Graham, Jeff Pendleton, Bide Alabi, Henry Tremblay, Tyler Cox, Nathan Cox (no relation), and Jesse Smith. Thanks and love to Mboligikpelani Nako who makes the sun rise and set every day.
+
+<!-- TODO: review and update, ask JS? -->
