@@ -17,7 +17,7 @@ export async function getPlayerPic(playerName, verbose = 1) {
   if (verbose >= 1) console.log(`Getting player headshot of ${playerName}...`);
   if (verbose >= 2) console.log(`Sourcing picture from ${playerUrl}`);
 
-  const $ = await cheerio.fromURL(testUrl);
+  // const $ = await cheerio.fromURL(testUrl);
 
   // FIRST PASS
   // const imgUrl1 = $.extract({
