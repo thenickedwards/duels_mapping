@@ -16,7 +16,7 @@ ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, 
 
 export default function PlayerRadarChart({ player }) {
   const theme = useTheme();
-  const labels = ["INT", "RECOV", "TKW", "SCHM"];
+  const labels = ["INT", "RECOV", "TKW", "SCHM", "ADW"];
   const data = [
     player.interceptions ?? 0,
     player.recoveries ?? 0,
