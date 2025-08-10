@@ -45,9 +45,7 @@ SUPABASE_ANON_KEY=#####
 
 _Note: you will need to adjust the path below as appropriate on your machine. I use [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/). You may need to adjust if you use [venv](https://docs.python.org/3/library/venv.html)._
 
-<!-- TODO: review and update -->
-
-- If this is the first time you are using this app, run the "setup" command from a terminal at the root of the project.
+- If this is the first time you are using this app, run the "setup" command from a terminal at the root of the project. Bear in mind this will overwrite your databases (you will need to setup a database and tables in Supabase for the last step in the pipeline) and leverage your machine for computing (e.g. extracting data through a browser, utilizing the file system for SQLite, etc).
 
   - `source ./duels_mapping.sh setup` OR `. ./duels_mapping.sh setup`
   - First the virtual environment will be activated.
@@ -96,11 +94,19 @@ The Mermaid diagram below illustrates how data flows through the processing pipe
 
 ```mermaid
 flowchart TD
-    %% Main pipeline
-    A[Raw Data] <--> B[Python ETL Pipeline Scripts 🪠]
-    B --> C[(raw_FBref_mls_players_all_stats_misc)]
-    C --> D[(stg_FBref_mls_players_all_stats_misc)]
-    D --> E[Schmetzer Score Algorithm Logic 🧮]
+    %% Supporting pivots (vertical layout, side-by-side with main flow)
+    subgraph PIVOTS [Double Pivot Components]
+        direction TB
+        DV[data_vars JSON]
+        DH[DataHandler Class]
+        PY[Python ETL Pipeline Scripts 🪠]
+    end
+
+%% Main pipeline
+    A[Raw Data] e1@<--> PY
+    PY e2@--> C[(raw_FBref_mls_players_all_stats_misc)]
+    C e3@--> D[(stg_FBref_mls_players_all_stats_misc)]
+    D e4@--> ALGO[Schmetzer Score Algorithm Logic 🧮]
 
     %% SQLite group
     subgraph SQLITE [SQLite db 🗄️]
@@ -115,38 +121,38 @@ flowchart TD
     end
 
     %% Frontend and deployment
-    H[Next.js Frontend Dashboard 💫]
     V[Vercel Deployment 🚀]
+    L[Local Deployment 👩🏾‍💻]
+    N[Next.js Frontend Dashboard 💫]
 
-    E --> SQLITE
-    SQLITE <--> H
-    SQLITE --> SUPABASE
+    %% DB integrations
+    ALGO e5@--> SQLITE
+    SQLITE <--> L
+    SQLITE e6@--> SUPABASE
     SUPABASE <--> V
-    V <--> H
-
-    %% Supporting pivots (vertical layout, side-by-side with main flow)
-    subgraph PIVOTS [Double Pivot Components]
-        direction TB
-        I[data_vars JSON]
-        J[DataHandler Class]
-    end
+    L --> N
+    V --> N
 
     %% Connections from pivots
-    I <--> J
-    J --> B
-    J --> C
-    J --> D
-    J --> E
-    J --> SQLITE
-    J --> SUPABASE
-    I --> SQLITE
-    I --> SUPABASE
+    DV <==> DH
+    DV <==> PY
+    DH <==> PY
+    DH --> C
+    DH --> D
+    DH --> ALGO
+    DH --> SQLITE
+    DH --> SUPABASE
 
     %% styling legend
     classDef dataNode fill:#3b5b83,stroke:#333,stroke-width:1px,color:#fff;
     classDef logicNode fill:#b6f18e,stroke:#333,stroke-width:1px,color:#000;
-    class A,C,D,F,G,F2,G2,H dataNode
-    class B,E,SQLITE,SUPABASE,V logicNode
+    classDef animate stroke-dasharray: 9,5,stroke-dashoffset: 900,animation: dash 25s linear infinite;
+    class e1,e2,e3,e4,e5,e6 animate
+    class A,C,D,F,G,F2,G2,N dataNode
+    class PY,ALGO,SQLITE,SUPABASE,V,L logicNode
+    PY@{ shape: procs}
+    ALGO@{ shape: procs}
+
 ```
 
 ### Data Modeling & ETL Pipeline Development
@@ -326,6 +332,6 @@ One possible avenue for future development could be creating a set of composite 
 
 ### Shout Outs
 
-The amazing folks at [FBref](https://fbref.com/en/) (the source data set for this project) and [Sports Reference](https://www.sports-reference.com/about.html) are doing God's work, democratizing sports data by making it publicly available. Also instrumental as a guide and inspiration for getting this app off the ground, Nathan Braun and his book [Learn to Code with Soccer](https://codesoccer.com/). Huge thanks to my buddy [Kai Curtis](https://github.com/thepelkus-too) who put me on it. More thanks in no particular order: Alan Graham, Jeff Pendleton, Bide Alabi, Henry Tremblay, Tyler Cox, Nathan Cox (no relation), and Jesse Smith. Thanks and love to Mboligikpelani Nako who makes the sun rise and set every day.
+The amazing folks at [FBref](https://fbref.com/en/) (the source data set for this project) and [Sports Reference](https://www.sports-reference.com/about.html) are doing God's work, democratizing sports data by making it publicly available. Also instrumental as a guide and inspiration for getting this app off the ground, Nathan Braun and his book [Learn to Code with Soccer](https://codesoccer.com/). Huge thanks to my buddy [Kai Curtis](https://github.com/thepelkus-too) who put me on it. More thanks in no particular order: Alan Graham, Jeff Pendleton, Bide Alabi, Henry Tremblay, Tyler Cox, Nathan Cox (no relation), and Jesse Smith. Thanks and love to Claudine Mboligikpelani Nako who makes the sun rise and set every day.
 
 <!-- TODO: review and update, ask JS? -->
