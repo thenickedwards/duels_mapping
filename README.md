@@ -14,23 +14,15 @@ The Duels Mapping repo powers the custom **Schmetzer Score** — a composite sta
 
 ## Table of Contents
 
-[Quick Setup](##'Quick-Setup')
-
-[Development Installation & Setup](###'Development-Installation-&-Setup')
-
-[Data Environment](##'Data-Environment')
-
-[Double Pivot (Recurring Data Drivers)](<###'Double-Pivot-(Recurring-Data-Drivers)'>)
-
-[Flow of Data](###'Flow-of-Data')
-
-[Data Modeling & ETL Pipeline Development](###'Data-Modeling-&-ETL-Pipeline-Development')
-
-[File Structure & Directory Layout](###'File-Structure-&-Directory-Layout')
-
-[Future Development](###'Future-Development')
-
-[Shout Outs](###'Shout-Outs')
+[Quick Setup](#quick-setup)  
+[Development Installation & Setup](#development-installation--setup)  
+[Data Environment](#data-environment)  
+[Double Pivot (Recurring Data Drivers)](#double-pivot-recurring-data-drivers)  
+[Flow of Data](#flow-of-data)  
+[Data Modeling & ETL Pipeline Development](#data-modeling--etl-pipeline-development)  
+[File Structure & Directory Layout](#file-structure--directory-layout)  
+[Future Development](#future-development)  
+[Shout Outs](#shout-outs)
 
 ## Quick Setup
 
