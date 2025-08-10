@@ -12,6 +12,26 @@ Welcome to **_duels_mapping_**, a code repository which supports a new composite
 
 The Duels Mapping repo powers the custom **Schmetzer Score** — a composite statistic for MLS players — by transforming raw FBref data through a lightweight, extensible SQLite-based ETL pipeline primarily written in Python, delivering that data to a Postgres database in the cloud and finally visualizing this data in an intuitive and interactive Next.js front end dashboard.
 
+## Table of Contents
+
+[Quick Setup](##'Quick-Setup')
+
+[Development Installation & Setup](###'Development-Installation-&-Setup')
+
+[Data Environment](##'Data-Environment')
+
+[Double Pivot (Recurring Data Drivers)](<###'Double-Pivot-(Recurring-Data-Drivers)'>)
+
+[Flow of Data](###'Flow-of-Data')
+
+[Data Modeling & ETL Pipeline Development](###'Data-Modeling-&-ETL-Pipeline-Development')
+
+[File Structure & Directory Layout](###'File-Structure-&-Directory-Layout')
+
+[Future Development](###'Future-Development')
+
+[Shout Outs](###'Shout-Outs')
+
 ## Quick Setup
 
 The Next.js app are within a subdirectory, so to install the node package modules, run the command:
