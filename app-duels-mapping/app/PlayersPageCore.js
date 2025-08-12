@@ -133,7 +133,7 @@ export default function PlayersPage() {
       displayName: "Age",
       width: 100,
       renderCell: (params) => {
-        const age = params.value?.split("-")[0] || "";
+        const age = params.value?.toString().split("-")[0] || "";
         return (
           <Box display="flex" alignItems="center" height="100%">
             <Typography fontSize="0.9rem">{age}</Typography>
