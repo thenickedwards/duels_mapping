@@ -22,6 +22,7 @@ export default function TeamPage() {
 
   return (
     <main style={{ padding: "2rem" }}>
+      {/* Team Page */}
       <Box>
         <Box
           sx={{
