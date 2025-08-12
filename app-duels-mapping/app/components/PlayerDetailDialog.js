@@ -51,6 +51,7 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+      {/* Player Info */}
       <DialogTitle
         sx={{
           backgroundColor: theme.palette.mode === "dark" ? "#17171B" : "#fff",

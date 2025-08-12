@@ -10,6 +10,7 @@ export default function MethodsPage() {
 
   return (
     <main style={{ padding: "2rem" }}>
+      {/* Methods Page */}
       <Box>
         <Box
           sx={{

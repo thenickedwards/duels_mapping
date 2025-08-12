@@ -11,6 +11,7 @@ export default function AboutPage() {
 
   return (
     <main style={{ padding: "2rem" }}>
+      {/* About Page */}
        <Box>
       <Box
         sx={{

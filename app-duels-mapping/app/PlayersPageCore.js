@@ -276,6 +276,7 @@ export default function PlayersPage() {
 
   return (
     <main style={{ padding: 24 }}>
+      {/* Home Page */}
       <Suspense fallback={<div>Loading...</div>}>
         <Tabs
           value={tab}
