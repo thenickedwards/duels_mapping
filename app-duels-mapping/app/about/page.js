@@ -1,14 +1,6 @@
-"use client";
 import Link from "next/link";
-import { Container, Typography, Box, Divider} from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-
 
 export default function AboutPage() {
-  const theme = useTheme();
-  const dividerColor = theme.palette.mode === "dark" ? "#fff" : "#000";
-  const rectColor = theme.palette.mode === "dark" ? "#3B5B84" : "#B7F08E"; 
-
   return (
     <main style={{ padding: "2rem" }}>
       {/* About Page */}

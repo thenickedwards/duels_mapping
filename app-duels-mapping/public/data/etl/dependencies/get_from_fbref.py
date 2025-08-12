@@ -50,6 +50,7 @@ def get_FBref_mls_player_misc_stats(year, url='https://FBref.com/en/comps/22/mis
     # ['player', 'nation', 'pos', 'squad', 'age', 'born', '90s', 'crdy', 'crdr', '2crdy', 'fls', 'fld', 'off', 'crs', 'int', 'tklw', 'pkwon', 'pkcon', 'og', 'recov', 'won', 'lost']
     misc_stats_df.columns = list_of_parsed_column_headers
     misc_stats_df.insert(0, 'season', year)
+    misc_stats_df['age'] = misc_stats_df['age'].str.extract(r'^(\d+)', expand=False).astype('Int64')  # Removes day values that are formatted as YY-DDD and converts to nullable integer type
     misc_stats_df = misc_stats_df.rename(columns={
                                             '90s': 'nineties', 
                                             '2crdy': 'second_crdy', 
