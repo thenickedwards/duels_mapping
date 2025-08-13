@@ -18,9 +18,9 @@ const nunitoSans = Nunito_Sans({
 });
 
 export const metadata = {
-  title: "Schmetzer Score",
+  title: "Duels Mapping",
   description:
-    "The Schmetzer Score is a web app that compares how possession is won or lost by soccer players using a new, custom-built sports statistic.",
+    "Duels Mapping is an interactive dashboard that compares how possession is won or retained by MLS players using a custom-built composite metric. A player's aerial duels won, tackles won, interceptions, recoveries, and aerial duels lost are weighted using an algorithm, then players receive a Schmetzer Score and ranking.",
 };
 
 export default function RootLayout(props) {
