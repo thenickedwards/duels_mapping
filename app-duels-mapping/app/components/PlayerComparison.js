@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Typography,
+  Container,
   TextField,
   Avatar,
   Grid,
@@ -15,6 +16,8 @@ import Autocomplete from "@mui/material/Autocomplete";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import useSWR from "swr";
+import { inputStyle } from "../styles/inputStyles";
+import CustomAutocomplete from "./CustomAutocomplete";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -30,6 +33,8 @@ const statLabels = [
 ];
 
 export default function PlayerComparison() {
+  const theme = useTheme();
+
   const [playerA, setPlayerA] = useState(null);
   const [playerB, setPlayerB] = useState(null);
 
@@ -46,44 +51,70 @@ export default function PlayerComparison() {
   const renderDonutChart = (stat) => {
     const statA = playerA ? playerA[stat] : 0;
     const statB = playerB ? playerB[stat] : 0;
+    const leftColor = theme.palette.mode === "dark" ? "#B7F08E" : "#A1D17E";
+    const rightColor = theme.palette.mode === "dark" ? "#ffffff" : "#3B5B84";  
 
     const data = {
       labels: ["Player A", "Player B"],
       datasets: [
         {
           data: [statA, statB],
-          backgroundColor: ["#d32f2f", "#1976d2"],
-          borderWidth: 2,
+          backgroundColor: [leftColor, rightColor],
+          borderColor: "transparent",
+          borderWidth: 4,
         },
       ],
+    };
+
+    const options = {
+      cutout: "88%",
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          enabled: true,
+          callbacks: {
+            label: (context) => {
+              const value = context.formattedValue;
+              return `  ${value}`;
+            },
+          },
+        },
+      },
     };
 
     const plugins = [
       {
         id: "customLabels",
         beforeDraw: (chart) => {
-          const { width, height, ctx } = chart;
-          ctx.restore();
-          const fontSize = 14;
-          ctx.font = `${fontSize}px sans-serif`;
-          ctx.textBaseline = "middle";
-          ctx.textAlign = "center";
-
-          ctx.fillStyle = "#d32f2f";
-          ctx.fillText(statA, width / 2, height / 2 - 10);
-
-          ctx.fillStyle = "#1976d2";
-          ctx.fillText(statB, width / 2, height / 2 + 10);
+          const { chartArea, ctx } = chart;
+          const centerX = (chartArea.left + chartArea.right) / 2;
+          const centerY = (chartArea.top + chartArea.bottom) / 2;
+          const leftColor = theme.palette.mode === "dark" ? "#B7F08E" : "#A1D17E";
+          const rightColor = theme.palette.mode === "dark" ? "#ffffff" : "#3B5B84";
+        
 
           ctx.save();
+          ctx.font = "2.5rem  'Bebas Neue', sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+
+          // Player A value on top
+          ctx.fillStyle = leftColor;
+          ctx.fillText(statA, centerX, centerY - 20);
+
+          // Player B value on bottom
+          ctx.fillStyle = rightColor;
+          ctx.fillText(statB, centerX, centerY + 22);
+
+          ctx.restore();
         },
       },
     ];
 
     return (
       <Box key={stat} sx={{ textAlign: "center", width: 160 }}>
-        <Doughnut data={data} options={{ cutout: "70%" }} plugins={plugins} />
-        <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: "bold" }}>
+        <Doughnut key={theme.palette.mode} data={data} options={options} plugins={plugins} />
+        <Typography variant="h4" sx={{ mt: 1, fontSize: "1.2rem" }}>
           {stat.replace(/_/g, " ").toUpperCase()}
         </Typography>
       </Box>
@@ -106,23 +137,30 @@ export default function PlayerComparison() {
         <Avatar
           src={hasImage ? player.player_image : undefined}
           sx={{
-            width: 80,
-            height: 80,
+            width: 100,
+            height: 100,
             mx: "auto",
-            border: `3px solid ${side === "left" ? "#d32f2f" : "#1976d2"}`,
+            border: "1px solid #000",
             bgcolor: hasImage ? "transparent" : "black",
             color: hasImage ? "inherit" : "white",
-            fontSize: "1.25rem",
+            fontFamily: "'Bebas Neue', sans-serif",
+            fontSize: "2rem",
           }}
         >
           {!hasImage && getInitials(player.player_name)}
         </Avatar>
         <Typography
-          variant="subtitle1"
+          variant="body1"
           sx={{
             mt: 1,
-            borderBottom: `2px solid ${
-              side === "left" ? "#d32f2f" : "#1976d2"
+            borderBottom: `4px solid ${
+              theme.palette.mode === "dark"
+                ? side === "left"
+                  ? "#B7F08E"
+                  : "#ffffff"
+                : side === "left"
+                ? "#A1D17E"
+                : "#3B5B84"
             }`,
             display: "inline-block",
           }}
@@ -136,48 +174,75 @@ export default function PlayerComparison() {
   if (isLoading) return <CircularProgress />;
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Container maxWidth="md">
+    <Box sx={{ py: 3 }}>
+      <Grid container justifyContent={"center"} mb={"80px"}>
+        <Grid item size={{ xs: 12, md: 10 }}>
+          <Typography variant="body1">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+            aliquip ex ea commodo consequat.
+          </Typography>
+        </Grid>
+      </Grid>
+
       <Grid container spacing={4} justifyContent="center">
-        <Grid item xs={12} md={5}>
-          <Autocomplete
+        <Grid item size={{ xs: 12, md: 5 }}>
+          <CustomAutocomplete
+            label="Player A"
+            placeholder="Select Player"
             options={playerOptions.map((p) => p.player_name)}
             value={playerA?.player_name || ""}
             onChange={(_, newValue) => setPlayerA(getPlayerStats(newValue))}
-            renderInput={(params) => (
-              <TextField {...params} label="Player A" variant="outlined" />
-            )}
           />
-          {renderPlayerDetails(playerA, "left")}
         </Grid>
 
-        <Grid item xs={12} md={2} textAlign="center">
-          <Typography variant="h5" sx={{ mt: 6 }}>
-            VS
-          </Typography>
-        </Grid>
-
-        <Grid item xs={12} md={5}>
-          <Autocomplete
+        <Grid item size={{ xs: 12, md: 5}}>
+          <CustomAutocomplete
+            label="Player A"
+            placeholder="Select Player"
             options={playerOptions.map((p) => p.player_name)}
             value={playerB?.player_name || ""}
             onChange={(_, newValue) => setPlayerB(getPlayerStats(newValue))}
-            renderInput={(params) => (
-              <TextField {...params} label="Player B" variant="outlined" />
-            )}
           />
+        </Grid>
+      </Grid>
+      <Grid container spacing={4} justifyContent="center">
+        <Grid item size={{ xs: 5, md: 3 }}>
+          {renderPlayerDetails(playerA, "left")}
+        </Grid>
+
+        {playerA && playerB && (
+          <Grid item size={{ xs: 2, md: 3 }} textAlign="center">
+            <Typography
+              fontFamily={"'Bebas Neue', sans-serif"}
+              fontSize={"2.5rem"}
+              sx={{ mt: 6 }}
+            >
+              VS
+            </Typography>
+          </Grid>
+        )}
+
+        <Grid item size={{ xs: 5, md: 3 }}>
           {renderPlayerDetails(playerB, "right")}
         </Grid>
       </Grid>
 
       {playerA && playerB && (
-        <Grid container spacing={3} justifyContent="center" mt={4}>
+        <Grid container spacing={3} justifyContent="center" mt={8}>
           {statLabels.map((stat) => (
-            <Grid item xs={6} md={4} key={stat}>
-              {renderDonutChart(stat)}
+            <Grid item size={{ xs: 6, md: 4 }} key={stat} p={2}>
+              <Box display={"flex"} justifyContent={"center"}>
+                {renderDonutChart(stat)}
+              </Box>
             </Grid>
           ))}
         </Grid>
       )}
     </Box>
+   </Container>
   );
+ 
 }
