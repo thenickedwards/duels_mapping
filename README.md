@@ -1,12 +1,28 @@
 # duels_mapping
 
+[![Vercel Deploy](https://deploy-badge.vercel.app/vercel/duels-mapping?style=for-the-badge&logo=duels_mapping&name=%E2%96%B2+vercel)](https://duels-mapping.vercel.app/)
+
+**Deployment URL: <https://duels-mapping.vercel.app/>**
+
 ## Contested Possession Metric AKA The Schmetzer Score
 
-Welcome to **_duels_mapping_**, a code repository which supports a new composite sports statistic: **`Contested Possession Metric`** -- a method for rating a player's ability to win and/or keep possession. Since `Contested Possession Metric` is a bit of a mouthful, we've dubbed it the `Schmetzer Score`. As a Sounders supporter, I've watched many press conferences where Coach Schmetzer will tap his pen on the table and reference his preferred statistic: _duels won_. In an effort to create a fuller picture of how possession is won/maintained, I have weighted aerial duels won, aerial duels lost, tackles won, interceptions, and recoveries using a custom algorithm to measure this skill by player, team, and across the league.
+Welcome to **_duels_mapping_**, a code repository which supports a new composite sports statistic: the **`Contested Possession Metric`** -- a method for rating a player's ability to win and/or keep possession. Since `Contested Possession Metric` is a bit of a mouthful, we've dubbed it the `Schmetzer Score`. Sounders supporters like myself have watched many-a press conferences where Coach Schmetzer will tap his pen on the table and reference his preferred statistic: _duels won_. In an effort to create a fuller picture of how possession is won/maintained, I have weighted aerial duels won, aerial duels lost, tackles won, interceptions, and recoveries using a custom algorithm to measure this skill by player and across the league.
 
 ### tl;dr
 
-This repo powers the custom **Schmetzer Score** — a composite statistic for MLS players — by transforming raw FBref data through a lightweight, extensible SQLite-based ETL pipeline primarily written in Python, then delivers and visualizes this data in an intuitive and interactive Next.js front end dashboard.
+The Duels Mapping repo powers the custom **Schmetzer Score** — a composite statistic for MLS players — by transforming raw FBref data through a lightweight, extensible SQLite-based ETL pipeline primarily written in Python, delivering that data to a Postgres database in the cloud and finally visualizing this data in an intuitive and interactive Next.js front end dashboard.
+
+## Table of Contents
+
+[Quick Setup](#quick-setup)  
+[Development Installation & Setup](#development-installation--setup)  
+[Data Environment](#data-environment)  
+[Double Pivot (Recurring Data Drivers)](#double-pivot-recurring-data-drivers)  
+[Flow of Data](#flow-of-data)  
+[Data Modeling & ETL Pipeline Development](#data-modeling--etl-pipeline-development)  
+[File Structure & Directory Layout](#file-structure--directory-layout)  
+[Future Development](#future-development)  
+[Shout Outs](#shout-outs)
 
 ## Quick Setup
 
@@ -24,20 +40,28 @@ If you're looking to get rolling with the application immediately (assuming you 
 
 Either run command will fire up the Next.js app (you can also change directories and run the commands individually). Once it's ready simply navigate to <http://localhost:3000/>
 
-You can review players raw stats as well as Schmetzer Score and a rank for that season. Clicking on a player will allow for a deep dive into that player's numbers and also present a year-over-year look at that player's Schmetzer Score across all seasons played in MLS going back to 2018 when these statistics first came available. The dashboard also has a `Comparisons` tool, allowing the user to explore 1v1 player match-ups and revealing data that can be critical strategizing in-game tactics, performance analysis, and scouting/recruitment opportunities.
+You can review players raw stats as well as Schmetzer Score and a rank for that season. Clicking on a player will display a deep dive into that player's numbers and also present a year-over-year look at that player's Schmetzer Score across all seasons played in MLS going back to 2018 when these statistics first came available. The dashboard also has a `Comparisons` tool, allowing the user to explore 1v1 player match-ups and revealing data that can be critical strategizing in-game tactics, performance analysis, and scouting/recruitment opportunities.
 
 ### Development Installation & Setup
 
-For convenience I've built out a bash script at the root of the project, [duels_mapping.sh](./duels_mapping.sh). There are instructions commented out near the top of the file and below is a quick summary. Before running, you'll need to build a .env file at the root of the project. Only a few variables are needed. If you'd like to match my process, I typically name my virtual environment to match the repo, for example:
+For convenience I've built out a bash script at the root of the project, [duels_mapping.sh](./duels_mapping.sh). There are instructions commented out near the top of the file and below is a quick summary. Before running, you'll need to build a .env file at the root of the project which contains information on your Python virtual environment and accessing Supabase. Only a few variables are needed. If you'd like to match my process, I typically name my virtual environment to match the repo and do the same in Supabase. Below is an example (with secure information as #####):
 
 ```
+# # Python Virtual Environment
 VENV_NAME=duels_mapping
-VENV_PATH=/Users/path_to/.virtualenvs/duels_mapping/bin/activate
+VENV_PATH=/Users/pathto/.virtualenvs/duels_mapping/bin/activate
+# # Database Settings
+SUPABASE_ORG=#####
+SUPABASE_PROJECT_NAME=duels-mapping
+SUPABASE_DB_PASSWORD=#####
+SUPABASE_URI=#####
+SUPABASE_URL=#####
+SUPABASE_ANON_KEY=#####
 ```
 
 _Note: you will need to adjust the path below as appropriate on your machine. I use [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/). You may need to adjust if you use [venv](https://docs.python.org/3/library/venv.html)._
 
-- If this is the first time you are using this app, run the "setup" command from a terminal at the root of the project.
+- If this is the first time you are using this app, run the "setup" command from a terminal at the root of the project. Bear in mind this will overwrite your databases (you will need to setup a database and tables in Supabase for the last step in the pipeline) and leverage your machine for computing (e.g. extracting data through a browser, utilizing the file system for SQLite, etc).
 
   - `source ./duels_mapping.sh setup` OR `. ./duels_mapping.sh setup`
   - First the virtual environment will be activated.
@@ -65,6 +89,8 @@ _Note: you will need to adjust the path below as appropriate on your machine. I 
 
 The duels_mapping data environment is contained within the [app-duels-mapping/public/data](app-duels-mapping/public/data) directory and includes the SQLite database which serves as a data warehouse, ETL pipelines for sourcing and delivery of statistics, and the SQL scripts that set up the data environment, ingest and transform data, and generate the statistics consumed by the Next.js frontend dashboard which rates MLS players based on aerial duels won vs lost, tackles won, interceptions, and recoveries.
 
+The original concept of this application was as an app proprietary to the club and installed on the tablets, laptops, and mobile devices of coaching staff. To make the application publicly available I've extended the data pipelines to upload to a Postgres database in the cloud using Supabase and deployed to Vercel: <https://duels-mapping.vercel.app/>.
+
 If you're this deep in the project, you're my kind of people ⚽️
 
 ### Double Pivot (Recurring Data Drivers)
@@ -84,30 +110,65 @@ The Mermaid diagram below illustrates how data flows through the processing pipe
 
 ```mermaid
 flowchart TD
-    A[Raw Data] <--> B[Python ETL Pipeline Scripts 🪠]
-    B --> C[(raw_FBref_mls_players_all_stats_misc)]
-    C --> D[(stg_FBref_mls_players_all_stats_misc)]
-    D --> E[Schmetzer Score Algorithm Logic 🧮]
-    E --> F[(schmetzer_scores_YYYY)] & G[(schmetzer_scores_all)]
-    F & G <--> H[Next.js Frontend Dashboard 💫]
-
-    %% Supporting pivots
+    %% Supporting pivots (vertical layout, side-by-side with main flow)
     subgraph PIVOTS [Double Pivot Components]
-        I[data_vars JSON]
-        J[DataHandler Class]
+        direction TB
+        DV[data_vars JSON]
+        DH[DataHandler Class]
+        PY[Python ETL Pipeline Scripts 🪠]
     end
 
-    I <--> J
-    J --> B
-    J --> C
-    J --> D
-    J --> E
+%% Main pipeline
+    A[Raw Data] e1@<--> PY
+    PY e2@--> C[(raw_FBref_mls_players_all_stats_misc)]
+    C e3@--> D[(stg_FBref_mls_players_all_stats_misc)]
+    D e4@--> ALGO[Schmetzer Score Algorithm Logic 🧮]
+
+    %% SQLite group
+    subgraph SQLITE [SQLite db 🗄️]
+        F[(schmetzer_scores_YYYY)]
+        G[(schmetzer_scores_all)]
+    end
+
+    %% Supabase group
+    subgraph SUPABASE [Supabase db ☁️]
+        F2[(schmetzer_scores_YYYY)]
+        G2[(schmetzer_scores_all)]
+    end
+
+    %% Frontend and deployment
+    V[Vercel Deployment 🚀]
+    L[Local Deployment 👩🏾‍💻]
+    N[Next.js Frontend Dashboard 💫]
+
+    %% DB integrations
+    ALGO e5@--> SQLITE
+    SQLITE <--> L
+    SQLITE e6@--> SUPABASE
+    SUPABASE <--> V
+    L --> N
+    V --> N
+
+    %% Connections from pivots
+    DV <==> DH
+    DV <==> PY
+    DH <==> PY
+    DH --> C
+    DH --> D
+    DH --> ALGO
+    DH --> SQLITE
+    DH --> SUPABASE
 
     %% styling legend
     classDef dataNode fill:#3b5b83,stroke:#333,stroke-width:1px,color:#fff;
     classDef logicNode fill:#b6f18e,stroke:#333,stroke-width:1px,color:#000;
-    class A,C,D,F,G,H dataNode
-    class B,E logicNode
+    classDef animate stroke-dasharray: 9,5,stroke-dashoffset: 900,animation: dash 25s linear infinite;
+    class e1,e2,e3,e4,e5,e6 animate
+    class A,C,D,F,G,F2,G2,N dataNode
+    class PY,ALGO,SQLITE,SUPABASE,V,L logicNode
+    PY@{ shape: procs}
+    ALGO@{ shape: procs}
+
 ```
 
 ### Data Modeling & ETL Pipeline Development
@@ -184,10 +245,13 @@ All tables are created using the SQL in the [app-duels-mapping/public/data/etl/s
 | aerial_duels_won_pct | Real      | Percent of aerial duels won (duels as percentage)                                              |
 | load_datetime        | Timestamp | Load timestamp with time zone (continued tracking of data reliability and ETL pipeline health) |
 
-`schmetzer_scores_{season}` and `schmetzer_scores_all` - serve as the final destination tables, including point tabulations attributed to each individual statistic as well as the composite metric as scored and ranked by the algorithm, ready for reporting and visualization. In the source data a player may be listed twice if they played for multiple teams in a season (this could be the result a number of scenarios including contract terms, inter-league trades or loans within the league). In order to create one record per player, records are consolidated to the squad with which the player played more minutes (i.e. higher value in nineties.)
+`schmetzer_scores_{season}` and `schmetzer_scores_all` - serve as the final destination tables, including point tabulations attributed to each individual statistic as well as the composite metric as scored and ranked by the algorithm, ready for reporting and visualization. The SQLite database serves as the "source of truth" and syncs these tables (as well as the dim table) to Supbase.
+
+In the source data a player may be listed twice if they played for multiple teams in a season (this could be the result a number of scenarios including contract terms, inter-league trades or loans within the league). In order to create one record per player, records are consolidated to the squad with which the player played more minutes (i.e. higher value in nineties.)
 
 | Column Name          | Data Type | Description                                                                                    |
 | -------------------- | --------- | ---------------------------------------------------------------------------------------------- |
+| id                   | Text      | Normalized name (lowercase, whitespace removed, snakecase, i.e. playername-yob-season-squad)   |
 | season               | Integer   | Year of Season                                                                                 |
 | player_name          | Text      | Player's name                                                                                  |
 | player_nationality   | Text      | Player's nationality                                                                           |
@@ -215,7 +279,7 @@ All tables are created using the SQL in the [app-duels-mapping/public/data/etl/s
 | aerial_duels_won_pct | Real      | Percent of aerial duels won (duels as percentage)                                              |
 | load_datetime        | Timestamp | Load timestamp with time zone (continued tracking of data reliability and ETL pipeline health) |
 
-All pipelines are contained within the [app-duels-mapping/public/data/etl](app-duels-mapping/public/data/etl) directory. Again, this architecture supports for extendibility, allowing for the build out of additional pipelines, expansion of the project to include other leagues, and development of new composite metrics. The order of the tables as listed above documents the process and flow of the data.
+All pipelines are contained within the [app-duels-mapping/public/data/etl](app-duels-mapping/public/data/etl) directory. Again, this architecture supports for extendibility (as exampled by the upsert to the cloud database), allowing for the build out of additional pipelines, expansion of the project to include other leagues, and development of new composite metrics. The order of the tables as listed above documents the process and flow of the data.
 
 ### File Structure & Directory Layout
 
@@ -223,13 +287,9 @@ Below is an outline of the data environment. Initially, this project's goal was 
 
 ```bash
 ├── app-duels-mapping   # Next.js app and front end components
-│   ├── app
+│   ├── app             # pages, components, styling
 │   │   ├── api         # API routing to deliver responses
-│   │   ├── globals.css
-│   │   ├── layout.js
-│   │   ├── page.js
-│   │   ├── page.module.css
-│   │   └── theme.js
+│   │   ├── components
 │   ├── package.json    # node package modules to install
 │   ├── public
 │   │   ├── data        # data environment
@@ -245,6 +305,7 @@ Below is an outline of the data environment. Initially, this project's goal was 
 │   │   │   │       ├── create        # CREATE TABLE scripts (one per table)
 │   │   │   │       ├── transform     # INSERT scripts for custom and one-off transformations (as needed)
 │   │   │   │       └── z_schmetzer_scores    # SQL scripts specific to loading tables with final statistical data for Schmetzer Scores
+│   │   ├── images    # images and other assets
 │   └── utils         # Modular functions to data delivery to front end
 ├── duels_mapping.sh
 ├── planning          # planning documents, wireframes, drafts, tests, POCs, etc
@@ -287,4 +348,4 @@ One possible avenue for future development could be creating a set of composite 
 
 ### Shout Outs
 
-The amazing folks at [FBref](https://fbref.com/en/) (the source data set for this project) and [Sports Reference](https://www.sports-reference.com/about.html) are doing God's work, democratizing sports data by making it publicly available. Also instrumental as a guide and inspiration for getting this app off the ground, Nathan Braun and his book [Learn to Code with Soccer](https://codesoccer.com/). Huge thanks to my buddy [Kai Curtis](https://github.com/thepelkus-too) who put me on it.
+I have to start by thanking my front end partner in crime and bootcamp buddy, Juanita Samborski, for her incredible UX/UI and sleek, cool design scheme. The amazing folks at [FBref](https://fbref.com/en/) (the source data set for this project) and [Sports Reference](https://www.sports-reference.com/about.html) are doing God's work, democratizing sports data by making it publicly available. Also instrumental as a guide and inspiration for getting this app off the ground, Nathan Braun and his book [Learn to Code with Soccer](https://codesoccer.com/). Huge thanks to my buddy Kai Curtis who put me on it. More thanks in no particular order: Alan Graham, Jeff Pendleton, Bide Alabi, Henry Tremblay, Tyler Cox, Nathan Cox (no relation), and Jesse Smith. Thanks and love to Claudine Mboligikpelani Nako who makes the sun rise and set every day.
