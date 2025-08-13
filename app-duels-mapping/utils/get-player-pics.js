@@ -19,6 +19,14 @@ export async function getPlayerPic(playerName, verbose = 1) {
 
   // const $ = await cheerio.fromURL(testUrl);
 
+  //Fetch HTML manually
+  const res = await fetch(playerUrl);
+  const html = await res.text();
+
+  // Load HTML using cheerio
+  const $ = cheerio.load(html);
+
+
   // FIRST PASS
   // const imgUrl1 = $.extract({
   //   imgs: [
@@ -40,7 +48,7 @@ export async function getPlayerPic(playerName, verbose = 1) {
     .filter((_, el) => $(el).attr("alt") === playerName)
     .attr("src");
 
-  const imgDesktopUrl = imgThumbUrl.replace(
+  const imgDesktopUrl = imgThumbUrl?.replace(
     "t_thumb_squared",
     "t_editorial_squared_6_desktop_2x"
   );
