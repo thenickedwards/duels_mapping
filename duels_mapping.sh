@@ -2,7 +2,7 @@
 # Note: the commands to start below will source script in current shell (instead of executing in a subshell), 
 # this allows environment changes (like activating the virtual environment) to persist
 
-# To start the virtual environment for development:
+# To start the virtual environment for development and run the app:
 # >> source ./duels_mapping.sh start    OR  >> . ./duels_mapping.sh start
 
 # To set up the data environment for the first time:
@@ -10,6 +10,9 @@
 
 # To update the data environment:
 # >> source ./duels_mapping.sh update    OR  >> . ./duels_mapping.sh update
+
+# To restore the data environment:
+# >> source ./duels_mapping.sh restore    OR  >> . ./duels_mapping.sh restore
 
 #####   #####   #####   #####   #####
 
@@ -88,10 +91,6 @@ elif [ "$action" = "setup" ]; then
     echo -e "\n📦 Installing Node Package modules from package.json..."
     (cd app-duels-mapping && npm install) || { echo "❌ Python dependencies installation failed."; return 1; }
 
-    echo -e "\n🧬 Running ETL pipeline to backfill all historical season data..."
-    python "$SCRIPT_DIR/app-duels-mapping/public/data/etl/pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players.py" || {
-        echo -e "❌ ETL pipeline execution failed."; return 1; }
-
     run_nextjs_app
 
     send_off
@@ -103,6 +102,18 @@ elif [ "$action" = "update" ]; then
     echo -e "\n🧬 Running ETL pipeline to update current season data..."
     python "$SCRIPT_DIR/app-duels-mapping/public/data/etl/pipeline_cur_FBref_misc_stats_to_schmetzer_scores_players.py" || {
         echo "❌ ETL pipeline execution failed."; return 1; }
+
+    run_nextjs_app
+    
+    send_off
+
+## restore
+elif [ "$action" = "restore" ]; then
+    activate_venv
+
+    echo -e "\n🧬 Running ETL pipeline to backfill all historical season data..."
+    python "$SCRIPT_DIR/app-duels-mapping/public/data/etl/pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players.py" || {
+        echo -e "❌ ETL pipeline execution failed."; return 1; }
 
     run_nextjs_app
     
