@@ -22,8 +22,7 @@ class DataHandler:
             # base_dir = os.path.dirname(os.path.abspath(data_vars_path))
             # full_path = os.path.join(base_dir, data_vars["database"]["path"], self.database_name)
             # self.database_path = os.path.normpath(full_path)
-            # TODO: Remove check
-            print(f"📂 Database will be opened from: {self.database_path}")
+            # print(f"📂 Database will be opened from: {self.database_path}")
             self.inaugural_season = data_vars["database"]["inaugural_season"]
             self.current_year = datetime.datetime.now().year
             self.raw_table = data_vars["database"]["misc_raw_table"]
