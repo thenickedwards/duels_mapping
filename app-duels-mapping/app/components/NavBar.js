@@ -70,12 +70,12 @@ export default function NavBar() {
       >
         <Toolbar>
           <Typography
-            variant="h6"
+            variant="h3"
             component={Link}
             href="/"
             sx={{ flexGrow: 1, textDecoration: "none", color: "inherit" }}
           >
-            ⚽️ Duels Mapping
+            ⚽︎ Duels Mapping
           </Typography>
 
           {isMobile ? (
