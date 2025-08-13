@@ -70,7 +70,7 @@ export default function NavBar() {
       >
         <Toolbar>
           <Typography
-            variant="h3"
+            variant="h1"
             component={Link}
             href="/"
             sx={{ flexGrow: 1, textDecoration: "none", color: "inherit" }}
