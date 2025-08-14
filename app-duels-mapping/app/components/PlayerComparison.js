@@ -52,7 +52,7 @@ export default function PlayerComparison() {
     const statA = playerA ? playerA[stat] : 0;
     const statB = playerB ? playerB[stat] : 0;
     const leftColor = theme.palette.mode === "dark" ? "#B7F08E" : "#A1D17E";
-    const rightColor = theme.palette.mode === "dark" ? "#ffffff" : "#3B5B84";  
+    const rightColor = theme.palette.mode === "dark" ? "#ffffff" : "#3B5B84";
 
     const data = {
       labels: ["Player A", "Player B"],
@@ -89,9 +89,10 @@ export default function PlayerComparison() {
           const { chartArea, ctx } = chart;
           const centerX = (chartArea.left + chartArea.right) / 2;
           const centerY = (chartArea.top + chartArea.bottom) / 2;
-          const leftColor = theme.palette.mode === "dark" ? "#B7F08E" : "#A1D17E";
-          const rightColor = theme.palette.mode === "dark" ? "#ffffff" : "#3B5B84";
-        
+          const leftColor =
+            theme.palette.mode === "dark" ? "#B7F08E" : "#A1D17E";
+          const rightColor =
+            theme.palette.mode === "dark" ? "#ffffff" : "#3B5B84";
 
           ctx.save();
           ctx.font = "2.5rem  'Bebas Neue', sans-serif";
@@ -113,7 +114,12 @@ export default function PlayerComparison() {
 
     return (
       <Box key={stat} sx={{ textAlign: "center", width: 160 }}>
-        <Doughnut key={theme.palette.mode} data={data} options={options} plugins={plugins} />
+        <Doughnut
+          key={theme.palette.mode}
+          data={data}
+          options={options}
+          plugins={plugins}
+        />
         <Typography variant="h4" sx={{ mt: 1, fontSize: "1.2rem" }}>
           {stat.replace(/_/g, " ").toUpperCase()}
         </Typography>
@@ -175,74 +181,73 @@ export default function PlayerComparison() {
 
   return (
     <Container maxWidth="md">
-    <Box sx={{ py: 3 }}>
-      <Grid container justifyContent={"center"} mb={"80px"}>
-        <Grid item size={{ xs: 12, md: 10 }}>
-          <Typography variant="body1">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat.
-          </Typography>
-        </Grid>
-      </Grid>
-
-      <Grid container spacing={4} justifyContent="center">
-        <Grid item size={{ xs: 12, md: 5 }}>
-          <CustomAutocomplete
-            label="Player A"
-            placeholder="Select Player"
-            options={playerOptions.map((p) => p.player_name)}
-            value={playerA?.player_name || ""}
-            onChange={(_, newValue) => setPlayerA(getPlayerStats(newValue))}
-          />
+      <Box sx={{ py: 3 }}>
+        <Grid container justifyContent={"center"} mb={"80px"}>
+          <Grid item size={{ xs: 12, md: 10 }}>
+            <Typography variant="body1">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+              enim ad minim veniam, quis nostrud exercitation ullamco laboris
+              nisi ut aliquip ex ea commodo consequat.
+            </Typography>
+          </Grid>
         </Grid>
 
-        <Grid item size={{ xs: 12, md: 5}}>
-          <CustomAutocomplete
-            label="Player A"
-            placeholder="Select Player"
-            options={playerOptions.map((p) => p.player_name)}
-            value={playerB?.player_name || ""}
-            onChange={(_, newValue) => setPlayerB(getPlayerStats(newValue))}
-          />
+        <Grid container spacing={4} justifyContent="center">
+          <Grid item size={{ xs: 12, md: 5 }}>
+            <CustomAutocomplete
+              label="Player A"
+              placeholder="Select Player"
+              options={playerOptions.map((p) => p.player_name)}
+              value={playerA?.player_name || ""}
+              onChange={(_, newValue) => setPlayerA(getPlayerStats(newValue))}
+            />
+          </Grid>
+
+          <Grid item size={{ xs: 12, md: 5 }}>
+            <CustomAutocomplete
+              label="Player B"
+              placeholder="Select Player"
+              options={playerOptions.map((p) => p.player_name)}
+              value={playerB?.player_name || ""}
+              onChange={(_, newValue) => setPlayerB(getPlayerStats(newValue))}
+            />
+          </Grid>
         </Grid>
-      </Grid>
-      <Grid container spacing={4} justifyContent="center">
-        <Grid item size={{ xs: 5, md: 3 }}>
-          {renderPlayerDetails(playerA, "left")}
+        <Grid container spacing={4} justifyContent="center">
+          <Grid item size={{ xs: 5, md: 3 }}>
+            {renderPlayerDetails(playerA, "left")}
+          </Grid>
+
+          {playerA && playerB && (
+            <Grid item size={{ xs: 2, md: 3 }} textAlign="center">
+              <Typography
+                fontFamily={"'Bebas Neue', sans-serif"}
+                fontSize={"2.5rem"}
+                sx={{ mt: 6 }}
+              >
+                VS
+              </Typography>
+            </Grid>
+          )}
+
+          <Grid item size={{ xs: 5, md: 3 }}>
+            {renderPlayerDetails(playerB, "right")}
+          </Grid>
         </Grid>
 
         {playerA && playerB && (
-          <Grid item size={{ xs: 2, md: 3 }} textAlign="center">
-            <Typography
-              fontFamily={"'Bebas Neue', sans-serif"}
-              fontSize={"2.5rem"}
-              sx={{ mt: 6 }}
-            >
-              VS
-            </Typography>
+          <Grid container spacing={3} justifyContent="center" mt={8}>
+            {statLabels.map((stat) => (
+              <Grid item size={{ xs: 6, md: 4 }} key={stat} p={2}>
+                <Box display={"flex"} justifyContent={"center"}>
+                  {renderDonutChart(stat)}
+                </Box>
+              </Grid>
+            ))}
           </Grid>
         )}
-
-        <Grid item size={{ xs: 5, md: 3 }}>
-          {renderPlayerDetails(playerB, "right")}
-        </Grid>
-      </Grid>
-
-      {playerA && playerB && (
-        <Grid container spacing={3} justifyContent="center" mt={8}>
-          {statLabels.map((stat) => (
-            <Grid item size={{ xs: 6, md: 4 }} key={stat} p={2}>
-              <Box display={"flex"} justifyContent={"center"}>
-                {renderDonutChart(stat)}
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
-      )}
-    </Box>
-   </Container>
+      </Box>
+    </Container>
   );
- 
 }
