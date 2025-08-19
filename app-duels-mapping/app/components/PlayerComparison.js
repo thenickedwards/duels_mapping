@@ -185,10 +185,10 @@ export default function PlayerComparison() {
         <Grid container justifyContent={"center"} mb={"80px"}>
           <Grid item size={{ xs: 12, md: 10 }}>
             <Typography variant="body1">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat.
+              The `Comparisons` tool of Duels Mapping allows you to explore 1v1
+              player match-ups which can be leveraged by coaching staff for
+              strategizing in-game tactics, performance analysis, and
+              scouting/recruitment opportunities.
             </Typography>
           </Grid>
         </Grid>
