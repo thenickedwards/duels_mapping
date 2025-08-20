@@ -7,13 +7,13 @@ from selenium_to_beautifulsoup import selenium_to_beautifulsoup, selenium_to_bea
 from parse_rows import parse_row_by_element, parse_row_by_element_class, parse_row_by_element_style, parse_nations
 
 
-#TODO: stash varaibles elsewhere
-# febRef_cur_url='https://fbref.com/en/comps/22/misc/Major-League-Soccer-Stats#all_stats_misc'
 
-febRef_2024_url='https://fbref.com/en/comps/22/2024/misc/2024-Major-League-Soccer-Stats'
+febRef_cur_url='https://fbref.com/en/comps/22/misc/Major-League-Soccer-Stats#all_stats_misc'
+# TEST URL for 2024 MLS season
+# febRef_2024_url='https://fbref.com/en/comps/22/2024/misc/2024-Major-League-Soccer-Stats'
 
-def get_fbref_mls_player_misc_stats(url=febRef_2024_url):
-    print("Hello World from get_fbref_mls_player_misc_stats()")
+def get_fbref_mls_player_misc_stats(url=febRef_cur_url):
+    # print("Hello World from get_fbref_mls_player_misc_stats()")
     
     # Pass page source from Selenium to BeautifulSoup
     soup = selenium_to_beautifulsoup(url)

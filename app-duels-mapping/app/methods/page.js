@@ -168,14 +168,16 @@ export default function MethodsPage() {
           </Typography>
 
           <Typography variant="body1">
-            Read more about the inspiration that sparked this project on the&nbsp;
+            Read more about the inspiration that sparked this project on
+            the&nbsp;
             <Link
               href="./about"
               style={{ textDecoration: "underline", color: "inherit" }}
             >
               About
             </Link>
-            &nbsp;page. Meet the two developers behind this project on the&nbsp;
+            &nbsp;page. <br></br>Meet the two developers behind this project on
+            the&nbsp;
             <Link
               href="./team"
               style={{ textDecoration: "underline", color: "inherit" }}
