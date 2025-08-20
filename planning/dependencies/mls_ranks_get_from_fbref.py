@@ -3,19 +3,17 @@ from bs4 import BeautifulSoup
 from pandas import DataFrame
 
 from parse_rows import parse_row_by_element, parse_row_by_element_attribute
-# from dags import variables_mls_all_teams as vars
 
 
-
-def get_FBref_mls_team_fixture_results():
-
+def get_FBref_mls_team_fixture_results(verbose=0):
     response = requests.get(
         url="https://FBref.com/en/squads/6218ebd4/2016/Seattle-Sounders-FC-Stats")
 
     soup = BeautifulSoup(response.content, 'html.parser')
 
     fixtures_table = soup.find(id='matchlogs_for')
-    print("HELLO!", fixtures_table)
+    if verbose >= 1:
+        print("The fixtures_table found with id='matchlogs_for'!", fixtures_table)
     fixtures_table_rows = fixtures_table.find_all('tr')
 
     list_of_parsed_rows = [parse_row_by_element(row, element='td') for row in fixtures_table_rows[1:]]
@@ -26,8 +24,7 @@ def get_FBref_mls_team_fixture_results():
     list_of_parsed_dates = [parse_row_by_element(row, element='th') for row in fixtures_table_rows[1:]]
     list_of_parsed_dates = [date[0] for date in list_of_parsed_dates]
 
-    # Time was captured in the DataFrame as None. Could this be a datatype issue? No string attribute?
-    # TODO: Investigate
+    # Time was initially captured in the DataFrame as None due to html nesting.
     list_of_parsed_times = [parse_row_by_element_attribute(row, element='span', attribute='venuetime') for row in fixtures_table_rows[1:]]
     list_of_parsed_times = [time[0] for time in list_of_parsed_times]
 
@@ -45,8 +42,14 @@ def get_FBref_mls_team_fixture_results():
     team_fixtures_df.columns = list_of_parsed_column_headers
 
     team_fixtures_df = team_fixtures_df.drop('match_report', axis=1)
-    # print(team_fixtures_df.head())
-    # print(team_fixtures_df)
+    
+    # Testing checks
+    if verbose >= 1:
+        print("team_fixtures_df.head()")
+    if verbose >= 2:
+        print(team_fixtures_df.head(), "\n#####\n", team_fixtures_df.tail())
+    if verbose >= 3:
+        print(team_fixtures_df)
 
 if __name__ == "__main__":
     get_FBref_mls_team_fixture_results()

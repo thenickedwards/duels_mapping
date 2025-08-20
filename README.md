@@ -66,7 +66,6 @@ _Note: you will need to adjust the path below as appropriate on your machine. I 
   - `source ./duels_mapping.sh setup` OR `. ./duels_mapping.sh setup`
   - First the virtual environment will be activated.
   - Next the dependencies from the `requirements.txt` file will be installed.
-  - The `pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players.py` script will be run to backfill all data.
   - Finally the terminal will navigate to the the Next.js app `cd app-duels-mapping`, run the `npm run dev` command, open a browser at <http://localhost:3000/api/schmetzer_scores/2025>, and send you on your way.
 
 - If the data for the current season needs to be updated, run the "update" command from a terminal at the root of the project.
@@ -82,8 +81,14 @@ _Note: you will need to adjust the path below as appropriate on your machine. I 
   - This command will simply activate the virtual environment and send you on your way.
 
 - Similarly to deactivate the virtual environment, run the "stop" command from a terminal at the root of the project.
+
   - `source ./duels_mapping.sh stop` OR `. ./duels_mapping.sh stop`
   - This command will simply deactivate the virtual environment and send you on your way.
+
+- If you ever need to conduct a data restore, run the "restore" command from a terminal at the root of the project.
+  - `source ./duels_mapping.sh restore` OR `. ./duels_mapping.sh restore`
+  - The `pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players.py` script will be run to backfill all data.
+  - Finally the terminal will navigate to the the Next.js app `cd app-duels-mapping`, run the `npm run dev` command, open a browser at <http://localhost:3000/api/schmetzer_scores/2025>, and send you on your way.
 
 ## Data Environment
 
