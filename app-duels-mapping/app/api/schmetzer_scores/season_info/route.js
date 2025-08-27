@@ -20,6 +20,7 @@ export async function GET(req) {
   const { searchParams, host } = new URL(req.url);
 
   const isLocal = host.includes("localhost") || host.includes("127.0.0.1");
+  // const isLocal = false; // for testing Supabase connection
   const season = searchParams.get("season");
 
   if (!season) {

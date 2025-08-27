@@ -23,7 +23,11 @@ let db = null;
 export async function GET(req) {
   const { searchParams, host } = new URL(req.url);
 
-  const isLocal = host.includes("localhost") || host.includes("127.0.0.1");
+  const isLocal =
+    host.includes("localhost") ||
+    host.includes("127.0.0.1") ||
+    host.includes("192.168.");
+  // const isLocal = false; // for testing Supabase connection
   const season = searchParams.get("season");
   const position = searchParams.get("position");
   const squad = searchParams.get("squad");
