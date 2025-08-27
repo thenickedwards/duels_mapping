@@ -65,13 +65,24 @@ export async function getPlayerPic(playerName, verbose = 1) {
     .filter((_, el) => $(el).attr("alt") === playerName)
     .attr("src");
 
-  // If not found, try normalized match
+  // If not found, second attempt: normalized match
   if (!imgThumbUrl) {
     const targetName = normalizeName(playerName);
     imgThumbUrl = $("img")
       .filter((_, el) => {
         const alt = $(el).attr("alt");
         return alt && normalizeName(alt) === targetName;
+      })
+      .attr("src");
+  }
+
+  // If still not found, third attempt: partial normalized match
+  if (!imgThumbUrl) {
+    const targetName = normalizeName(playerName);
+    imgThumbUrl = $("img")
+      .filter((_, el) => {
+        const alt = $(el).attr("alt");
+        return alt && targetName.includes(normalizeName(alt));
       })
       .attr("src");
   }
