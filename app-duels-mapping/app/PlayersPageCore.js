@@ -16,7 +16,10 @@ import {
   DialogContent,
   InputAdornment,
   Avatar,
+  Pagination,
+  Divider,
 } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { DataGrid } from "@mui/x-data-grid";
 import useSWR from "swr";
 import { useState, Suspense } from "react";
@@ -62,6 +65,35 @@ import TeamBadgeCell from "./components/TeamBadgeCell";
 
 const fetcher = (url) => fetch(url).then((r) => r.json());
 
+// Custom Styled Pagination
+const StyledPagination = styled(Pagination)(({ theme }) => ({
+  "& .MuiPaginationItem-root": {
+    fontFamily: "'Bebas Neue', sans-serif",
+    border: `1px solid ${theme.palette.mode === "light" ? "black" : "white"}`,
+    color: theme.palette.text.primary,
+  },
+  "& .MuiPaginationItem-page.Mui-selected": {
+    color: theme.palette.mode === "light" ? "black" : "white",
+    fontWeight: "bold",
+    position: "relative",
+    backgroundColor: "transparent",
+    "&::before": {
+      content: '""',
+      position: "absolute",
+      top: "-3px",
+      left: "3px",
+      width: "100%",
+      height: "100%",
+      borderRadius: "50%",
+      backgroundColor: "#B7F08E",
+      zIndex: -1,
+    },
+  },
+  "& .MuiPaginationItem-ellipsis": {
+    border: "none",
+  },
+}));
+
 export default function PlayersPage() {
   const theme = useTheme();
   const router = useRouter();
@@ -82,6 +114,11 @@ export default function PlayersPage() {
   const [hiddenColumns, setHiddenColumns] = useState([]);
   const [showSearch, setShowSearch] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const [selectOpen, setSelectOpen] = useState(false);
 
   const query = new URLSearchParams({ season });
   if (filters.position) query.set("position", filters.position);
@@ -111,8 +148,6 @@ export default function PlayersPage() {
     );
   };
 
-  
-
   const columns = [
     {
       field: "schmetzer_rk",
@@ -139,7 +174,7 @@ export default function PlayersPage() {
             <Typography fontSize="0.9rem">{age}</Typography>
           </Box>
         );
-      }
+      },
     },
     {
       field: "squad",
@@ -241,6 +276,17 @@ export default function PlayersPage() {
     row.player_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // CUSTOM STYLED PAGINATION
+  const handlePageChange = (event, value) => setPage(value);
+  const handlePageSizeChange = (event) => setPageSize(event.target.value);
+
+  const totalPages = Math.ceil(filteredRows.length / pageSize);
+  const paginatedRows = filteredRows.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
+
+  // EXPORT
   function exportToCSV(data, filename) {
     if (!data || data.length === 0) return;
 
@@ -263,6 +309,7 @@ export default function PlayersPage() {
   const hardcodedYears = ["2025", "2024"];
   const dropdownYears = ["2023", "2022", "2021", "2020", "2019", "2018"];
 
+  // CUSTOM ARROW ICON
   const CustomArrowIcon = () => (
     <ArrowForwardIosIcon
       sx={{
@@ -750,12 +797,16 @@ export default function PlayersPage() {
             )}
           </Box>
 
-          <Box mt={2} sx={{ height: 450, width: "100%" }}>
+          <Box mt={2} mb={4} sx={{ height: 450, width: "100%" }}>
             {isLoading ? (
               <Typography>Loading…</Typography>
             ) : (
               <DataGrid
-                rows={filteredRows}
+                // rows={filteredRows}
+                rows={paginatedRows}
+                // columns={columns.filter(
+                //   (col) => !hiddenColumns.includes(col.field)
+                // )}
                 columns={columns.filter(
                   (col) => !hiddenColumns.includes(col.field)
                 )}
@@ -764,6 +815,10 @@ export default function PlayersPage() {
                 components={{
                   ColumnMenu: CustomColumnMenu,
                 }}
+                hideFooter
+
+
+
                 sx={{
                   border: "none",
 
@@ -863,9 +918,129 @@ export default function PlayersPage() {
                       opacity: 1,
                       visibility: "visible",
                     },
+                 
                 }}
               />
             )}
+
+            {/* Custom Footer */}
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mt={4}
+            >
+              {/* Players by Page */}
+              <Box display="flex" alignItems="center" gap={1}>
+                <Typography
+                  variant="body2"
+                  fontFamily="'Bebas Neue', sans-serif"
+                >
+                  Players by Page
+                </Typography>
+
+                <Select
+                  value={pageSize}
+                  onChange={handlePageSizeChange}
+                  size="small"
+                  IconComponent={(props) => (
+                    <ArrowForwardIosIcon
+                      {...props}
+                      sx={{
+                        transform: selectOpen
+                          ? "rotate(-90deg)"
+                          : "rotate(90deg)", // points down
+                        width: "0.7em",
+                        height: "0.7em",
+                        color:
+                          theme.palette.mode === "dark" ? "white" : "black",
+                        pointerEvents: "none", // allow click to pass through to select
+                        marginTop: "2px",
+                      }}
+                    />
+                  )}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        mt: "10px",
+                        ml: "-8px",
+                        maxHeight: 300,
+                        width: 100,
+                        borderRadius: 0,
+                        boxShadow: "none",
+                        backgroundColor:
+                          theme.palette.mode === "dark" ? "#000" : "#fff",
+                        border: `1px solid ${
+                          theme.palette.mode === "dark" ? "#fff" : "#000"
+                        }`,
+                        fontFamily: "'Nunito Sans', sans-serif",
+                        fontSize: "0.875rem",
+                      },
+                    },
+                  }}
+                  sx={{
+                    fontFamily: "'Bebas Neue', sans-serif",
+                    height: "30px",
+                    borderRadius: 0,
+                    backgroundColor:
+                      theme.palette.mode === "light" ? "#fff" : "#000", // light: white, dark: black
+                    color: theme.palette.mode === "dark" ? "#fff" : "#000", // dark: white text
+                    position: "relative",
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor:
+                        theme.palette.mode === "light" ? "black" : "white",
+                      "&.Mui-focused": {
+                        outline: "none",
+                      },
+                    },
+                    "& .MuiSelect-select": {
+                      display: "flex",
+                      alignItems: "center",
+                      padding: "0 8px",
+                      position: "relative",
+                      zIndex: 1,
+                    },
+                    "&::before": {
+                      content: '""',
+                      position: "absolute",
+                      top: "-5px",
+                      right: "-5px",
+                      width: "100%",
+                      height: "100%",
+                      bgcolor: "#B7F08E",
+                      borderRadius: 0,
+                      zIndex: 0,
+                      pointerEvents: "none", // ensure clicks pass through
+                    },
+                  }}
+                >
+                  {[5, 10, 25, 50].map((size) => (
+                    <MenuItem key={size} value={size}>
+                      {size}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </Box>
+
+              {/* Pagination */}
+              <StyledPagination
+                count={totalPages}
+                page={page}
+                onChange={handlePageChange}
+                variant="outlined"
+              />
+            </Box>
+            <Box pb={5}>
+              <Divider sx={{ my: "20px", border: "1px solid #000" }} />
+              <Typography
+                variant="body2"
+                sx={{
+                  color: theme.palette.mode === "dark" ? "#FAFAFA" : "#000",
+                }}
+              >
+                Data Last Updated on August 31, 2025 at 9:00 PM EST
+              </Typography>
+            </Box>
           </Box>
 
           <Drawer
