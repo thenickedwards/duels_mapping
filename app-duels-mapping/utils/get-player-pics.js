@@ -16,7 +16,7 @@ The helper function below retrieves a player's MLS headshot. One argument is req
 The return will be an object with two key-value-pairs: imgThumbUrl and imgDesktopUrl.
 */
 
-export async function getPlayerPic(playerName, verbose = 1) {
+export async function getPlayerPic(playerName, verbose = 0) {
   const playerNameSimple = removeAccents(playerName);
   const playerNameUrl = playerNameSimple.toLowerCase().replace(/\s/g, "-");
   const playerUrl = `https://www.mlssoccer.com/players/${playerNameUrl}/`;
@@ -26,19 +26,27 @@ export async function getPlayerPic(playerName, verbose = 1) {
   // const $ = await cheerio.fromURL(testUrl);
 
   //Fetch HTML manually
-  let html;
-  try {
-    const res = await fetch(playerUrl);
+  // let html;
+  // try {
+  //   const res = await fetch(playerUrl);
 
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status} (${res.statusText})`);
-    }
+  //   if (!res.ok) {
+  //     throw new Error(`HTTP error! status: ${res.status} (${res.statusText})`);
+  //   }
 
-    html = await res.text();
-  } catch (err) {
-    console.error(`Failed to fetch ${playerUrl}:`, err.message);
-    return { imgThumbUrl: null, imgDesktopUrl: null };
+  //   html = await res.text();
+  // } catch (err) {
+  //   console.log(`Failed to fetch ${playerUrl}:`, err.message);
+  //   return { imgThumbUrl: null, imgDesktopUrl: null };
+  // }
+
+  const res = await fetch(playerUrl);
+  if (!res.ok) {
+    console.log(`HTTP error - status: ${res.status} (${res.statusText})`);
+    console.log(`Failed to fetch ${playerUrl}:`, res.message);
   }
+
+  const html = await res.text();
 
   // Load HTML using cheerio
   const $ = cheerio.load(html);
