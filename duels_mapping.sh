@@ -103,7 +103,7 @@ elif [ "$action" = "update" ]; then
     python "$SCRIPT_DIR/app-duels-mapping/public/data/etl/pipeline_cur_FBref_misc_stats_to_schmetzer_scores_players.py" || {
         echo "❌ ETL pipeline execution failed."; return 1; }
 
-    run_nextjs_app
+    # run_nextjs_app
     
     send_off
 
