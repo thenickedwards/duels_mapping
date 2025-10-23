@@ -12,7 +12,7 @@ SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
 
 def pipeline_hist_SQLite_to_Supabase():
     # Upload SQLite data to Supabase
-    data_handler.insert_hist_SQLite_to_Supabase(supabase_url=SUPABASE_URL, supabase_key=SUPABASE_ANON_KEY)
+    data_handler.insert_SQLite_to_Supabase(supabase_url=SUPABASE_URL, supabase_key=SUPABASE_ANON_KEY)
 
 
 
