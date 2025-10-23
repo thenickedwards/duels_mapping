@@ -25,8 +25,8 @@ CREATE TABLE schmetzer_scores_all (
   interceptions_pts       REAL DEFAULT 0, 
   recoveries              INTEGER DEFAULT 0,
   recoveries_pts          REAL DEFAULT 0, 
-  load_datetime           TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(player_name, player_yob, season, squad)
+  load_datetime           TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  -- , UNIQUE(player_name, player_yob, season, squad)
 );
 
 -- Indexes for fast querying

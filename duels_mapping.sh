@@ -11,6 +11,9 @@
 # To update the data environment:
 # >> source ./duels_mapping.sh update    OR  >> . ./duels_mapping.sh update
 
+# To sync the data environment (SQLite local to Postgres remote):
+# >> source ./duels_mapping.sh sync    OR  >> . ./duels_mapping.sh sync
+
 # To restore the data environment:
 # >> source ./duels_mapping.sh restore    OR  >> . ./duels_mapping.sh restore
 
@@ -103,7 +106,17 @@ elif [ "$action" = "update" ]; then
     python "$SCRIPT_DIR/app-duels-mapping/public/data/etl/pipeline_cur_FBref_misc_stats_to_schmetzer_scores_players.py" || {
         echo "❌ ETL pipeline execution failed."; return 1; }
 
-    run_nextjs_app
+    # run_nextjs_app
+    
+    send_off
+
+## sync
+elif [ "$action" = "sync" ]; then
+    activate_venv
+
+    echo -e "\n🚰 Syncing local SQLite database to remote Postres database (Supabase)..."
+    python "$SCRIPT_DIR/app-duels-mapping/public/data/etl/pipeline_SQLite_to_Supabase.py" || {
+        echo "❌ Sync to Supabase failed."; return 1; }
     
     send_off
 

@@ -167,7 +167,7 @@ class DataHandler:
             conn.close()
             
             
-    def insert_hist_SQLite_to_Supabase(self, supabase_url, supabase_key):
+    def insert_SQLite_to_Supabase(self, supabase_url, supabase_key):
         tables = [
             self.schmetzer_scores_tables["all"]] + [
             self.schmetzer_scores_tables["season"].replace("YEAR", str(year)) for year in range(2018, self.current_year + 1)
@@ -188,7 +188,7 @@ class DataHandler:
                     normalize_row(r) for r in rows
                     if r['season'] is not None and isinstance(r['season'], int)
                 ]
-                response = supabase.table(t).upsert(data, default_to_null=True).execute()
+                response = supabase.table(t).upsert(data, default_to_null=True, on_conflict='player_name,player_yob,season,squad').execute()
                 print(f'Inserted data into Supbase table: {t}')
         except sqlite3.Error as e:
             print(e)
