@@ -26,8 +26,8 @@ CREATE TABLE "schmetzer_scores_{year}" (
     interceptions_pts       REAL DEFAULT 0, 
     recoveries              INTEGER DEFAULT 0,
     recoveries_pts          REAL DEFAULT 0, 
-    load_datetime           TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(player_name, player_yob, season, squad)
+    load_datetime           TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    -- , UNIQUE(player_name, player_yob, season, squad)
 );
 
 -- Index for quicker lookup
@@ -63,8 +63,9 @@ INSERT INTO "schmetzer_scores_{year}" (
 -- In order to create one record per player, records are consolidated to the squad at which the player had more minutes (i.e. higher value in nineties)
 WITH ranked_squads AS (
     SELECT *,
-           RANK() OVER (
-               PARTITION BY player_name
+           -- RANK() OVER ( -- converted rank to row_number to avoid duplicate ranks
+           ROW_NUMBER() OVER (
+               PARTITION BY player_name, player_yob
                ORDER BY nineties DESC
            ) AS squad_rank
     FROM stg_FBref_mls_players_all_stats_misc
@@ -73,8 +74,8 @@ WITH ranked_squads AS (
 squad_agg_by_nineties AS (
     SELECT
         {year} AS season,
-        player_name,
-        MAX(player_nationality) AS player_nationality,  -- TODO: check for varinace (i.e. one time switch)
+        MAX(player_name) AS player_name,
+        MAX(player_nationality) AS player_nationality,  -- TODO: check for variance (i.e. one time switch)
         MAX(position) AS position,
         -- Take the squad from row with most nineties
         MAX(CASE WHEN squad_rank = 1 THEN squad END) AS squad,
@@ -87,12 +88,13 @@ squad_agg_by_nineties AS (
         SUM(aerial_duels_won) AS aerial_duels_won,
         SUM(aerial_duels_lost) AS aerial_duels_lost
     FROM ranked_squads
-    GROUP BY player_name
+    GROUP BY LOWER(REPLACE(player_name, ' ', '')), player_yob
 )
 -- 
 SELECT
     -- Construct id manually with SQLite syntax
-    LOWER(REPLACE(player_name, ' ', '')) || '-' || player_yob || '-' || season || '-' || LOWER(REPLACE(squad, ' ', '')) AS id,
+    LOWER(REPLACE(player_name, ' ', '')) || '-' || player_yob || '-' || season || '-' || LOWER(REPLACE(COALESCE(squad, 'unknown_squad'), ' ', '')) || '-' || LOWER(REPLACE(COALESCE(player_nationality, 'unknown_nat'), ' ', '')) AS id,
+    -- LOWER(REPLACE(player_name, ' ', '')) || '-' || player_yob || '-' || season || '-' || LOWER(REPLACE(squad, ' ', '')) AS id, -- v1
     season,
     player_name,
     player_nationality,

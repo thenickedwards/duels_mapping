@@ -175,7 +175,6 @@ export default function PlayersPage() {
     );
   };
 
-
   const columns = [
     {
       field: "schmetzer_rk",
@@ -249,30 +248,6 @@ export default function PlayersPage() {
       ),
     },
     {
-      field: "tackles_won",
-      headerName: "tkw",
-      displayName: "Tackles Won",
-      width: 100,
-      headerAlign: "center",
-      renderCell: (params) => <RightAlignedCenterCell value={params.value} />,
-    },
-    {
-      field: "interceptions",
-      headerName: "int",
-      displayName: "Interceptions",
-      width: 100,
-      headerAlign: "center",
-      renderCell: (params) => <RightAlignedCenterCell value={params.value} />,
-    },
-    {
-      field: "recoveries",
-      headerName: "recov",
-      displayName: "Recoveries",
-      width: 100,
-      headerAlign: "center",
-      renderCell: (params) => <RightAlignedCenterCell value={params.value} />,
-    },
-    {
       field: "aerial_duels_won",
       headerName: "adw",
       displayName: "Aerial Duels Won",
@@ -292,6 +267,30 @@ export default function PlayersPage() {
       field: "aerial_duels_won_pct",
       headerName: "adw%",
       displayName: "Aerial Duels Won %",
+      width: 100,
+      headerAlign: "center",
+      renderCell: (params) => <RightAlignedCenterCell value={params.value} />,
+    },
+    {
+      field: "tackles_won",
+      headerName: "tkw",
+      displayName: "Tackles Won",
+      width: 100,
+      headerAlign: "center",
+      renderCell: (params) => <RightAlignedCenterCell value={params.value} />,
+    },
+    {
+      field: "interceptions",
+      headerName: "int",
+      displayName: "Interceptions",
+      width: 100,
+      headerAlign: "center",
+      renderCell: (params) => <RightAlignedCenterCell value={params.value} />,
+    },
+    {
+      field: "recoveries",
+      headerName: "recov",
+      displayName: "Recoveries",
       width: 100,
       headerAlign: "center",
       renderCell: (params) => <RightAlignedCenterCell value={params.value} />,

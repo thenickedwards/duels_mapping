@@ -111,7 +111,9 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
             </Box>
           </Box>
           <IconButton onClick={onClose} aria-label="close">
-            <CloseIcon sx={{color: theme.palette.mode === "dark" ? "#fff" : "#000"}}/>
+            <CloseIcon
+              sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000" }}
+            />
           </IconButton>
         </Box>
       </DialogTitle>
@@ -165,13 +167,13 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
             >
               <PlayerMetricsBarChart
                 metrics={{
-                  INT: player.interceptions,
-                  TKW: player.tackles_won,
-                  RECOV: player.recoveries,
                   ADW: player.aerial_duels_won,
                   ADL: player.aerial_duels_lost,
+                  TKW: player.tackles_won,
+                  INT: player.interceptions,
+                  RECOV: player.recoveries,
                 }}
-                averages={{ INT: 20, TKW: 18, RECOV: 30, ADW: 15, ADL: 5 }}
+                averages={{ ADW: 15, ADL: 5, TKW: 18, INT: 20, RECOV: 30 }}
               />
             </Box>
           </Grid>

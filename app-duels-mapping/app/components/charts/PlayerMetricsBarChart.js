@@ -6,24 +6,26 @@ export default function PlayerMetricsBarChart({ metrics = {}, averages = {} }) {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
-  const labels = ["INT", "TKW", "RECOV", "ADW", "ADL"];
+  const labels = ["ADW", "ADL", "TKW", "INT", "RECOV"];
 
   const dataValues = labels.map((label) => metrics[label] ?? 0);
   const averageValues = labels.map((label) => averages[label] ?? 0);
 
   return (
-    <Box sx={{
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center", 
-      height: "100%", 
-    }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        height: "100%",
+      }}
+    >
       {labels.map((label, index) => {
         const isLast = index === labels.length - 1;
         const value = dataValues[index];
         const average = averageValues[index];
         const allValues = [...dataValues, ...averageValues];
-        const max = Math.max(...allValues, 1); 
+        const max = Math.max(...allValues, 1);
 
         const percent = (value / max) * 100;
         const avgPos = (average / max) * 100;
@@ -51,7 +53,7 @@ export default function PlayerMetricsBarChart({ metrics = {}, averages = {} }) {
                 mx: 1,
                 display: "flex",
                 alignItems: "center",
-                height: 20, 
+                height: 20,
                 position: "relative",
               }}
             >

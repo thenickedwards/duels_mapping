@@ -30,7 +30,7 @@ def pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players():
     data_handler.insert_schmetzer_scores_all_seasons()
     
     # Upload SQLite data to Supabase
-    data_handler.insert_hist_SQLite_to_Supabase(supabase_url=SUPABASE_URL, supabase_key=SUPABASE_ANON_KEY)
+    data_handler.insert_SQLite_to_Supabase(supabase_url=SUPABASE_URL, supabase_key=SUPABASE_ANON_KEY)
 
 
 if __name__ == "__main__":

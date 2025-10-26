@@ -39,12 +39,12 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 const fetcher = (url) => fetch(url).then((res) => res.json());
 const currentYear = new Date().getFullYear();
 const statLabels = [
-  "schmetzer_rk",
+  "aerial_duels_won",
+  "aerial_duels_lost",
+  "aerial_duels_won_pct",
   "interceptions",
   "tackles_won",
   "recoveries",
-  "aerial_duels_won",
-  "aerial_duels_total",
 ];
 
 export default function PlayerComparison({
