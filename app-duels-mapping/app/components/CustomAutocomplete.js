@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import {
   Autocomplete,
   TextField,
@@ -46,8 +47,7 @@ export default function CustomAutocomplete({
             }`,
             borderRadius: 0,
             boxShadow: "none",
-            backgroundColor:
-              theme.palette.mode === "dark" ? "#1a1a1a" : "#fff",
+            backgroundColor: theme.palette.mode === "dark" ? "#1a1a1a" : "#fff",
             "& .MuiAutocomplete-option": {
               fontFamily: "'Nunito Sans', sans-serif",
               fontSize: "0.875rem",
@@ -80,7 +80,7 @@ export default function CustomAutocomplete({
             input: {
               ...params.InputProps,
               sx: {
-                pr: 6, 
+                pr: 6,
               },
               endAdornment: (
                 <>
@@ -97,7 +97,16 @@ export default function CustomAutocomplete({
                       translate: "0 -50%",
                     }}
                   />
-                   {params.InputProps.endAdornment}
+                  {params.InputProps.endAdornment &&
+                    React.cloneElement(params.InputProps.endAdornment, {
+                      sx: {
+                        ...params.InputProps.endAdornment.props.sx,
+                        right: "36px!important",
+                        "& .MuiSvgIcon-root": {
+                          color: "#000000",
+                        },
+                      },
+                    })}
                 </>
               ),
             },
