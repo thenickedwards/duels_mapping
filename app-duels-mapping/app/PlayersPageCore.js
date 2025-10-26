@@ -100,7 +100,11 @@ export default function PlayersPage() {
   const searchParams = useSearchParams();
 
   const tab = searchParams.get("tab") || "players";
-  const season = searchParams.get("season") || "2025";
+  // const season = searchParams.get("season") || "2025";
+  // --
+    const seasonFromUrl = searchParams.get("season") || new Date().getFullYear().toString();
+  const currentYear = new Date().getFullYear();
+  // --
 
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [filters, setFilters] = useState({
@@ -111,7 +115,7 @@ export default function PlayersPage() {
 
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [showColumns, setShowColumns] = useState(false);
-  const [hiddenColumns, setHiddenColumns] = useState([]);
+  const [hiddenColumns, setHiddenColumns] = useState(["player_age", "nineties"]);
   const [showSearch, setShowSearch] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -120,7 +124,28 @@ export default function PlayersPage() {
 
   const [selectOpen, setSelectOpen] = useState(false);
 
-  const query = new URLSearchParams({ season });
+
+
+  // ---
+
+//  const currentYear = new Date().getFullYear();
+//  const [selectedYear, setSelectedYear] = useState(currentYear);
+
+ const [selectedYear, setSelectedYear] = useState(Number(seasonFromUrl));
+
+    const { data: players } = useSWR(
+    `/api/schmetzer_scores?season=${selectedYear}`,
+    fetcher
+  );
+
+  // --
+
+  // const query = new URLSearchParams({ season });
+  // ---
+  // const query = new URLSearchParams({ seasonFromUrl });
+  const query = new URLSearchParams({ season: selectedYear.toString() });
+
+  // ---
   if (filters.position) query.set("position", filters.position);
   if (filters.squad) query.set("squad", filters.squad);
   if (filters.minMinutes) query.set("minMinutes", filters.minMinutes);
@@ -134,6 +159,8 @@ export default function PlayersPage() {
     const newParams = new URLSearchParams(searchParams.toString());
     newParams.set("season", year);
     router.replace(`?${newParams.toString()}`);
+    // --
+    setSelectedYear(year);
   };
 
   const handleTabChange = (_, newTab) => {
@@ -147,6 +174,7 @@ export default function PlayersPage() {
       prev.includes(field) ? prev.filter((f) => f !== field) : [...prev, field]
     );
   };
+
 
   const columns = [
     {
@@ -560,7 +588,8 @@ export default function PlayersPage() {
               <Button
                 variant="outlined"
                 onClick={() =>
-                  exportToCSV(filteredRows, `schmetzer_scores_${season}.csv`)
+                  // exportToCSV(filteredRows, `schmetzer_scores_${season}.csv`)
+                  exportToCSV(filteredRows, `schmetzer_scores_${selectedYear}.csv`)
                 }
                 startIcon={
                   <Image
@@ -671,7 +700,8 @@ export default function PlayersPage() {
                     <Button
                       key={year}
                       onClick={() => updateSeason(year)}
-                      sx={baseButtonStyle(theme, season === year, true)}
+                      sx={baseButtonStyle(theme, selectedYear === year, true)}
+                      // sx={baseButtonStyle(theme)}
                     >
                       {year}
                     </Button>
@@ -681,7 +711,8 @@ export default function PlayersPage() {
                 <Suspense fallback={<div>Loading...</div>}>
                   <Box position="relative" width={44} height={40}>
                     <Select
-                      value={dropdownYears.includes(season) ? season : ""}
+                      // value={dropdownYears.includes(season) ? season : ""}
+                      value={dropdownYears.includes(selectedYear) ? selectedYear : ""}
                       onChange={(e) => updateSeason(e.target.value)}
                       displayEmpty
                       IconComponent={() => null}
@@ -773,9 +804,11 @@ export default function PlayersPage() {
               />
             )}
             {/* Dropdown Year Chip */}
-            {dropdownYears.includes(season) && (
+            {/* {dropdownYears.includes(season) && ( */}
+            {dropdownYears.includes(selectedYear) && (
               <FilterChip
-                label={season}
+              label={selectedYear}
+                // label={season}
                 onRemove={() => updateSeason("2025")}
               />
             )}
@@ -1203,7 +1236,12 @@ export default function PlayersPage() {
 
       {tab === "comparisons" && (
         <Box mt={4}>
-          <PlayerComparison />
+          <PlayerComparison  
+   currentYear={currentYear}
+            selectedYear={selectedYear}
+            updateSeason={updateSeason}
+            players={players || []}
+          />
         </Box>
       )}
     </main>

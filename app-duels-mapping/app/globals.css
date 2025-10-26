@@ -34,50 +34,6 @@ a {
   color: inherit;
   text-decoration: none;
 }
-/* DATAGRID MENU DROPDOWN */
-/* .MuiDataGrid-menu {
-  box-shadow: none !important;
-  border: 1px solid #000 !important;
-  background-color: #fff !important;
-  border-radius: 0 !important;
-  padding: 0 !important;
-}
-
-.MuiDataGrid-menu .MuiMenuItem-root {
-  font-family: "Nunito Sans", sans-serif !important;
-  font-size: 0.875rem !important;
-  color: #000 !important;
-}
-
-.MuiDataGrid-menu .MuiSvgIcon-root {
-  color: #000 !important;
-} */
-
-/* Dark mode */
-/* @media (prefers-color-scheme: dark) {
-  .MuiDataGrid-menu {
-    box-shadow: none !important;
-    border: 1px solid #fff !important;
-    background-color: #000 !important;
-    border-radius: 0 !important;
-    padding: 0 !important;
-  }
-
-  .MuiDataGrid-menu .MuiMenuItem-root {
-    color: #fff !important;
-  }
-
-  .MuiDataGrid-menu .MuiSvgIcon-root {
-    color: #fff !important;
-  }
-} */
-
-/* .MuiDataGrid-menuList {
-  background-color: #fff;
-} */
-
-
-
 
 @media (prefers-color-scheme: dark) {
   html {

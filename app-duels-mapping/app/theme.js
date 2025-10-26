@@ -62,15 +62,10 @@ const getDesignTokens = (mode) => ({
     MuiPaper: {
       styleOverrides: {
         root: {
-           border: `1px solid ${mode === "dark" ? "#fff" : "#000"}`,
            borderRadius: 0,
            boxShadow: "none",
           "&.MuiDataGrid-paper": {
             marginTop: "10px",
-            // backgroundColor: mode === "dark" ? "#000" : "#fff",
-            // border: `1px solid ${mode === "dark" ? "#fff" : "#000"}`,
-            // borderRadius: 0,
-            // boxShadow: "none",
           },
           "& .MuiSvgIcon-root": {
             color: mode === "dark" ? "#fff" : "#000",
@@ -78,21 +73,23 @@ const getDesignTokens = (mode) => ({
         },
       },
     },
-    // MuiList: {
-    //   styleOverrides: {
-    //     root: {
-    //       // backgroundColor: mode === "dark" ? "#000" : "#fff", // menu background
-    //       // color: mode === "dark" ? "#fff" : "#000",           // menu text
-    //       border: `1px solid ${mode === "dark" ? "#fff" : "#000"}`, // menu border
-    //     },
-    //   },
-    // },
+     MuiPopper: {
+      styleOverrides: {
+        root: {
+          "&.MuiDataGrid-menu": {
+            border: `1px solid ${mode === "dark" ? "#fff" : "#000"}`,
+          },
+          "& .MuiSvgIcon-root": {
+            color: mode === "dark" ? "#fff" : "#000",
+          },
+        },
+      },
+    },
     MuiMenuItem: {
       styleOverrides: {
         root: {
-          // color: mode === "dark" ? "#fff" : "#000", // menu item text
           "&:hover": {
-            backgroundColor: mode === "dark" ? "#333" : "#f0f0f0", // optional hover
+            backgroundColor: mode === "dark" ? "#333" : "#f0f0f0", 
           },
         },
       },
