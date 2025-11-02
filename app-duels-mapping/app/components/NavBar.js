@@ -14,6 +14,7 @@ import {
   ListItemButton,
   ListItemText,
   Switch,
+  Divider,
 } from "@mui/material";
 import Image from "next/image";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -23,6 +24,7 @@ import { usePathname } from "next/navigation";
 import { useColorMode } from "@/app/theme";
 import DarkMode from "../../public/images/dark_mode.png";
 import LightMode from "../../public/images/light_mode.png";
+import CloseIcon from "@mui/icons-material/Close";
 
 const pages = [
   { label: "Home", href: "/" },
@@ -43,17 +45,85 @@ export default function NavBar() {
   };
 
   const drawer = (
-    <Box onClick={handleDrawerToggle} sx={{ textAlign: "center" }}>
-      <Typography variant="h6" sx={{ my: 2 }}>
-        Duels Mapping
-      </Typography>
+    <Box
+      onClick={handleDrawerToggle}
+      sx={{
+        textAlign: "center",
+        width: 400,
+        height: "100%",
+        bgcolor: theme.palette.mode === "dark" ? "#000" : "#fff",
+        color: "ffffff",
+        borderLeft: "4px solid #B7F08E",
+        paddingTop: "50px",
+        paddingX: "40px",
+      }}
+    >
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
+        <Typography
+          variant="h3"
+          fontSize="2.25rem"
+          sx={{
+            fontFamily: "'Bebas Neue', sans-serif",
+          }}
+        >
+          Duels Mapping
+        </Typography>
+        <IconButton
+          onClick={() => setFilterDrawerOpen(false)}
+          aria-label="close drawer"
+          size="small"
+        >
+          <CloseIcon
+            sx={{
+              color: (theme) =>
+                theme.palette.mode === "dark" ? "#fff" : "#000",
+            }}
+          />
+        </IconButton>
+      </Box>
       <List>
         {pages.map((page) => (
           <ListItemButton key={page.label} component={Link} href={page.href}>
-            <ListItemText primary={page.label} />
+            <ListItemText
+              primary={page.label}
+              slotProps={{
+                primary: {
+                  sx: {
+                    fontFamily: "'Bebas Neue', sans-serif",
+                    color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                    fontSize: "1.25rem",
+                  },
+                },
+              }}
+            />
           </ListItemButton>
         ))}
       </List>
+      <Divider
+        sx={{ backgroundColor: "#ffffff", mx: "16px", mt: "16px", mb: "30px" }}
+      />
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingX: "16px",
+        }}
+      >
+        <Typography variant="body1">Display Mode</Typography>
+        <IconButton onClick={toggleColorMode} color="inherit">
+          <Image
+            src={mode === "light" ? LightMode : DarkMode}
+            alt="Toggle theme"
+            height={24}
+          />
+        </IconButton>
+      </Box>
     </Box>
   );
 
