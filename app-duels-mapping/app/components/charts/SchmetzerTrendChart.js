@@ -27,7 +27,7 @@ Tooltip.positioners.customBelow = function (elements, eventPosition) {
   if (base) {
     return {
       x: base.x,
-      y: base.y + 12, // 👈 offset tooltip 10px below
+      y: base.y + 12, 
     };
   }
   return base;
@@ -99,58 +99,6 @@ export default function SchmetzerTrendChart({ history = [] }) {
         </Box>
       </Box>
 
-      {/* <Line
-        data={{
-          labels,
-          datasets: [
-            {
-              label: "Score",
-              data: scores,
-              fill: false,
-              borderWidth: 1,
-              borderColor:
-                theme.palette.mode === "dark" ? "#B7F08E" : "#1976d2",
-              tension: 0.2,
-              pointRadius: 7.5,
-              pointHoverRadius: 7.5,
-              pointBackgroundColor:
-                theme.palette.mode === "dark" ? "#B7F08E" : "#1976d2",
-              pointBorderColor: theme.palette.mode === "dark" ? "#fff" : "#000",
-              pointBorderWidth: 1,
-            },
-          ],
-        }}
-        options={{
-          plugins: {
-            legend: { display: false },
-            tooltip: { enabled: true },
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                stepSize: 30, // Adjust this to control spacing (e.g., 50, 100, etc.)
-                display: false, // Still hiding tick labels
-              },
-              border: {
-                display: false,
-              },
-              grid: {
-                display: true,
-                color: theme.palette.mode === "dark" ? "#444" : "#ccc",
-                drawBorder: false,
-              },
-            },
-            x: {
-              ticks: { color: theme.palette.text.primary },
-              grid: {
-                display: false,
-                drawBorder: false,
-              },
-            },
-          },
-        }}
-      /> */}
       <Line
         data={{
           labels,
@@ -158,15 +106,15 @@ export default function SchmetzerTrendChart({ history = [] }) {
             {
               label: "Score",
               data: scores,
-              borderColor: theme.palette.mode === "dark" ? "#fff" : "#000",
+              borderColor: theme.palette.mode === "dark" ? "white" : "black",
               borderWidth: 2,
               tension: 0.2,
               pointRadius: 2.5,
               pointHoverRadius: 10,
               pointBackgroundColor:
-                theme.palette.mode === "dark" ? "#fff" : "#000",
+                theme.palette.mode === "dark" ? "white" : "black",
               pointHoverBackgroundColor: "#B7F08E",
-              pointBorderColor: theme.palette.mode === "dark" ? "#fff" : "#000",
+              pointBorderColor: theme.palette.mode === "dark" ? "white" : "black",
               pointBorderWidth: 0,
               pointHoverBorderWidth: 2,
             },
@@ -180,32 +128,10 @@ export default function SchmetzerTrendChart({ history = [] }) {
           },
           plugins: {
             legend: { display: false },
-            // tooltip: {
-            //   enabled: true,
-            //   position: "nearest",
-            //   yAlign: "top", // ⬇️ tooltip appears *beneath* point, arrow points up
-            //   backgroundColor: theme.palette.mode === "dark" ? "#fff" : "#000",
-            //   titleColor: theme.palette.mode === "dark" ? "#000" : "#fff",
-            //   bodyColor: theme.palette.mode === "dark" ? "#000" : "#fff",
-            //   cornerRadius: 0,
-            //   caretSize: 6,
-            //   borderWidth: 0,
-            //   displayColors: false,
-            //   padding: {
-            //     top: 8,
-            //     bottom: 8,
-            //     left: 20,
-            //     right: 20,
-            //   },
-            //   callbacks: {
-            //     title: () => null,
-            //     label: (context) => `${context.raw}`,
-            //   },
-            // },
             tooltip: {
               enabled: true,
-              position: "customBelow", // ✅ use the custom one we just registered
-              yAlign: "top", // ✅ arrow points up
+              position: "customBelow", 
+              yAlign: "top", 
               backgroundColor: theme.palette.mode === "dark" ? "#fff" : "#000",
               titleColor: theme.palette.mode === "dark" ? "#000" : "#fff",
               bodyColor: theme.palette.mode === "dark" ? "#000" : "#fff",
@@ -228,7 +154,7 @@ export default function SchmetzerTrendChart({ history = [] }) {
           scales: {
             y: {
               beginAtZero: true,
-              ticks: { display: false },
+              ticks: { display: false, stepSize: 30 },
               grid: {
                 display: true,
                 color: theme.palette.mode === "dark" ? "#444" : "#ccc",

@@ -15,9 +15,7 @@ import {
   DialogTitle,
   DialogContent,
   InputAdornment,
-  Avatar,
   Pagination,
-  Divider,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { DataGrid } from "@mui/x-data-grid";
@@ -25,13 +23,8 @@ import useSWR from "swr";
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import PlayerComparison from "./components/PlayerComparison";
-import { useRef } from "react";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import { CSVLink } from "react-csv";
 import { saveAs } from "file-saver";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import PlayerDetailDialog from "./components/PlayerDetailDialog";
 import CloseIcon from "@mui/icons-material/Close";
@@ -42,11 +35,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faSliders,
   faMagnifyingGlass,
-  faDownload,
-  faEye,
   faXmark,
-  faChevronDown,
-  faSquare,
   faSquareCheck,
   faSquareMinus,
 } from "@fortawesome/free-solid-svg-icons";
@@ -57,11 +46,11 @@ import ExportBlack from "../public/images/export-icon.png";
 import ExportWhite from "../public/images/export-wh-icon.png";
 import RightAlignedCenterCell from "./components/RightAlignedCenterCell";
 import CustomColumnMenu from "./components/CustomColumnMenu";
-import StyledMenuItem from "./components/StyledMenuItem";
 import { inputStyle } from "./styles/inputStyles";
 import CustomSelect from "./components/CustomSelect";
 import PlayerNameCell from "./components/PlayerNameCell";
 import TeamBadgeCell from "./components/TeamBadgeCell";
+import LastUpdated from "./components/LastUpdated";
 
 const fetcher = (url) => fetch(url).then((r) => r.json());
 
@@ -73,7 +62,7 @@ const StyledPagination = styled(Pagination)(({ theme }) => ({
     color: theme.palette.text.primary,
   },
   "& .MuiPaginationItem-page.Mui-selected": {
-    color: theme.palette.mode === "light" ? "black" : "white",
+    color: theme.palette.mode === "light" ? "black" : "black",
     fontWeight: "bold",
     position: "relative",
     backgroundColor: "transparent",
@@ -102,7 +91,8 @@ export default function PlayersPage() {
   const tab = searchParams.get("tab") || "players";
   // const season = searchParams.get("season") || "2025";
   // --
-    const seasonFromUrl = searchParams.get("season") || new Date().getFullYear().toString();
+  const seasonFromUrl =
+    searchParams.get("season") || new Date().getFullYear().toString();
   const currentYear = new Date().getFullYear();
   // --
 
@@ -115,7 +105,10 @@ export default function PlayersPage() {
 
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [showColumns, setShowColumns] = useState(false);
-  const [hiddenColumns, setHiddenColumns] = useState(["player_age", "nineties"]);
+  const [hiddenColumns, setHiddenColumns] = useState([
+    "player_age",
+    "nineties",
+  ]);
   const [showSearch, setShowSearch] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -124,16 +117,14 @@ export default function PlayersPage() {
 
   const [selectOpen, setSelectOpen] = useState(false);
 
-
-
   // ---
 
-//  const currentYear = new Date().getFullYear();
-//  const [selectedYear, setSelectedYear] = useState(currentYear);
+  //  const currentYear = new Date().getFullYear();
+  //  const [selectedYear, setSelectedYear] = useState(currentYear);
 
- const [selectedYear, setSelectedYear] = useState(Number(seasonFromUrl));
+  const [selectedYear, setSelectedYear] = useState(Number(seasonFromUrl));
 
-    const { data: players } = useSWR(
+  const { data: players } = useSWR(
     `/api/schmetzer_scores?season=${selectedYear}`,
     fetcher
   );
@@ -180,7 +171,7 @@ export default function PlayersPage() {
       field: "schmetzer_rk",
       headerName: "rk",
       displayName: "Schmetzer Rank",
-      width: 70,
+      width: 60,
     },
     {
       field: "player_name",
@@ -215,6 +206,7 @@ export default function PlayersPage() {
       headerName: "POS",
       displayName: "Position",
       width: 100,
+      renderCell: (params) => <span>{params.value?.replace(/,/g, ", ")}</span>,
     },
     {
       field: "nineties",
@@ -588,7 +580,10 @@ export default function PlayersPage() {
                 variant="outlined"
                 onClick={() =>
                   // exportToCSV(filteredRows, `schmetzer_scores_${season}.csv`)
-                  exportToCSV(filteredRows, `schmetzer_scores_${selectedYear}.csv`)
+                  exportToCSV(
+                    filteredRows,
+                    `schmetzer_scores_${selectedYear}.csv`
+                  )
                 }
                 startIcon={
                   <Image
@@ -711,7 +706,9 @@ export default function PlayersPage() {
                   <Box position="relative" width={44} height={40}>
                     <Select
                       // value={dropdownYears.includes(season) ? season : ""}
-                      value={dropdownYears.includes(selectedYear) ? selectedYear : ""}
+                      value={
+                        dropdownYears.includes(selectedYear) ? selectedYear : ""
+                      }
                       onChange={(e) => updateSeason(e.target.value)}
                       displayEmpty
                       IconComponent={() => null}
@@ -806,7 +803,7 @@ export default function PlayersPage() {
             {/* {dropdownYears.includes(season) && ( */}
             {dropdownYears.includes(selectedYear) && (
               <FilterChip
-              label={selectedYear}
+                label={selectedYear}
                 // label={season}
                 onRemove={() => updateSeason("2025")}
               />
@@ -848,9 +845,6 @@ export default function PlayersPage() {
                   ColumnMenu: CustomColumnMenu,
                 }}
                 hideFooter
-
-
-
                 sx={{
                   border: "none",
 
@@ -950,7 +944,6 @@ export default function PlayersPage() {
                       opacity: 1,
                       visibility: "visible",
                     },
-                 
                 }}
               />
             )}
@@ -985,7 +978,9 @@ export default function PlayersPage() {
                         width: "0.7em",
                         height: "0.7em",
                         color:
-                          theme.palette.mode === "dark" ? "white" : "black",
+                          theme.palette.mode === "dark"
+                            ? "black!important"
+                            : "black",
                         pointerEvents: "none", // allow click to pass through to select
                         marginTop: "2px",
                       }}
@@ -1001,9 +996,9 @@ export default function PlayersPage() {
                         borderRadius: 0,
                         boxShadow: "none",
                         backgroundColor:
-                          theme.palette.mode === "dark" ? "#000" : "#fff",
+                          theme.palette.mode === "dark" ? "black" : "white",
                         border: `1px solid ${
-                          theme.palette.mode === "dark" ? "#fff" : "#000"
+                          theme.palette.mode === "dark" ? "white" : "black"
                         }`,
                         fontFamily: "'Nunito Sans', sans-serif",
                         fontSize: "0.875rem",
@@ -1015,8 +1010,8 @@ export default function PlayersPage() {
                     height: "30px",
                     borderRadius: 0,
                     backgroundColor:
-                      theme.palette.mode === "light" ? "#fff" : "#000", // light: white, dark: black
-                    color: theme.palette.mode === "dark" ? "#fff" : "#000", // dark: white text
+                      theme.palette.mode === "light" ? "white" : "black", // light: white, dark: black
+                    color: theme.palette.mode === "dark" ? "black" : "black", // dark: white text
                     position: "relative",
                     "& .MuiOutlinedInput-notchedOutline": {
                       borderColor:
@@ -1062,8 +1057,16 @@ export default function PlayersPage() {
                 variant="outlined"
               />
             </Box>
-            <Box pb={5}>
-              <Divider sx={{ my: "20px", border: "1px solid #000" }} />
+
+            {/* <Box pb={5}>
+              <Divider
+                sx={{
+                  my: "20px",
+                  border: `1px solid ${
+                    theme.palette.mode === "light" ? "black" : "white"
+                  }`,
+                }}
+              />
               <Typography
                 variant="body2"
                 sx={{
@@ -1072,7 +1075,8 @@ export default function PlayersPage() {
               >
                 Data Last Updated on August 31, 2025 at 9:00 PM EST
               </Typography>
-            </Box>
+            </Box> */}
+            <LastUpdated />
           </Box>
 
           <Drawer
@@ -1219,9 +1223,9 @@ export default function PlayersPage() {
           >
             <DialogTitle>{selectedPlayer?.player_name}</DialogTitle>
             <DialogContent>
-              <Typography>Position: {selectedPlayer?.position}</Typography>
+              {/* <Typography>Position: {selectedPlayer?.position}</Typography>
               <Typography>Squad: {selectedPlayer?.squad}</Typography>
-              <Typography>Age: {selectedPlayer?.player_age}</Typography>
+              <Typography>Age: {selectedPlayer?.player_age}</Typography> */}
               {/* Add more fields here */}
               <PlayerDetailDialog
                 player={selectedPlayer}
@@ -1235,8 +1239,8 @@ export default function PlayersPage() {
 
       {tab === "comparisons" && (
         <Box mt={4}>
-          <PlayerComparison  
-   currentYear={currentYear}
+          <PlayerComparison
+            currentYear={currentYear}
             selectedYear={selectedYear}
             updateSeason={updateSeason}
             players={players || []}

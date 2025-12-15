@@ -74,7 +74,7 @@ export default function NavBar() {
           Duels Mapping
         </Typography>
         <IconButton
-          onClick={() => setFilterDrawerOpen(false)}
+          onClick={handleDrawerToggle}
           aria-label="close drawer"
           size="small"
         >

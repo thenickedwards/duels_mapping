@@ -3,7 +3,6 @@ import React from "react";
 import {
   Autocomplete,
   TextField,
-  InputAdornment,
   Popper,
   useTheme,
 } from "@mui/material";
@@ -17,6 +16,7 @@ export default function CustomAutocomplete({
   options = [],
   value,
   onChange,
+  disabledOptions = [],
   ...props
 }) {
   const theme = useTheme();
@@ -24,8 +24,14 @@ export default function CustomAutocomplete({
   return (
     <Autocomplete
       options={options}
-      value={value}
+      // value={value}
+      value={value || null}
       onChange={onChange}
+
+      isOptionEqualToValue={(option, val) => option === val}
+      getOptionDisabled={(option) => disabledOptions.includes(option)}
+
+
       clearIcon={<CloseIcon fontSize="small" />}
       disableClearable={false}
       popupIcon={null}
@@ -43,14 +49,17 @@ export default function CustomAutocomplete({
           sx={{
             mt: 1,
             border: `1px solid ${
-              theme.palette.mode === "dark" ? "#fff" : "#000"
+              theme.palette.mode === "dark" ? "white" : "black"
             }`,
             borderRadius: 0,
             boxShadow: "none",
-            backgroundColor: theme.palette.mode === "dark" ? "#1a1a1a" : "#fff",
+            backgroundColor: theme.palette.mode === "dark" ? "#1a1a1a" : "white",
             "& .MuiAutocomplete-option": {
               fontFamily: "'Nunito Sans', sans-serif",
               fontSize: "0.875rem",
+            },
+            "& .MuiAutocomplete-option[aria-disabled='true']": {
+              opacity: 0.45,
             },
           }}
         />
@@ -71,9 +80,9 @@ export default function CustomAutocomplete({
                 fontSize: "1.8rem",
                 fontFamily: "'Bebas Neue', sans-serif",
                 fontWeight: 400,
-                color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                color: theme.palette.mode === "dark" ? "white" : "black",
                 "&.Mui-focused": {
-                  color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                  color: theme.palette.mode === "dark" ? "white" : "black",
                 },
               },
             },
@@ -88,7 +97,7 @@ export default function CustomAutocomplete({
                     sx={{
                       transform: "rotate(90deg)",
                       pointerEvents: "none",
-                      color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                      color: theme.palette.mode === "dark" ? "white" : "black",
                       fontSize: "1.25rem",
                       position: "absolute",
                       right: 16,
@@ -103,7 +112,7 @@ export default function CustomAutocomplete({
                         ...params.InputProps.endAdornment.props.sx,
                         right: "36px!important",
                         "& .MuiSvgIcon-root": {
-                          color: "#000000",
+                          color: "black",
                         },
                       },
                     })}

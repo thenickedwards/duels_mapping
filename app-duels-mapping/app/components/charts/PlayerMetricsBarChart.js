@@ -20,6 +20,21 @@ export default function PlayerMetricsBarChart({ metrics = {}, averages = {} }) {
         height: "100%",
       }}
     >
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
+        <Typography
+          variant="subtitle1"
+          component={"div"}
+          sx={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.25rem" }}
+        >
+          Chart Label
+        </Typography>
+      </Box>
+
       {labels.map((label, index) => {
         const isLast = index === labels.length - 1;
         const value = dataValues[index];
