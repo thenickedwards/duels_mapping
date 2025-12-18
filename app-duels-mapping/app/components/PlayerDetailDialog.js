@@ -54,7 +54,7 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
       {/* Player Info */}
       <DialogTitle
         sx={{
-          backgroundColor: theme.palette.mode === "dark" ? "#17171B" : "#fff",
+          backgroundColor: theme.palette.mode === "dark" ? "#17171B" : "white",
         }}
       >
         <Box display="flex" justifyContent="space-between" alignItems="start">
@@ -64,15 +64,16 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
               sx={{
                 width: 80,
                 height: 80,
-                fontSize: "1.25rem",
+                fontSize: "3rem",
+                pt: "6px",
                 bgcolor: imgUrl
                   ? "transparent"
                   : theme.palette.mode === "dark"
                   ? "transparent"
                   : "black",
-                color: imgUrl ? "inherit" : "#fff",
+                color: imgUrl ? "inherit" : "white",
                 border: `1px solid ${
-                  theme.palette.mode === "dark" ? "#fff" : "#000"
+                  theme.palette.mode === "dark" ? "white" : "black"
                 }`,
                 fontFamily: "'Bebas Neue', sans-serif",
               }}
@@ -93,6 +94,7 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
               >
                 {player.schmetzer_rk} PLACE
               </Typography>
+      
               <Typography
                 sx={{
                   fontFamily: "'Bebas Neue', sans-serif",
@@ -133,7 +135,7 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
                   theme.palette.mode === "dark" ? "#303034" : "#FAFAFA",
               }}
             >
-              <Typography variant="h2" component={"div"} fontSize={"1.5rem"}>
+              {/* <Typography variant="h2" component={"div"} fontSize={"1.6rem"}>
                 SCHMETZER SCORE
               </Typography>
               <Typography
@@ -145,7 +147,7 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
                 mt={"-12px"}
               >
                 {player.schmetzer_score}
-              </Typography>
+              </Typography> */}
               <SchmetzerScoreBar
                 value={player.schmetzer_score}
                 average={150}

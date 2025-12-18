@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, useTheme } from "@mui/material";
+import { Box, useTheme, Typography } from "@mui/material";
 import {
   Chart as ChartJS,
   RadialLinearScale,
@@ -32,10 +32,25 @@ export default function PlayerRadarChart({ player }) {
     player.aerial_duels_won_pct ?? 0,
   ];
 
-  const baseColor = theme.palette.mode === "dark" ? "#B7F08E" : "#1976d2";
+  const baseColor = theme.palette.mode === "dark" ? "#B7F08E" : "#3B5B84";
 
   return (
     <Box>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={0}
+      >
+        <Typography
+          variant="subtitle1"
+          component={"div"}
+          sx={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.25rem" }}
+        >
+          Chart Label
+        </Typography>
+      </Box>
+
       <Radar
         data={{
           labels,
@@ -58,8 +73,15 @@ export default function PlayerRadarChart({ player }) {
               suggestedMin: 0,
               suggestedMax: 100,
               ticks: { display: false },
+
               pointLabels: {
-                font: { size: 12 },
+                font: {
+                  family: "'Bebas Neue', sans-serif",
+                  size: 16,
+                  weight: "400",
+                },
+                color: theme.palette.mode === "dark" ? "white" : "black",
+                padding: 8,
               },
               grid: {
                 color: theme.palette.mode === "dark" ? "#888" : "#ccc",

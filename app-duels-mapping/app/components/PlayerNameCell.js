@@ -40,16 +40,27 @@ const PlayerNameCell = ({ name }) => {
             : theme.palette.mode === "dark"
             ? "transparent"
             : "black",
-          color: imgUrl
-            ? "inherit"
-            : "#fff",
-        border: `1px solid ${theme.palette.mode === "dark" ? "#fff" : "#000"}`,
+          color: imgUrl ? "inherit" : "#fff",
+          border: `1px solid ${
+            theme.palette.mode === "dark" ? "#fff" : "#000"
+          }`,
           fontFamily: "'Bebas Neue', sans-serif",
         }}
       >
         {!imgUrl && getInitials(name)}
       </Avatar>
-      <Typography fontSize="0.9rem">{name}</Typography>
+      <Typography
+        fontSize="0.9rem"
+        sx={{
+          textDecoration: "underline",
+          textDecorationStyle: "dashed",
+          textUnderlineOffset: "3px",
+          color: theme.palette.mode === 'dark' ? 'white' : 'black',
+
+        }}
+      >
+        {name}
+      </Typography>
     </Box>
   );
 };
