@@ -343,6 +343,12 @@ For programmatic use as well as readability, a number of naming conventions have
   - `transform/` includes non-stat-specific transformations (e.g. inserting to a staging table from raw)
   - `z_name_of_stat` specific stat transformations and table loading are stored in the directory of the name of the stat with the prefix `z_...`
 
+#### Database Keep-Alive 🐶
+
+The [supabase-watchdog](https://github.com/thenickedwards/supabase-watchdog) repo will uses GitHub Actions to automate keeping the tables in our database active. This automation ensures the database isn't paused, the deployed app remains active and available, and the project is not deleted by Supabase.
+
+More details in the repo's README and [this issue](https://github.com/thenickedwards/duels_mapping/issues/48).
+
 ### Future Development
 
 The source data set only includes league games for Major League Soccer, however most MLS teams are playing in multiple competitions (US Open Cup, Canadian Championship, Concacaf Champions Cup/League, Club World Cup, Leagues Cup, etc.) Ideally we could include game actions from all matches, regardless of the competition.
