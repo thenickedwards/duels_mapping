@@ -13,7 +13,6 @@ import {
   List,
   ListItemButton,
   ListItemText,
-  Switch,
   Divider,
 } from "@mui/material";
 import Image from "next/image";
@@ -22,8 +21,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useColorMode } from "@/app/theme";
-import DarkMode from "../../public/images/dark_mode.png";
-import LightMode from "../../public/images/light_mode.png";
+import DarkMode from "../../../public/images/dark_mode.png";
+import LightMode from "../../../public/images/light_mode.png";
 import CloseIcon from "@mui/icons-material/Close";
 
 const pages = [
@@ -51,8 +50,14 @@ export default function NavBar() {
         textAlign: "center",
         width: 400,
         height: "100%",
-        bgcolor: theme.palette.mode === "dark" ? "#000" : "#fff",
-        color: "ffffff",
+        bgcolor:
+          theme.palette.mode === "dark"
+            ? theme.palette.common.black
+            : theme.palette.common.white,
+        color:
+          theme.palette.mode === "dark"
+            ? theme.palette.common.white
+            : theme.palette.common.black,
         borderLeft: "4px solid #B7F08E",
         paddingTop: "50px",
         paddingX: "40px",
@@ -79,10 +84,12 @@ export default function NavBar() {
           size="small"
         >
           <CloseIcon
-            sx={{
-              color: (theme) =>
-                theme.palette.mode === "dark" ? "#fff" : "#000",
-            }}
+            sx={(theme) => ({
+              color:
+                theme.palette.mode === "dark"
+                  ? theme.palette.common.white
+                  : theme.palette.common.black,
+            })}
           />
         </IconButton>
       </Box>
@@ -95,7 +102,10 @@ export default function NavBar() {
                 primary: {
                   sx: {
                     fontFamily: "'Bebas Neue', sans-serif",
-                    color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                    color:
+                      theme.palette.mode === "dark"
+                        ? theme.palette.common.white
+                        : theme.palette.common.black,
                     fontSize: "1.25rem",
                   },
                 },
@@ -105,7 +115,12 @@ export default function NavBar() {
         ))}
       </List>
       <Divider
-        sx={{ backgroundColor: "#ffffff", mx: "16px", mt: "16px", mb: "30px" }}
+        sx={{
+          backgroundColor: theme.palette.common.white,
+          mx: "16px",
+          mt: "16px",
+          mb: "30px",
+        }}
       />
       <Box
         sx={{
@@ -134,7 +149,10 @@ export default function NavBar() {
         color="default"
         elevation={0}
         sx={{
-          bgcolor: theme.palette.mode === "dark" ? "#000" : "#fff",
+          bgcolor:
+            theme.palette.mode === "dark"
+              ? theme.palette.common.black
+              : theme.palette.common.white,
           boxShadow: "none",
         }}
       >
@@ -190,7 +208,7 @@ export default function NavBar() {
                           bottom: 0,
                           height: "4px",
                           width: "100%",
-                          backgroundColor: isActive ? "#B7F08E" : "#3B5B84",
+                          backgroundColor: isActive ? theme.palette.common.limegreen : theme.palette.common.blue,
                           borderRadius: 0,
                           transformOrigin: "left",
                           transform: isActive ? "scaleX(1)" : "scaleX(0)",

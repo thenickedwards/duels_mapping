@@ -14,43 +14,50 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  InputAdornment,
   Pagination,
+  useMediaQuery,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { DataGrid } from "@mui/x-data-grid";
 import useSWR from "swr";
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import PlayerComparison from "./components/PlayerComparison";
+import PlayerComparison from "./components/comparisons/PlayerComparison";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
 import { saveAs } from "file-saver";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import PlayerDetailDialog from "./components/PlayerDetailDialog";
+import PlayerDetailDialog from "./components/players/PlayerDetailDialog";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@mui/material/styles";
-import { baseButtonStyle } from "./styles/buttonStyles";
+import {
+  baseButtonStyle,
+  primaryActionButtonStyle,
+} from "./styles/buttonStyles";
 import FilterChip from "./styles/FilterChip";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faSliders,
-  faMagnifyingGlass,
-  faXmark,
-  faSquareCheck,
-  faSquareMinus,
-} from "@fortawesome/free-solid-svg-icons";
-import Image from "next/image";
-import ColumnsBlack from "../public/images/columns-icon.png";
-import ColumnsWhite from "../public/images/columns-wh-icon.png";
-import ExportBlack from "../public/images/export-icon.png";
-import ExportWhite from "../public/images/export-wh-icon.png";
-import RightAlignedCenterCell from "./components/RightAlignedCenterCell";
-import CustomColumnMenu from "./components/CustomColumnMenu";
+import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import RightAlignedCenterCell from "./components/datagrid/RightAlignedCenterCell";
+import CustomColumnMenu from "./components/datagrid/CustomColumnMenu";
 import { inputStyle } from "./styles/inputStyles";
-import CustomSelect from "./components/CustomSelect";
-import PlayerNameCell from "./components/PlayerNameCell";
-import TeamBadgeCell from "./components/TeamBadgeCell";
-import LastUpdated from "./components/LastUpdated";
+import CustomSelect from "./components/inputs/CustomSelect";
+import PlayerNameCell from "./components/datagrid/PlayerNameCell";
+import TeamBadgeCell from "./components/datagrid/TeamBadgeCell";
+import LastUpdated from "./components/common/LastUpdated";
+import PlayerSearchField from "./components/inputs/PlayerSearchField";
+import PlayerFiltersRow from "./components/players/PlayerFiltersRow";
+import PlayerYearControls from "./components/players/PlayerYearControls";
+import SquadSelect from "./components/inputs/SquadSelect";
+import { textActionButtonStyle } from "./styles/buttonStyles";
+
+function removeAccents(str = "") {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function normalizeName(str = "") {
+  return removeAccents(str) // strip accents/diacritics  (é → e)
+    .toLowerCase()
+    .replace(/\s+/g, ""); // remove all spaces
+}
 
 const fetcher = (url) => fetch(url).then((r) => r.json());
 
@@ -58,11 +65,18 @@ const fetcher = (url) => fetch(url).then((r) => r.json());
 const StyledPagination = styled(Pagination)(({ theme }) => ({
   "& .MuiPaginationItem-root": {
     fontFamily: "'Bebas Neue', sans-serif",
-    border: `1px solid ${theme.palette.mode === "light" ? "black" : "white"}`,
+    border: `1px solid ${
+      theme.palette.mode === "light"
+        ? theme.palette.common.black
+        : "theme.palette.common.white"
+    }`,
     color: theme.palette.text.primary,
   },
   "& .MuiPaginationItem-page.Mui-selected": {
-    color: theme.palette.mode === "light" ? "black" : "black",
+    color:
+      theme.palette.mode === "light"
+        ? theme.palette.common.black
+        : theme.palette.common.black,
     fontWeight: "bold",
     position: "relative",
     backgroundColor: "transparent",
@@ -74,7 +88,7 @@ const StyledPagination = styled(Pagination)(({ theme }) => ({
       width: "100%",
       height: "100%",
       borderRadius: "50%",
-      backgroundColor: "#B7F08E",
+      backgroundColor: theme.palette.common.limegreen,
       zIndex: -1,
     },
   },
@@ -85,16 +99,31 @@ const StyledPagination = styled(Pagination)(({ theme }) => ({
 
 export default function PlayersPage() {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const tab = searchParams.get("tab") || "players";
-  // const season = searchParams.get("season") || "2025";
-  // --
-  const seasonFromUrl =
-    searchParams.get("season") || new Date().getFullYear().toString();
+
+  // DATA YEARS
+
   const currentYear = new Date().getFullYear();
-  // --
+
+  // Update this when you add new data seasons
+  const maxYearWithData = 2025;
+
+  const seasonFromUrl = parseInt(
+    searchParams.get("season") || currentYear.toString(),
+    10
+  );
+
+  // Prevent defaulting to a year with no data
+  const safeSeason = Math.min(seasonFromUrl, maxYearWithData);
+
+  const [selectedYear, setSelectedYear] = useState(safeSeason.toString());
+
+  const hardcodedYears = ["2025", "2024"];
+  const dropdownYears = ["2023", "2022", "2021", "2020", "2019", "2018"];
 
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [filters, setFilters] = useState({
@@ -117,28 +146,14 @@ export default function PlayersPage() {
 
   const [selectOpen, setSelectOpen] = useState(false);
 
-  // ---
-
-  //  const currentYear = new Date().getFullYear();
-  //  const [selectedYear, setSelectedYear] = useState(currentYear);
-
-  const [selectedYear, setSelectedYear] = useState(Number(seasonFromUrl));
-
   const { data: players } = useSWR(
     `/api/schmetzer_scores?season=${selectedYear}`,
     fetcher
   );
 
-  // --
-
-  // const query = new URLSearchParams({ season });
-  // ---
-  // const query = new URLSearchParams({ seasonFromUrl });
   const query = new URLSearchParams({ season: selectedYear.toString() });
 
-  // ---
   if (filters.position) query.set("position", filters.position);
-  if (filters.squad) query.set("squad", filters.squad);
   if (filters.minMinutes) query.set("minMinutes", filters.minMinutes);
 
   const { data, error, isLoading } = useSWR(
@@ -150,7 +165,7 @@ export default function PlayersPage() {
     const newParams = new URLSearchParams(searchParams.toString());
     newParams.set("season", year);
     router.replace(`?${newParams.toString()}`);
-    // --
+
     setSelectedYear(year);
   };
 
@@ -289,11 +304,38 @@ export default function PlayersPage() {
     },
   ];
 
-  const rows = data?.map((row, i) => ({ id: i, ...row })) || [];
+  const rawRows = Array.isArray(data)
+    ? data
+    : Array.isArray(data?.rows)
+    ? data.rows
+    : Array.isArray(data?.players)
+    ? data.players
+    : [];
 
-  const filteredRows = rows.filter((row) =>
-    row.player_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const rows = rawRows.map((row, i) => ({ id: i, ...row }));
+
+  const squadOptions = Array.from(
+    new Set(rows.map((r) => r.squad).filter(Boolean))
+  ).sort((a, b) => a.localeCompare(b));
+
+  const normalizedSearch = normalizeName(searchTerm);
+
+  const filteredRows = rows.filter((row) => {
+    if (!row) return false;
+
+    // Search: player OR squad (accent-insensitive)
+    const playerNameNormalized = normalizeName(row.player_name || "");
+    const squadNormalized = normalizeName(row.squad || "");
+    const matchesSearch =
+      !normalizedSearch ||
+      playerNameNormalized.includes(normalizedSearch) ||
+      squadNormalized.includes(normalizedSearch);
+
+    // Squad filter: if no squad selected, match all
+    const matchesSquad = !filters.squad || row.squad === filters.squad;
+
+    return matchesSearch && matchesSquad;
+  });
 
   // CUSTOM STYLED PAGINATION
   const handlePageChange = (event, value) => setPage(value);
@@ -325,17 +367,23 @@ export default function PlayersPage() {
     saveAs(blob, filename);
   }
 
-  const hardcodedYears = ["2025", "2024"];
-  const dropdownYears = ["2023", "2022", "2021", "2020", "2019", "2018"];
+  const filterCount = [
+    filters.position,
+    filters.squad,
+    filters.minMinutes,
+  ].filter(Boolean).length;
 
-  // CUSTOM ARROW ICON
+  // CUSTOM ARROW ICON (for page size select)
   const CustomArrowIcon = () => (
     <ArrowForwardIosIcon
       sx={{
         transform: "rotate(90deg)", // points down
         width: "1em",
         height: "1em",
-        color: (theme) => (theme.palette.mode === "dark" ? "#fff" : "#000"),
+        color: (theme) =>
+          theme.palette.mode === "dark"
+            ? theme.palette.common.white
+            : theme.palette.common.black,
       }}
     />
   );
@@ -355,15 +403,44 @@ export default function PlayersPage() {
               textTransform: "uppercase",
               minHeight: 48,
               padding: "20px 48px",
-              color: theme.palette.mode === "dark" ? "#fff" : "#000",
+              color:
+                theme.palette.mode === "dark"
+                  ? theme.palette.common.white
+                  : theme.palette.common.black,
+              transition: "background-color 0.15s ease",
+              // Hover (inactive tabs only)
+              "&:not(.Mui-selected):hover": {
+                backgroundColor:
+                  theme.palette.mode === "dark" ? "#26262A" : "#f2f2f2",
+                boxShadow: `inset 0 -2px 0 ${
+                  theme.palette.mode === "dark"
+                    ? theme.palette.common.white
+                    : theme.palette.common.black
+                }`,
+              },
             },
             "& .MuiTab-root.Mui-selected": {
               backgroundColor:
-                theme.palette.mode === "dark" ? "#B7F08E" : "#3B5B84",
-              color: theme.palette.mode === "dark" ? "#000" : "#fff",
+                theme.palette.mode === "dark"
+                  ? theme.palette.common.limegreen
+                  : theme.palette.common.blue,
+              color:
+                theme.palette.mode === "dark"
+                  ? theme.palette.common.black
+                  : theme.palette.common.white,
+              "&:hover": {
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? theme.palette.common.white
+                    : "#324d70",
+                color:
+                  theme.palette.mode === "dark"
+                    ? theme.palette.common.black
+                    : theme.palette.common.white,
+              },
             },
             "& .MuiTabs-indicator": {
-              backgroundColor: "#B7F08E",
+              backgroundColor: theme.palette.common.limegreen,
               height: "4px",
             },
           }}
@@ -375,7 +452,10 @@ export default function PlayersPage() {
       <Box
         sx={{
           height: "2px",
-          backgroundColor: theme.palette.mode === "dark" ? "#fff" : "#000",
+          backgroundColor:
+            theme.palette.mode === "dark"
+              ? theme.palette.common.white
+              : theme.palette.common.black,
           width: "100%",
           mt: "-2px",
         }}
@@ -383,406 +463,109 @@ export default function PlayersPage() {
 
       {tab === "players" && (
         <>
+          {/* Top controls: responsive layout */}
           <Box
             mt={3}
             display="flex"
-            flexWrap="wrap"
-            justifyContent="space-between"
-            alignItems="center"
+            flexDirection={isMobile ? "column" : "row"}
+            flexWrap={isMobile ? "nowrap" : "wrap"}
+            justifyContent={isMobile ? "flex-start" : "space-between"}
+            alignItems={isMobile ? "stretch" : "center"}
             gap={2}
           >
-            {/* Left side buttons */}
-            <Box display="flex" gap={1} alignItems="center" flexWrap="wrap">
-              <Button
-                variant="outlined"
-                startIcon={
-                  <FontAwesomeIcon
-                    icon={faSliders}
-                    style={{ fontSize: "15px" }}
+            {isMobile ? (
+              <>
+                {/* MOBILE: Search on top, full width, always expanded */}
+                <Box width="100%" mb={"12px"}>
+                  <PlayerSearchField
+                    value={searchTerm}
+                    onChange={setSearchTerm}
+                    onClear={() => setSearchTerm("")}
+                    fullWidth
                   />
-                }
-                onClick={() => setFilterDrawerOpen(true)}
-                sx={baseButtonStyle(theme)}
-              >
-                Filters
-                {(() => {
-                  const count = [
-                    filters.position,
-                    filters.squad,
-                    filters.minMinutes,
-                  ].filter(Boolean).length;
-                  return count > 0 ? ` (${count})` : "";
-                })()}
-              </Button>
+                </Box>
 
-              {/* Columns Dropdown */}
-              <ClickAwayListener onClickAway={() => setShowColumns(false)}>
-                <Box position="relative">
-                  <Button
-                    variant="outlined"
-                    onClick={() => setShowColumns(!showColumns)}
-                    startIcon={
-                      <Image
-                        src={
-                          theme.palette.mode === "dark"
-                            ? ColumnsWhite
-                            : ColumnsBlack
-                        }
-                        alt="Columns"
-                        height={14}
+                {/* MOBILE: Filter / Columns / Export (no count) */}
+                <PlayerFiltersRow
+                  filters={filters}
+                  onOpenFilterDrawer={() => setFilterDrawerOpen(true)}
+                  columns={columns}
+                  hiddenColumns={hiddenColumns}
+                  toggleColumnVisibility={toggleColumnVisibility}
+                  setHiddenColumns={setHiddenColumns}
+                  filteredRows={filteredRows}
+                  selectedYear={selectedYear}
+                  exportToCSV={exportToCSV}
+                  showFilterCount={false}
+                  baseButtonStyle={baseButtonStyle}
+                />
+
+                {/* MOBILE: Year controls on their own row */}
+                <Box mt={1} mb={2}>
+                  <PlayerYearControls
+                    selectedYear={selectedYear}
+                    updateSeason={updateSeason}
+                    baseButtonStyle={baseButtonStyle}
+                    hardcodedYears={hardcodedYears}
+                    dropdownYears={dropdownYears}
+                  />
+                </Box>
+              </>
+            ) : (
+              <>
+                {/* DESKTOP: Left – Filter / Columns / Export (with count) */}
+                <PlayerFiltersRow
+                  filters={filters}
+                  onOpenFilterDrawer={() => setFilterDrawerOpen(true)}
+                  columns={columns}
+                  hiddenColumns={hiddenColumns}
+                  toggleColumnVisibility={toggleColumnVisibility}
+                  setHiddenColumns={setHiddenColumns}
+                  filteredRows={filteredRows}
+                  selectedYear={selectedYear}
+                  exportToCSV={exportToCSV}
+                  showFilterCount={true}
+                  baseButtonStyle={baseButtonStyle}
+                />
+
+                {/* DESKTOP: Right – expandable search + year controls */}
+                <Box display="flex" gap={1} alignItems="center">
+                  {showSearch ? (
+                    <ClickAwayListener onClickAway={() => setShowSearch(false)}>
+                      <Box>
+                        <PlayerSearchField
+                          value={searchTerm}
+                          onChange={setSearchTerm}
+                          onClear={() => setSearchTerm("")}
+                          autoFocus
+                        />
+                      </Box>
+                    </ClickAwayListener>
+                  ) : (
+                    <IconButton onClick={() => setShowSearch(true)}>
+                      <FontAwesomeIcon
+                        icon={faMagnifyingGlass}
                         style={{
-                          borderRadius: 0,
-                          objectFit: "contain",
-                          imageRendering: "crisp-edges",
+                          fontSize: "18px",
+                          color:
+                            theme.palette.mode === "dark"
+                              ? theme.palette.common.white
+                              : theme.palette.common.black,
                         }}
                       />
-                    }
-                    sx={baseButtonStyle(theme)}
-                  >
-                    Columns
-                  </Button>
-
-                  {showColumns && (
-                    <Box
-                      position="absolute"
-                      top={50}
-                      left={0}
-                      width={220}
-                      height={250}
-                      overflow="auto"
-                      display="flex"
-                      flexDirection="column"
-                      justifyContent="space-between"
-                      border={`1px solid ${
-                        theme.palette.mode === "dark" ? "#fff" : "#000"
-                      }`}
-                      bgcolor={theme.palette.mode === "dark" ? "#000" : "#fff"}
-                      borderRadius={0}
-                      zIndex={10}
-                    >
-                      <Box p={2} overflow="auto">
-                        {columns.map((col) => (
-                          <Box
-                            key={col.field}
-                            display="flex"
-                            alignItems="center"
-                            mb={1.5}
-                            sx={{ cursor: "pointer" }}
-                            onClick={() => toggleColumnVisibility(col.field)}
-                          >
-                            {hiddenColumns.includes(col.field) ? (
-                              // Unchecked: custom box with border
-                              <Box
-                                sx={{
-                                  width: 16,
-                                  height: 16,
-                                  borderRadius: "3px",
-                                  border: `1px solid ${
-                                    theme.palette.mode === "dark"
-                                      ? "#fff"
-                                      : "#000"
-                                  }`,
-                                  marginRight: 1,
-                                }}
-                              />
-                            ) : (
-                              // Checked: FontAwesome icon
-                              <FontAwesomeIcon
-                                icon={faSquareCheck}
-                                style={{
-                                  fontSize: "1.2rem",
-                                  marginRight: 8,
-                                  color:
-                                    theme.palette.mode === "dark"
-                                      ? "#fff"
-                                      : "#000",
-                                }}
-                              />
-                            )}
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                fontFamily: "'Nunito Sans', sans-serif",
-                                fontSize: "0.875rem",
-                              }}
-                            >
-                              {col.displayName}
-                            </Typography>
-                          </Box>
-                        ))}
-                      </Box>
-
-                      <Box
-                        display="flex"
-                        justifyContent="space-between"
-                        alignItems="center"
-                        px={1.5}
-                        py={0.4}
-                        borderTop={`1px solid ${
-                          theme.palette.mode === "dark" ? "#fff" : "#000"
-                        }`}
-                        bgcolor={
-                          theme.palette.mode === "dark" ? "#1a1a1a" : "#f2f2f2"
-                        }
-                      >
-                        <Button
-                          variant="text"
-                          onClick={() => {
-                            const areAllVisible = columns.every(
-                              (col) => !hiddenColumns.includes(col.field)
-                            );
-                            setHiddenColumns(
-                              areAllVisible
-                                ? columns.map((col) => col.field)
-                                : []
-                            );
-                          }}
-                          startIcon={
-                            <FontAwesomeIcon
-                              icon={faSquareMinus}
-                              style={{
-                                fontSize: "1.2rem",
-                                marginRight: 6,
-                                color:
-                                  theme.palette.mode === "dark"
-                                    ? "#fff"
-                                    : "#000",
-                              }}
-                            />
-                          }
-                          sx={{
-                            fontSize: "0.875rem",
-                            fontFamily: "'Bebas Neue', sans-serif",
-                            color: theme.palette.text.primary,
-                          }}
-                        >
-                          SHOW/HIDE ALL
-                        </Button>
-                        <Button
-                          variant="text"
-                          onClick={() => setHiddenColumns([])}
-                          sx={{
-                            fontSize: "0.875rem",
-                            fontFamily: "'Bebas Neue', sans-serif",
-                            color: theme.palette.text.primary,
-                          }}
-                        >
-                          RESET
-                        </Button>
-                      </Box>
-                    </Box>
+                    </IconButton>
                   )}
+
+                  <PlayerYearControls
+                    selectedYear={selectedYear}
+                    updateSeason={updateSeason}
+                    baseButtonStyle={baseButtonStyle}
+                    hardcodedYears={hardcodedYears}
+                    dropdownYears={dropdownYears}
+                  />
                 </Box>
-              </ClickAwayListener>
-
-              {/* Export Button */}
-              <Button
-                variant="outlined"
-                onClick={() =>
-                  // exportToCSV(filteredRows, `schmetzer_scores_${season}.csv`)
-                  exportToCSV(
-                    filteredRows,
-                    `schmetzer_scores_${selectedYear}.csv`
-                  )
-                }
-                startIcon={
-                  <Image
-                    src={
-                      theme.palette.mode === "dark" ? ExportWhite : ExportBlack
-                    }
-                    alt="Columns"
-                    height={14}
-                    style={{
-                      borderRadius: 0,
-                      objectFit: "contain",
-                      imageRendering: "crisp-edges",
-                    }}
-                  />
-                }
-                sx={baseButtonStyle(theme)}
-              >
-                Export
-              </Button>
-            </Box>
-
-            {/* Right side controls */}
-            <Box display="flex" gap={1} alignItems="center">
-              {/* Expandable Search */}
-              {showSearch ? (
-                <ClickAwayListener onClickAway={() => setShowSearch(false)}>
-                  <TextField
-                    variant="standard"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search Player"
-                    sx={{
-                      input: {
-                        fontFamily: "'Nunito Sans', sans-serif",
-                        fontSize: "1rem",
-                        color: theme.palette.mode === "dark" ? "#fff" : "#000",
-                      },
-                      "& .MuiInput-underline:before": {
-                        borderBottomColor:
-                          theme.palette.mode === "dark" ? "#fff" : "#000",
-                      },
-                      "& .MuiInput-underline:hover:before": {
-                        borderBottomColor:
-                          theme.palette.mode === "dark" ? "#fff" : "#000",
-                      },
-                      "& .MuiInput-underline:after": {
-                        borderBottomColor:
-                          theme.palette.mode === "dark" ? "#fff" : "#000",
-                      },
-                      "& input::placeholder": {
-                        color: theme.palette.mode === "dark" ? "#aaa" : "#888",
-                        opacity: 1,
-                      },
-                    }}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <FontAwesomeIcon
-                            icon={faMagnifyingGlass}
-                            style={{
-                              fontSize: "18px",
-                              color:
-                                theme.palette.mode === "dark"
-                                  ? "white"
-                                  : "black",
-                            }}
-                          />
-                        </InputAdornment>
-                      ),
-                      endAdornment: searchTerm && (
-                        <InputAdornment position="end">
-                          <IconButton
-                            size="small"
-                            onClick={() => setSearchTerm("")}
-                            sx={{ padding: 0.5 }}
-                          >
-                            <FontAwesomeIcon
-                              icon={faXmark}
-                              style={{
-                                fontSize: "14px",
-                                color:
-                                  theme.palette.mode === "dark"
-                                    ? "white"
-                                    : "black",
-                              }}
-                            />
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </ClickAwayListener>
-              ) : (
-                <IconButton onClick={() => setShowSearch(true)}>
-                  <FontAwesomeIcon
-                    icon={faMagnifyingGlass}
-                    style={{
-                      fontSize: "18px",
-                      color: theme.palette.mode === "dark" ? "white" : "black",
-                    }}
-                  />
-                </IconButton>
-              )}
-
-              <>
-                <Suspense fallback={<div>Loading...</div>}>
-                  {hardcodedYears.map((year) => (
-                    <Button
-                      key={year}
-                      onClick={() => updateSeason(year)}
-                      sx={baseButtonStyle(theme, selectedYear === year, true)}
-                      // sx={baseButtonStyle(theme)}
-                    >
-                      {year}
-                    </Button>
-                  ))}
-                </Suspense>
-
-                <Suspense fallback={<div>Loading...</div>}>
-                  <Box position="relative" width={44} height={40}>
-                    <Select
-                      // value={dropdownYears.includes(season) ? season : ""}
-                      value={
-                        dropdownYears.includes(selectedYear) ? selectedYear : ""
-                      }
-                      onChange={(e) => updateSeason(e.target.value)}
-                      displayEmpty
-                      IconComponent={() => null}
-                      MenuProps={{
-                        PaperProps: {
-                          sx: {
-                            mt: "10px",
-                            ml: "-8px",
-                            maxHeight: 300,
-                            width: 100,
-                            borderRadius: 0,
-                            boxShadow: "none",
-                            backgroundColor:
-                              theme.palette.mode === "dark" ? "#000" : "#fff",
-                            border: `1px solid ${
-                              theme.palette.mode === "dark" ? "#fff" : "#000"
-                            }`,
-                            fontFamily: "'Nunito Sans', sans-serif",
-                            fontSize: "0.875rem",
-                          },
-                        },
-                      }}
-                      sx={{
-                        width: 44,
-                        height: 40,
-                        backgroundColor: "transparent",
-                        border: `1px solid ${
-                          theme.palette.mode === "dark" ? "#fff" : "#000"
-                        }`,
-                        borderRadius: 0,
-                        padding: 0,
-                        "& .MuiSelect-select": {
-                          padding: 0,
-                          textIndent: "-9999px",
-                        },
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          border: "none",
-                        },
-                      }}
-                    >
-                      <MenuItem value="" disabled sx={{ display: "none" }}>
-                        More
-                      </MenuItem>
-                      {dropdownYears.map((year) => (
-                        <MenuItem
-                          key={year}
-                          value={year}
-                          sx={{
-                            fontFamily: "'Nunito Sans', sans-serif",
-                            fontSize: "0.875rem",
-                          }}
-                        >
-                          {year}
-                        </MenuItem>
-                      ))}
-                    </Select>
-
-                    {/* Custom Positioned Icon */}
-                    <ArrowForwardIosIcon
-                      sx={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%) rotate(90deg)",
-                        width: "1em",
-                        height: "1em",
-                        pointerEvents: "none",
-                        color: theme.palette.mode === "dark" ? "#fff" : "#000",
-                      }}
-                    />
-                  </Box>
-                </Suspense>
               </>
-            </Box>
+            )}
           </Box>
 
           {/* Filter Chips Row */}
@@ -793,36 +576,41 @@ export default function PlayersPage() {
                 onRemove={() => setFilters({ ...filters, squad: "" })}
               />
             )}
+
             {filters.position && (
               <FilterChip
                 label={filters.position}
                 onRemove={() => setFilters({ ...filters, position: "" })}
               />
             )}
+
+            {filters.minMinutes && (
+              <FilterChip
+                label={`${filters.minMinutes} mins`}
+                onRemove={() => setFilters({ ...filters, minMinutes: "" })}
+              />
+            )}
+
             {/* Dropdown Year Chip */}
-            {/* {dropdownYears.includes(season) && ( */}
             {dropdownYears.includes(selectedYear) && (
               <FilterChip
                 label={selectedYear}
-                // label={season}
                 onRemove={() => updateSeason("2025")}
               />
             )}
-            {(filters.squad || filters.position) && (
-              <Button
-                variant="text"
-                onClick={() =>
-                  setFilters({ position: "", squad: "", minMinutes: "" })
-                }
-                sx={{
-                  fontSize: "1rem",
-                  fontFamily: "'Bebas Neue', 'sans-serif'",
-                  textTransform: "uppercase",
-                  color: theme.palette.text.primary,
-                }}
-              >
-                Clear All
-              </Button>
+
+            {(filters.squad || filters.position || filters.minMinutes) && (
+              <Box sx={{ px: "12px", alignContent: "center" }}>
+                <Button
+                  variant="text"
+                  onClick={() =>
+                    setFilters({ position: "", squad: "", minMinutes: "" })
+                  }
+                  sx={(theme) => textActionButtonStyle(theme)}
+                >
+                  Clear All
+                </Button>
+              </Box>
             )}
           </Box>
 
@@ -831,11 +619,7 @@ export default function PlayersPage() {
               <Typography>Loading…</Typography>
             ) : (
               <DataGrid
-                // rows={filteredRows}
                 rows={paginatedRows}
-                // columns={columns.filter(
-                //   (col) => !hiddenColumns.includes(col.field)
-                // )}
                 columns={columns.filter(
                   (col) => !hiddenColumns.includes(col.field)
                 )}
@@ -844,6 +628,7 @@ export default function PlayersPage() {
                 components={{
                   ColumnMenu: CustomColumnMenu,
                 }}
+                disableColumnFilter
                 hideFooter
                 sx={{
                   border: "none",
@@ -853,7 +638,9 @@ export default function PlayersPage() {
                     backgroundColor:
                       theme.palette.mode === "dark" ? "#26262A" : "#FAFAFA",
                     borderBottom: `2px solid ${
-                      theme.palette.mode === "dark" ? "#fff" : "#000"
+                      theme.palette.mode === "dark"
+                        ? theme.palette.common.white
+                        : theme.palette.common.black
                     }`,
                   },
                   "& .MuiDataGrid-columnHeader": {
@@ -861,7 +648,9 @@ export default function PlayersPage() {
                       textDecoration: "underline 1px dashed",
                       textUnderlineOffset: "4px",
                       textDecorationColor:
-                        theme.palette.mode === "dark" ? "#fff" : "#000",
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.white
+                          : theme.palette.common.black,
                     },
                   },
                   "& .MuiDataGrid-columnHeaderTitleContainer": {
@@ -873,13 +662,26 @@ export default function PlayersPage() {
                     width: "100%",
                   },
                   "& .MuiDataGrid-sortIcon": {
-                    backgroundColor: "#B7F08E",
+                    backgroundColor: theme.palette.common.limegreen,
                     borderRadius: "50%",
                     width: "18px",
                     height: "18px",
-                    color: "#000!important",
+                    color: `${theme.palette.common.black} !important`,
                     padding: "1px",
                     opacity: "1",
+                  },
+
+                  "& .MuiDataGrid-columnHeader:focus, \
+                  & .MuiDataGrid-columnHeader:focus-within": {
+                    outline: "none",
+                  },
+
+                  "& .MuiDataGrid-columnHeader .MuiButtonBase-root:focus": {
+                    outline: "none",
+                  },
+
+                  "& .MuiDataGrid-columnHeader .MuiDataGrid-sortIcon:focus": {
+                    outline: "none",
                   },
 
                   // TITLE TEXT
@@ -905,19 +707,13 @@ export default function PlayersPage() {
                     backgroundColor:
                       theme.palette.mode === "dark" ? "#17171B" : "#F2F2F2",
                   },
-                  "& .MuiDataGrid-columnHeader": {
-                    "& .MuiDataGrid-iconButtonContainer": {
-                      opacity: 1,
-                      visibility: "visible",
-                    },
-                  },
                   "& .MuiDataGrid-columnSeparator": {
                     display: "none",
                   },
                   // Sort button (contains arrow)
                   "& .MuiDataGrid-columnHeader .MuiDataGrid-sortButton": {
                     opacity: 0,
-                    transition: "opacity 0.2s ease-in-out",
+                    transition: "none",
                   },
                   "& .MuiDataGrid-columnHeader:hover .MuiDataGrid-sortButton": {
                     opacity: "1!important",
@@ -931,8 +727,7 @@ export default function PlayersPage() {
                     {
                       opacity: 0,
                       visibility: "hidden",
-                      transition:
-                        "opacity 0.2s ease-in-out, visibility 0.2s ease-in-out",
+                      transition: "none",
                     },
                   "& .MuiDataGrid-columnHeader:hover .MuiDataGrid-iconButtonContainer":
                     {
@@ -950,10 +745,12 @@ export default function PlayersPage() {
 
             {/* Custom Footer */}
             <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
               mt={4}
+              display="flex"
+              flexDirection={isMobile ? "column" : "row"}
+              justifyContent={isMobile ? "flex-start" : "space-between"}
+              alignItems={isMobile ? "flex-start" : "center"}
+              gap={isMobile ? 2 : 0}
             >
               {/* Players by Page */}
               <Box display="flex" alignItems="center" gap={1}>
@@ -974,14 +771,14 @@ export default function PlayersPage() {
                       sx={{
                         transform: selectOpen
                           ? "rotate(-90deg)"
-                          : "rotate(90deg)", // points down
+                          : "rotate(90deg)",
                         width: "0.7em",
                         height: "0.7em",
                         color:
                           theme.palette.mode === "dark"
-                            ? "black!important"
-                            : "black",
-                        pointerEvents: "none", // allow click to pass through to select
+                            ? `${theme.palette.common.black} !important`
+                            : theme.palette.common.black,
+                        pointerEvents: "none",
                         marginTop: "2px",
                       }}
                     />
@@ -996,12 +793,22 @@ export default function PlayersPage() {
                         borderRadius: 0,
                         boxShadow: "none",
                         backgroundColor:
-                          theme.palette.mode === "dark" ? "black" : "white",
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.black
+                            : theme.palette.common.white,
                         border: `1px solid ${
-                          theme.palette.mode === "dark" ? "white" : "black"
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.white
+                            : theme.palette.common.black
                         }`,
                         fontFamily: "'Nunito Sans', sans-serif",
                         fontSize: "0.875rem",
+                        "& .MuiMenuItem-root.Mui-selected": {
+                          backgroundColor:
+                            theme.palette.mode === "dark"
+                              ? "rgba(255,255,255,0.16)"
+                              : "rgba(25,118,210,0.12)",
+                        },
                       },
                     },
                   }}
@@ -1010,12 +817,19 @@ export default function PlayersPage() {
                     height: "30px",
                     borderRadius: 0,
                     backgroundColor:
-                      theme.palette.mode === "light" ? "white" : "black", // light: white, dark: black
-                    color: theme.palette.mode === "dark" ? "black" : "black", // dark: white text
+                      theme.palette.mode === "light"
+                        ? theme.palette.common.white
+                        : theme.palette.common.black,
+                    color:
+                      theme.palette.mode === "dark"
+                        ? theme.palette.common.black
+                        : theme.palette.common.black,
                     position: "relative",
                     "& .MuiOutlinedInput-notchedOutline": {
                       borderColor:
-                        theme.palette.mode === "light" ? "black" : "white",
+                        theme.palette.mode === "light"
+                          ? theme.palette.common.black
+                          : theme.palette.common.white,
                       "&.Mui-focused": {
                         outline: "none",
                       },
@@ -1034,15 +848,22 @@ export default function PlayersPage() {
                       right: "-5px",
                       width: "100%",
                       height: "100%",
-                      bgcolor: "#B7F08E",
+                      bgcolor: theme.palette.common.limegreen,
                       borderRadius: 0,
                       zIndex: 0,
-                      pointerEvents: "none", // ensure clicks pass through
+                      pointerEvents: "none",
                     },
                   }}
                 >
                   {[5, 10, 25, 50].map((size) => (
-                    <MenuItem key={size} value={size}>
+                    <MenuItem
+                      key={size}
+                      value={size}
+                      sx={{
+                        fontSize: "0.875rem",
+                        fontFamily: "'Nunito Sans', sans-serif",
+                      }}
+                    >
                       {size}
                     </MenuItem>
                   ))}
@@ -1050,35 +871,23 @@ export default function PlayersPage() {
               </Box>
 
               {/* Pagination */}
-              <StyledPagination
-                count={totalPages}
-                page={page}
-                onChange={handlePageChange}
-                variant="outlined"
-              />
+              <Box
+                mt={isMobile ? 1 : 0}
+                alignSelf={isMobile ? "flex-start" : "auto"}
+              >
+                <StyledPagination
+                  count={totalPages}
+                  page={page}
+                  onChange={handlePageChange}
+                  variant="outlined"
+                />
+              </Box>
             </Box>
 
-            {/* <Box pb={5}>
-              <Divider
-                sx={{
-                  my: "20px",
-                  border: `1px solid ${
-                    theme.palette.mode === "light" ? "black" : "white"
-                  }`,
-                }}
-              />
-              <Typography
-                variant="body2"
-                sx={{
-                  color: theme.palette.mode === "dark" ? "#FAFAFA" : "#000",
-                }}
-              >
-                Data Last Updated on August 31, 2025 at 9:00 PM EST
-              </Typography>
-            </Box> */}
             <LastUpdated />
           </Box>
 
+          {/* Filter Drawer */}
           <Drawer
             anchor="right"
             open={filterDrawerOpen}
@@ -1089,8 +898,14 @@ export default function PlayersPage() {
                 width: 400,
                 height: "100%",
                 backgroundColor:
-                  theme.palette.mode === "dark" ? "#000" : "#FAFAFA",
-                borderLeft: "4px solid #B7F08E",
+                  theme.palette.mode === "dark"
+                    ? theme.palette.common.black
+                    : "#FAFAFA",
+                borderLeft: `4px solid ${
+                  theme.palette.mode === "dark"
+                    ? theme.palette.common.limegreen
+                    : theme.palette.common.white
+                }`,
                 paddingTop: "50px",
                 paddingX: "40px",
               })}
@@ -1116,7 +931,9 @@ export default function PlayersPage() {
                   <CloseIcon
                     sx={{
                       color: (theme) =>
-                        theme.palette.mode === "dark" ? "#fff" : "#000",
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.white
+                          : theme.palette.common.black,
                     }}
                   />
                 </IconButton>
@@ -1145,14 +962,11 @@ export default function PlayersPage() {
               <Typography variant="h4" fontSize="1rem" mb={-0.5}>
                 Squad
               </Typography>
-              <TextField
-                fullWidth
+
+              <SquadSelect
+                options={squadOptions}
                 value={filters.squad}
-                onChange={(e) =>
-                  setFilters({ ...filters, squad: e.target.value })
-                }
-                placeholder="Search for Squad"
-                sx={(theme) => inputStyle(theme)}
+                onChange={(value) => setFilters({ ...filters, squad: value })}
               />
 
               {/* Minutes */}
@@ -1176,37 +990,15 @@ export default function PlayersPage() {
                   onClick={() =>
                     setFilters({ position: "", squad: "", minMinutes: "" })
                   }
-                  sx={(theme) => ({
-                    fontFamily: "'Bebas Neue', sans-serif",
-                    fontSize: "1rem",
-                    color: theme.palette.text.primary,
-                    border: "none",
-                    p: 0,
-                    borderRadius: 0,
-                  })}
+                  sx={(theme) => textActionButtonStyle(theme)}
                 >
                   Clear All
                 </Button>
 
                 <Button
                   variant="contained"
-                  sx={(theme) => ({
-                    fontFamily: "'Bebas Neue', sans-serif",
-                    fontSize: "1rem",
-                    backgroundColor:
-                      theme.palette.mode === "dark" ? "#B7F08E" : "#3B5B84",
-                    color: theme.palette.mode === "dark" ? "#000" : "#fff",
-                    px: "40px",
-                    py: "10px",
-                    borderRadius: 0,
-                    boxShadow: "none",
-                    "&:hover": {
-                      backgroundColor:
-                        theme.palette.mode === "dark" ? "#A3DB79" : "#2F4D6E",
-                    },
-                  })}
+                  sx={(theme) => primaryActionButtonStyle(theme)}
                   onClick={() => {
-                    // optional no-op since filter updates on change
                     setFilterDrawerOpen(false);
                   }}
                 >
@@ -1216,6 +1008,7 @@ export default function PlayersPage() {
             </Box>
           </Drawer>
 
+          {/* Player Detail Dialog */}
           <Dialog
             open={!!selectedPlayer}
             onClose={() => setSelectedPlayer(null)}
@@ -1223,10 +1016,6 @@ export default function PlayersPage() {
           >
             <DialogTitle>{selectedPlayer?.player_name}</DialogTitle>
             <DialogContent>
-              {/* <Typography>Position: {selectedPlayer?.position}</Typography>
-              <Typography>Squad: {selectedPlayer?.squad}</Typography>
-              <Typography>Age: {selectedPlayer?.player_age}</Typography> */}
-              {/* Add more fields here */}
               <PlayerDetailDialog
                 player={selectedPlayer}
                 open={!!selectedPlayer}

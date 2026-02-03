@@ -11,6 +11,7 @@ import {
   Legend,
 } from "chart.js";
 import { Radar } from "react-chartjs-2";
+import { baseChartTooltipOptions } from "./styles/chartTooltipOptions";
 
 ChartJS.register(
   RadialLinearScale,
@@ -32,7 +33,7 @@ export default function PlayerRadarChart({ player }) {
     player.aerial_duels_won_pct ?? 0,
   ];
 
-  const baseColor = theme.palette.mode === "dark" ? "#B7F08E" : "#3B5B84";
+  const baseColor = theme.palette.mode === "dark" ? theme.palette.common.limegreen : theme.palette.common.blue;
 
   return (
     <Box>
@@ -68,6 +69,16 @@ export default function PlayerRadarChart({ player }) {
           ],
         }}
         options={{
+          responsive: true,
+          interaction: {
+            mode: "nearest",
+            intersect: true,
+          },
+          onHover: (event, elements) => {
+            const canvas = event?.native?.target;
+            if (!canvas) return;
+            canvas.style.cursor = elements?.length ? "pointer" : "default";
+          },
           scales: {
             r: {
               suggestedMin: 0,
@@ -80,7 +91,7 @@ export default function PlayerRadarChart({ player }) {
                   size: 16,
                   weight: "400",
                 },
-                color: theme.palette.mode === "dark" ? "white" : "black",
+                color: theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
                 padding: 8,
               },
               grid: {
@@ -90,6 +101,7 @@ export default function PlayerRadarChart({ player }) {
           },
           plugins: {
             legend: { display: false },
+            tooltip: baseChartTooltipOptions(theme),
           },
         }}
       />

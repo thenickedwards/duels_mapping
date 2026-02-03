@@ -5,8 +5,8 @@ import { useTheme } from "@mui/material/styles";
 
 export default function MethodsPage() {
   const theme = useTheme();
-  const dividerColor = theme.palette.mode === "dark" ? "#fff" : "#000";
-  const rectColor = theme.palette.mode === "dark" ? "#3B5B84" : "#B7F08E";
+  const dividerColor = theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black;
+  const rectColor = theme.palette.mode === "dark" ? theme.palette.common.blue : theme.palette.common.limegreen;
 
   return (
     <main style={{ padding: "2rem" }}>

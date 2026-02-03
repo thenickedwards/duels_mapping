@@ -10,14 +10,14 @@ export default function LastUpdated() {
         sx={{
           my: "20px",
           border: `1px solid ${
-            theme.palette.mode === "light" ? "black" : "white"
+            theme.palette.mode === "light" ? theme.palette.common.black : theme.palette.common.white
           }`,
         }}
       />
       <Typography
         variant="body2"
         sx={{
-          color: theme.palette.mode === "dark" ? "#FAFAFA" : "black",
+          color: theme.palette.mode === "dark" ? "#FAFAFA" : theme.palette.common.black,
         }}
       >
         Data Last Updated on August 31, 2025 at 9:00 PM EST

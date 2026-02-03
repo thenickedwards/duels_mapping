@@ -11,22 +11,28 @@ const getDesignTokens = (mode) => ({
     ...(mode === "light"
       ? {
           background: {
-            default: "#ffffff",
-            paper: "#ffffff",
+            default: "#fff",
+            paper: "#fff",
           },
           text: {
-            primary: "#000000",
+            primary: "#000",
           },
         }
       : {
           background: {
-            default: "#000000",
-            paper: "#000000",
+            default: "#000",
+            paper: "#000",
           },
           text: {
-            primary: "#ffffff",
+            primary: "#fff",
           },
         }),
+    common: {
+      black: "#000",
+      white: "#fff",
+      limegreen: "#B7F08E",
+      blue: "#3B5B84",
+    },
   },
   typography: {
     h1: {
@@ -62,8 +68,8 @@ const getDesignTokens = (mode) => ({
     MuiPaper: {
       styleOverrides: {
         root: {
-           borderRadius: 0,
-           boxShadow: "none",
+          borderRadius: 0,
+          boxShadow: "none",
           "&.MuiDataGrid-paper": {
             marginTop: "10px",
           },
@@ -73,10 +79,12 @@ const getDesignTokens = (mode) => ({
         },
       },
     },
-     MuiPopper: {
+    MuiPopper: {
       styleOverrides: {
         root: {
-          "&.MuiDataGrid-menu": {
+          "&.MuiDataGrid-menu .MuiPaper-root": {
+            // transition: "none !important",
+            transform: "none !important",
             border: `1px solid ${mode === "dark" ? "#fff" : "#000"}`,
           },
           "& .MuiSvgIcon-root": {
@@ -89,12 +97,11 @@ const getDesignTokens = (mode) => ({
       styleOverrides: {
         root: {
           "&:hover": {
-            backgroundColor: mode === "dark" ? "#333" : "#f0f0f0", 
+            backgroundColor: mode === "dark" ? "#333" : "#f0f0f0",
           },
         },
       },
     },
-        
   },
 });
 

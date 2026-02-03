@@ -1,27 +1,23 @@
 "use client";
 
-import React, {
-  useMemo,
-  useState,
-} from "react";
+import React, { useMemo, useState } from "react";
 import {
   Box,
   Typography,
   Container,
   Grid,
   useTheme,
-  Button,
   Menu,
   MenuItem,
 } from "@mui/material";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
-import CustomAutocomplete from "./CustomAutocomplete";
-import { baseButtonStyle } from "../styles/buttonStyles";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import FilterChip from "../styles/FilterChip";
-import PlayerAvatar from "./PlayerAvatar";
-import LastUpdated from "./LastUpdated";
+import CustomAutocomplete from "../inputs/CustomAutocomplete";
+import { baseButtonStyle } from "../../styles/buttonStyles";
+import FilterChip from "../../styles/FilterChip";
+import PlayerAvatar from "../players/PlayerAvatar";
+import LastUpdated from "../common/LastUpdated";
+import PlayerYearControls from "../players/PlayerYearControls";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -49,17 +45,18 @@ export default function PlayerComparison({
   const [dropdownYear, setDropdownYear] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const playerOptions = useMemo(() => players || [], [players]);
+  const playerOptions = useMemo(
+    () => (Array.isArray(players) ? players : []),
+    [players]
+  );
 
   const getPlayerStats = (playerName) =>
     playerOptions?.find((p) => p.player_name === playerName);
 
-  // -------
   const playerNames = useMemo(
     () => playerOptions.map((p) => p.player_name),
     [playerOptions]
   );
-
 
   const disabledForA = useMemo(
     () => (playerB?.player_name ? [playerB.player_name] : []),
@@ -70,7 +67,6 @@ export default function PlayerComparison({
     () => (playerA?.player_name ? [playerA.player_name] : []),
     [playerA]
   );
-// --------
 
   const centerValuesPlugin = {
     id: "centerValues",
@@ -81,17 +77,17 @@ export default function PlayerComparison({
 
       // Always read the latest values from the dataset
       const ds = chart.config.data?.datasets?.[0];
-      const [rawA = 0, rawB = 0] = Array.isArray(ds?.data) ? ds.data : [0, 0];
+      const [rawB = 0, rawA = 0] = Array.isArray(ds?.data) ? ds.data : [0, 0];
 
       const statA = Number(rawA) || 0;
       const statB = Number(rawB) || 0;
 
-      const leftColor = Array.isArray(ds?.backgroundColor)
-        ? ds.backgroundColor[0]
-        : "#A1D17E";
       const rightColor = Array.isArray(ds?.backgroundColor)
-        ? ds.backgroundColor[1]
-        : "#3B5B84";
+        ? ds.backgroundColor[0] // Player B
+        : blue;
+      const leftColor = Array.isArray(ds?.backgroundColor)
+        ? ds.backgroundColor[1] // Player A
+        : limegreen;
 
       ctx.save();
       ctx.textAlign = "center";
@@ -112,15 +108,16 @@ export default function PlayerComparison({
     const statA = playerA ? Number(playerA[stat]) || 0 : 0;
     const statB = playerB ? Number(playerB[stat]) || 0 : 0;
 
-    const leftColor = theme.palette.mode === "dark" ? "#B7F08E" : "#A1D17E";
-    const rightColor = theme.palette.mode === "dark" ? "#ffffff" : "#3B5B84";
+    const leftColor = theme.palette.mode === "dark" ? theme.palette.common.limegreen : "#A1D17E";
+    const rightColor = theme.palette.mode === "dark" ? white : blue;
 
     const data = {
-      labels: ["Player A", "Player B"],
+      labels: ["Player B", "Player A"],
+
       datasets: [
         {
-          data: [statA, statB],
-          backgroundColor: [leftColor, rightColor],
+          data: [statB, statA],
+          backgroundColor: [rightColor, leftColor],
           borderColor: "transparent",
           borderWidth: 4,
         },
@@ -130,7 +127,21 @@ export default function PlayerComparison({
     const options = {
       cutout: "88%",
       animation: { duration: 300 },
-      plugins: { legend: { display: false }, tooltip: { enabled: true } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          enabled: true,
+          callbacks: {
+            // Fix tooltip labels so they match Player A/B meaning
+            label: (ctx) => {
+              if (ctx.dataIndex === 0) {
+                return ` ${statB}`; // Player B
+              }
+              return ` ${statA}`; // Player A
+            },
+          },
+        },
+      },
       maintainAspectRatio: false,
     };
 
@@ -179,13 +190,18 @@ export default function PlayerComparison({
     updateSeason(currentYear); // <-- reset URL
   };
 
+  const black = theme.palette.common.black;
+  const white = theme.palette.common.white;
+  const limegreen = theme.palette.common.limegreen;
+  const blue = theme.palette.common.blue;
+
   // Dropdown years (2018-2023)
   const previousYears = [2023, 2022, 2021, 2020, 2019, 2018];
 
   return (
     <Box
       sx={{
-        minHeight: "76vh", 
+        minHeight: "76vh",
         display: "flex",
         flexDirection: "column",
       }}
@@ -236,46 +252,22 @@ export default function PlayerComparison({
                     justifyContent: "flex-end",
                   }}
                 >
-                  {[2025, 2024].map((year) => (
-                    <Button
-                      key={year}
-                      variant={selectedYear === year ? "contained" : "outlined"}
-                      onClick={() => handleButtonYearClick(year)}
-                      sx={baseButtonStyle(theme, selectedYear === year, true)}
-                    >
-                      {year}
-                    </Button>
-                  ))}
-
-                  <Button
-                    variant="outlined"
-                    onClick={handleMenuOpen}
-                    sx={{
-                      width: 44,
-                      height: 40,
-                      minWidth: 44,
-                      backgroundColor: "transparent",
-                      border: `1px solid ${
-                        theme.palette.mode === "dark" ? "#fff" : "#000"
-                      }`,
-                      borderRadius: 0,
-                      padding: 0,
-                      position: "relative",
+                  <PlayerYearControls
+                    selectedYear={selectedYear}
+                    updateSeason={(year) => {
+                      // reset players any time year changes (same as your current logic)
+                      setPlayerA(null);
+                      setPlayerB(null);
+                      updateSeason(year);
                     }}
-                  >
-                    <ArrowForwardIosIcon
-                      sx={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%) rotate(90deg)",
-                        width: "1em",
-                        height: "1em",
-                        pointerEvents: "none",
-                        color: theme.palette.mode === "dark" ? "#fff" : "#000",
-                      }}
-                    />
-                  </Button>
+                    baseButtonStyle={baseButtonStyle}
+                    hardcodedYears={[2025, 2024]}
+                    dropdownYears={previousYears}
+                    onDropdownSelect={(yearOrNull) => {
+                      // chip only for dropdown years, clear for hardcoded
+                      setDropdownYear(yearOrNull);
+                    }}
+                  />
 
                   <Menu
                     anchorEl={anchorEl}
@@ -290,9 +282,9 @@ export default function PlayerComparison({
                         borderRadius: 0,
                         boxShadow: "none",
                         backgroundColor:
-                          theme.palette.mode === "dark" ? "#000" : "#fff",
+                          theme.palette.mode === "dark" ? black : white,
                         border: `1px solid ${
-                          theme.palette.mode === "dark" ? "#fff" : "#000"
+                          theme.palette.mode === "dark" ? white : black
                         }`,
                         fontFamily: "'Nunito Sans', sans-serif",
                         fontSize: "0.875rem",
@@ -322,10 +314,8 @@ export default function PlayerComparison({
               <CustomAutocomplete
                 label="Player A"
                 placeholder="Select Player"
-                // options={playerOptions.map((p) => p.player_name)}
-                 options={playerNames}                 
+                options={playerNames}
                 disabledOptions={disabledForA}
-                // -------
                 value={playerA?.player_name || ""}
                 onChange={(_, newValue) => setPlayerA(getPlayerStats(newValue))}
               />
@@ -335,10 +325,8 @@ export default function PlayerComparison({
               <CustomAutocomplete
                 label="Player B"
                 placeholder="Select Player"
-                // options={playerOptions.map((p) => p.player_name)}
-                options={playerNames}                 
-                disabledOptions={disabledForB} 
-                // -----
+                options={playerNames}
+                disabledOptions={disabledForB}
                 value={playerB?.player_name || ""}
                 onChange={(_, newValue) => setPlayerB(getPlayerStats(newValue))}
               />
