@@ -4,10 +4,14 @@ import { Box, Typography } from "@mui/material";
 import Image from "next/image";
 
 const formatBadgeFileName = (squad) => {
+  if (!squad) return "";
+
   return squad
+    .normalize("NFD")                // split letters and diacritics
+    .replace(/[\u0300-\u036f]/g, "") // remove diacritics (é -> e, etc.)
     .toLowerCase()
-    .replace(/[.’']/g, "")     // remove punctuation
-    .replace(/\s+/g, "-");     // replace spaces with dashes
+    .replace(/[.’']/g, "")           // remove punctuation
+    .replace(/\s+/g, "-");           // replace spaces with dashes
 };
 
 const TeamBadgeCell = ({ squad }) => {

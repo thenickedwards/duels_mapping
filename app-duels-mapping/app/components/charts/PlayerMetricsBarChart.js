@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, Tooltip, Typography, useTheme } from "@mui/material";
+import { getMuiChartTooltipSlotProps } from "./styles/chartTooltipOptions";
 
 export default function PlayerMetricsBarChart({ metrics = {}, averages = {} }) {
   const theme = useTheme();
@@ -10,6 +11,8 @@ export default function PlayerMetricsBarChart({ metrics = {}, averages = {} }) {
 
   const dataValues = labels.map((label) => metrics[label] ?? 0);
   const averageValues = labels.map((label) => averages[label] ?? 0);
+
+   const tooltipSlotProps = getMuiChartTooltipSlotProps(theme);
 
   return (
     <Box
@@ -73,18 +76,19 @@ export default function PlayerMetricsBarChart({ metrics = {}, averages = {} }) {
               }}
             >
               {/* Filled bar */}
-              <Tooltip title={`Value: ${value}`} arrow>
+              <Tooltip title={`Value: ${value}`} arrow slotProps={tooltipSlotProps}>
                 <Box
                   sx={{
                     height: 16,
                     width: `${percent}%`,
                     background: isDark
                       ? "linear-gradient(to right, #3B5B84, #B7F08E)"
-                      : "#3B5B84",
+                      : theme.palette.common.blue,
                     borderRadius: 4,
                     position: "absolute",
                     left: 0,
                     zIndex: 1,
+                    cursor: "pointer",
                   }}
                 />
               </Tooltip>
@@ -94,15 +98,16 @@ export default function PlayerMetricsBarChart({ metrics = {}, averages = {} }) {
                 sx={{
                   height: 16,
                   width: "100%",
-                  border: isDark ? "1px solid #646464" : "1px solid #3B5B84",
-                  backgroundColor: isDark ? "#646464" : "white",
+                  border: isDark ? "1px solid #646464" : `1px solid ${theme.palette.common.blue}`,
+                  backgroundColor: isDark ? "#646464" : theme.palette.common.white,
                   borderRadius: 4,
                   zIndex: 0,
+                  cursor: "default",
                 }}
               />
 
               {/* Average dot */}
-              <Tooltip title={`Avg: ${average}`} arrow>
+              <Tooltip title={`Avg: ${average}`} arrow slotProps={tooltipSlotProps}>
                 <Box
                   sx={{
                     position: "absolute",
@@ -111,9 +116,10 @@ export default function PlayerMetricsBarChart({ metrics = {}, averages = {} }) {
                     width: 12,
                     height: 12,
                     borderRadius: "50%",
-                    border: isDark ? "1px solid #fff" : "1px solid #3B5B84",
-                    backgroundColor: isDark ? "#fff" : "#B7F08E",
+                    border: isDark ? `1px solid ${theme.palette.common.white}` : "1px solid #3B5B84",
+                    backgroundColor: isDark ? theme.palette.common.white : theme.palette.common.limegreen,
                     zIndex: 2,
+                    cursor: "pointer",
                   }}
                 />
               </Tooltip>

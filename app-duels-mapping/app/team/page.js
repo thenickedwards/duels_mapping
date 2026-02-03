@@ -16,8 +16,8 @@ import { useTheme } from "@mui/material/styles";
 
 export default function TeamPage() {
   const theme = useTheme();
-  const dividerColor = theme.palette.mode === "dark" ? "#fff" : "#000";
-  const rectColor = theme.palette.mode === "dark" ? "#3B5B84" : "#B7F08E";
+  const dividerColor = theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black;
+  const rectColor = theme.palette.mode === "dark" ? theme.palette.common.blue : theme.palette.common.limegreen;
   const roleColor = theme.palette.mode === "dark" ? "#b2b2b2" : "#505050"; 
 
   return (

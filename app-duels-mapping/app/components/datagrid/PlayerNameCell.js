@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Avatar, Box, Typography, useTheme } from "@mui/material";
-import { getPlayerPic } from "./../../utils/get-player-pics";
+import { getPlayerPic } from "../../../utils/get-player-pics";
 
 const PlayerNameCell = ({ name }) => {
   const theme = useTheme();
@@ -28,7 +28,7 @@ const PlayerNameCell = ({ name }) => {
   };
 
   return (
-    <Box display="flex" alignItems="center" height="100%" gap={1}>
+    <Box display="flex" alignItems="center" height="100%" gap={1} sx={{cursor: "pointer"}}>
       <Avatar
         src={imgUrl || undefined}
         sx={{
@@ -39,10 +39,10 @@ const PlayerNameCell = ({ name }) => {
             ? "transparent"
             : theme.palette.mode === "dark"
             ? "transparent"
-            : "black",
-          color: imgUrl ? "inherit" : "#fff",
+            : theme.palette.common.black,
+          color: imgUrl ? "inherit" : "white",
           border: `1px solid ${
-            theme.palette.mode === "dark" ? "#fff" : "#000"
+            theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black
           }`,
           fontFamily: "'Bebas Neue', sans-serif",
         }}
@@ -55,7 +55,7 @@ const PlayerNameCell = ({ name }) => {
           textDecoration: "underline",
           textDecorationStyle: "dashed",
           textUnderlineOffset: "3px",
-          color: theme.palette.mode === 'dark' ? 'white' : 'black',
+          color: theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.black,
 
         }}
       >

@@ -11,14 +11,14 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import { getInitials } from "../../utils/getInitials";
-import SchmetzerScoreBar from "./charts/SchmetzerScoreBar";
-import PlayerMetricsBarChart from "./charts/PlayerMetricsBarChart";
-import PlayerRadarChart from "./charts/PlayerRadarChart";
-import SchmetzerTrendChart from "./charts/SchmetzerTrendChart";
+import { getInitials } from "@/utils/getInitials";
+import SchmetzerScoreBar from "../charts/SchmetzerScoreBar";
+import PlayerMetricsBarChart from "../charts/PlayerMetricsBarChart";
+import PlayerRadarChart from "../charts/PlayerRadarChart";
+import SchmetzerTrendChart from "../charts/SchmetzerTrendChart";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
-import { getPlayerPic } from "./../../utils/get-player-pics";
+import { getPlayerPic } from "@/utils/get-player-pics";
 
 export default function PlayerDetailDialog({ player, open, onClose }) {
   const theme = useTheme();
@@ -54,11 +54,11 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
       {/* Player Info */}
       <DialogTitle
         sx={{
-          backgroundColor: theme.palette.mode === "dark" ? "#17171B" : "white",
+          backgroundColor: theme.palette.mode === "dark" ? "#17171B" : theme.palette.common.white,
         }}
       >
         <Box display="flex" justifyContent="space-between" alignItems="start">
-          <Box display="flex" alignItems="center" gap={2}>
+          <Box display="flex" alignItems={isMobile ? "flex-start" : "center"} flexDirection={isMobile ? "column" : "row"} gap={2}>
             <Avatar
               src={imgUrl || undefined}
               sx={{
@@ -70,10 +70,10 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
                   ? "transparent"
                   : theme.palette.mode === "dark"
                   ? "transparent"
-                  : "black",
-                color: imgUrl ? "inherit" : "white",
+                  : theme.palette.common.black,
+                color: imgUrl ? "inherit" : theme.palette.common.white,
                 border: `1px solid ${
-                  theme.palette.mode === "dark" ? "white" : "black"
+                  theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black
                 }`,
                 fontFamily: "'Bebas Neue', sans-serif",
               }}
@@ -114,14 +114,14 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
           </Box>
           <IconButton onClick={onClose} aria-label="close">
             <CloseIcon
-              sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000" }}
+              sx={{ color: theme.palette.mode === "dark" ? "white" : theme.palette.common.black }}
             />
           </IconButton>
         </Box>
       </DialogTitle>
       <DialogContent
         sx={{
-          backgroundColor: theme.palette.mode === "dark" ? "#17171B" : "#fff",
+          backgroundColor: theme.palette.mode === "dark" ? "#17171B" : theme.palette.common.white,
         }}
       >
         <Grid container spacing={3}>
@@ -135,19 +135,6 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
                   theme.palette.mode === "dark" ? "#303034" : "#FAFAFA",
               }}
             >
-              {/* <Typography variant="h2" component={"div"} fontSize={"1.6rem"}>
-                SCHMETZER SCORE
-              </Typography>
-              <Typography
-                fontFamily={"'Bebas Neue', sans-serif"}
-                textAlign="left"
-                fontSize={"6rem"}
-                fontWeight={"bold"}
-                mb={1}
-                mt={"-12px"}
-              >
-                {player.schmetzer_score}
-              </Typography> */}
               <SchmetzerScoreBar
                 value={player.schmetzer_score}
                 average={150}
@@ -159,7 +146,7 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
           <Grid item size={{ xs: 12, sm: 6 }}>
             <Box
               p={4}
-              borderRadius={2}
+              borderRadius={0}
               height="100%"
               width="100%"
               sx={{
@@ -183,7 +170,7 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
           <Grid item size={{ xs: 12, sm: 6 }}>
             <Box
               p={4}
-              borderRadius={2}
+              borderRadius={0}
               height={"100%"}
               sx={{
                 backgroundColor:
@@ -197,7 +184,7 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
           <Grid item size={{ xs: 12, sm: 6 }}>
             <Box
               p={4}
-              borderRadius={2}
+              borderRadius={0}
               height={"100%"}
               sx={{
                 backgroundColor:

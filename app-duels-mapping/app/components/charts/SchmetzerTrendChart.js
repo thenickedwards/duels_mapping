@@ -12,6 +12,7 @@ import {
   Legend,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
+import { baseChartTooltipOptions } from "./styles/chartTooltipOptions";
 
 ChartJS.register(
   CategoryScale,
@@ -27,7 +28,7 @@ Tooltip.positioners.customBelow = function (elements, eventPosition) {
   if (base) {
     return {
       x: base.x,
-      y: base.y + 12, 
+      y: base.y + 12,
     };
   }
   return base;
@@ -67,7 +68,7 @@ export default function SchmetzerTrendChart({ history = [] }) {
             sx={{
               fontFamily: "Nunito Sans, sans-serif",
               fontSize: "0.875rem",
-              color: theme.palette.mode === "dark" ? "#fff" : "#000",
+              color: theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
             }}
           >
             {percentChange}%
@@ -78,7 +79,7 @@ export default function SchmetzerTrendChart({ history = [] }) {
               width: 20,
               height: 20,
               borderRadius: "50%",
-              backgroundColor: "#B7F08E",
+              backgroundColor: theme.palette.common.limegreen,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -87,12 +88,12 @@ export default function SchmetzerTrendChart({ history = [] }) {
             {isIncrease ? (
               <ArrowUpward
                 fontSize="inherit"
-                sx={{ color: "#000", fontSize: 16 }}
+                sx={{ color: `${theme.palette.common.black} !important`, fontSize: 16 }}
               />
             ) : (
               <ArrowDownward
                 fontSize="inherit"
-                sx={{ color: "#000", fontSize: 16 }}
+                sx={{ color: `${theme.palette.common.black} !important`, fontSize: 16 }}
               />
             )}
           </Box>
@@ -106,15 +107,16 @@ export default function SchmetzerTrendChart({ history = [] }) {
             {
               label: "Score",
               data: scores,
-              borderColor: theme.palette.mode === "dark" ? "white" : "black",
+              borderColor: theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
               borderWidth: 2,
               tension: 0.2,
               pointRadius: 2.5,
               pointHoverRadius: 10,
               pointBackgroundColor:
-                theme.palette.mode === "dark" ? "white" : "black",
-              pointHoverBackgroundColor: "#B7F08E",
-              pointBorderColor: theme.palette.mode === "dark" ? "white" : "black",
+                theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+              pointHoverBackgroundColor: theme.palette.common.limegreen,
+              pointBorderColor:
+                theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
               pointBorderWidth: 0,
               pointHoverBorderWidth: 2,
             },
@@ -126,30 +128,14 @@ export default function SchmetzerTrendChart({ history = [] }) {
             mode: "nearest",
             intersect: true,
           },
+          onHover: (event, elements) => {
+            const canvas = event?.native?.target;
+            if (!canvas) return;
+            canvas.style.cursor = elements?.length ? "pointer" : "default";
+          },
           plugins: {
             legend: { display: false },
-            tooltip: {
-              enabled: true,
-              position: "customBelow", 
-              yAlign: "top", 
-              backgroundColor: theme.palette.mode === "dark" ? "#fff" : "#000",
-              titleColor: theme.palette.mode === "dark" ? "#000" : "#fff",
-              bodyColor: theme.palette.mode === "dark" ? "#000" : "#fff",
-              cornerRadius: 0,
-              caretSize: 6,
-              borderWidth: 0,
-              displayColors: false,
-              padding: {
-                top: 8,
-                bottom: 8,
-                left: 20,
-                right: 20,
-              },
-              callbacks: {
-                title: () => null,
-                label: (context) => `${context.raw}`,
-              },
-            },
+            tooltip: baseChartTooltipOptions(theme),
           },
           scales: {
             y: {
