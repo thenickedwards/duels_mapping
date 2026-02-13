@@ -47,7 +47,7 @@ export default function PlayerComparison({
 
   const playerOptions = useMemo(
     () => (Array.isArray(players) ? players : []),
-    [players]
+    [players],
   );
 
   const getPlayerStats = (playerName) =>
@@ -55,17 +55,17 @@ export default function PlayerComparison({
 
   const playerNames = useMemo(
     () => playerOptions.map((p) => p.player_name),
-    [playerOptions]
+    [playerOptions],
   );
 
   const disabledForA = useMemo(
     () => (playerB?.player_name ? [playerB.player_name] : []),
-    [playerB]
+    [playerB],
   );
 
   const disabledForB = useMemo(
     () => (playerA?.player_name ? [playerA.player_name] : []),
-    [playerA]
+    [playerA],
   );
 
   const centerValuesPlugin = {
@@ -108,7 +108,10 @@ export default function PlayerComparison({
     const statA = playerA ? Number(playerA[stat]) || 0 : 0;
     const statB = playerB ? Number(playerB[stat]) || 0 : 0;
 
-    const leftColor = theme.palette.mode === "dark" ? theme.palette.common.limegreen : "#A1D17E";
+    const leftColor =
+      theme.palette.mode === "dark"
+        ? theme.palette.common.limegreen
+        : "#A1D17E";
     const rightColor = theme.palette.mode === "dark" ? white : blue;
 
     const data = {
@@ -195,8 +198,22 @@ export default function PlayerComparison({
   const limegreen = theme.palette.common.limegreen;
   const blue = theme.palette.common.blue;
 
-  // Dropdown years (2018-2023)
-  const previousYears = [2023, 2022, 2021, 2020, 2019, 2018];
+  // DATA YEARS
+
+  const currentDate = new Date();
+  // const currentYear = currentDate.getFullYear();
+  // March 17th used bc this is a few weeks after the seasons start to get data from first few games.
+  const cutoffDate = new Date(currentYear, 2, 17);
+
+  // If before March 17th, use previous year, otherwise use current year.
+  const maxYearWithData =
+    currentDate < cutoffDate ? currentYear - 1 : currentYear;
+
+  // Dropdown seasons = 2 years ago through 2018
+  const previousYears = [];
+  for (let year = maxYearWithData - 2; year >= 2018; year--) {
+    previousYears.push(year.toString());
+  }
 
   return (
     <Box
@@ -261,7 +278,10 @@ export default function PlayerComparison({
                       updateSeason(year);
                     }}
                     baseButtonStyle={baseButtonStyle}
-                    hardcodedYears={[2025, 2024]}
+                    hardcodedYears={[
+                      maxYearWithData.toString(),
+                      (maxYearWithData - 1).toString(),
+                    ]}
                     dropdownYears={previousYears}
                     onDropdownSelect={(yearOrNull) => {
                       // chip only for dropdown years, clear for hardcoded
