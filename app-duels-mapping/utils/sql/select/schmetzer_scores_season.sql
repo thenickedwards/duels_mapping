@@ -20,8 +20,9 @@ SELECT
     -- tackles_won_pts,
     interceptions,
     -- interceptions_pts,
-    recoveries
-    -- recoveries_pts
+    recoveries,
+    -- recoveries_pts,
+    load_datetime
 FROM "schmetzer_scores_{year}"
     {where_clause}
     ORDER BY schmetzer_score DESC;

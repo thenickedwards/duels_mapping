@@ -36,6 +36,7 @@ export default function PlayerComparison({
   selectedYear,
   updateSeason,
   players,
+  lastUpdated,
 }) {
   const theme = useTheme();
 
@@ -47,7 +48,7 @@ export default function PlayerComparison({
 
   const playerOptions = useMemo(
     () => (Array.isArray(players) ? players : []),
-    [players]
+    [players],
   );
 
   const getPlayerStats = (playerName) =>
@@ -55,17 +56,17 @@ export default function PlayerComparison({
 
   const playerNames = useMemo(
     () => playerOptions.map((p) => p.player_name),
-    [playerOptions]
+    [playerOptions],
   );
 
   const disabledForA = useMemo(
     () => (playerB?.player_name ? [playerB.player_name] : []),
-    [playerB]
+    [playerB],
   );
 
   const disabledForB = useMemo(
     () => (playerA?.player_name ? [playerA.player_name] : []),
-    [playerA]
+    [playerA],
   );
 
   const centerValuesPlugin = {
@@ -108,7 +109,10 @@ export default function PlayerComparison({
     const statA = playerA ? Number(playerA[stat]) || 0 : 0;
     const statB = playerB ? Number(playerB[stat]) || 0 : 0;
 
-    const leftColor = theme.palette.mode === "dark" ? theme.palette.common.limegreen : "#A1D17E";
+    const leftColor =
+      theme.palette.mode === "dark"
+        ? theme.palette.common.limegreen
+        : "#A1D17E";
     const rightColor = theme.palette.mode === "dark" ? white : blue;
 
     const data = {
@@ -368,7 +372,7 @@ export default function PlayerComparison({
         </Box>
       </Container>
       <Box sx={{ mt: "auto" }}>
-        <LastUpdated />
+        <LastUpdated lastUpdated={lastUpdated} />
       </Box>
     </Box>
   );

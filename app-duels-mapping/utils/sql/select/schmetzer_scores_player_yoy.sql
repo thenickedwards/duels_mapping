@@ -8,7 +8,8 @@ SELECT
     player_yob,
     nineties,
     schmetzer_score, 
-    schmetzer_rk
+    schmetzer_rk,
+    load_datetime
 FROM schmetzer_scores_all
     WHERE {playerFilter}
     ORDER BY season;

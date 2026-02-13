@@ -114,7 +114,7 @@ export default function PlayersPage() {
 
   const seasonFromUrl = parseInt(
     searchParams.get("season") || currentYear.toString(),
-    10
+    10,
   );
 
   // Prevent defaulting to a year with no data
@@ -148,7 +148,7 @@ export default function PlayersPage() {
 
   const { data: players } = useSWR(
     `/api/schmetzer_scores?season=${selectedYear}`,
-    fetcher
+    fetcher,
   );
 
   const query = new URLSearchParams({ season: selectedYear.toString() });
@@ -158,7 +158,7 @@ export default function PlayersPage() {
 
   const { data, error, isLoading } = useSWR(
     `/api/schmetzer_scores?${query.toString()}`,
-    fetcher
+    fetcher,
   );
 
   const updateSeason = (year) => {
@@ -177,7 +177,7 @@ export default function PlayersPage() {
 
   const toggleColumnVisibility = (field) => {
     setHiddenColumns((prev) =>
-      prev.includes(field) ? prev.filter((f) => f !== field) : [...prev, field]
+      prev.includes(field) ? prev.filter((f) => f !== field) : [...prev, field],
     );
   };
 
@@ -307,15 +307,18 @@ export default function PlayersPage() {
   const rawRows = Array.isArray(data)
     ? data
     : Array.isArray(data?.rows)
-    ? data.rows
-    : Array.isArray(data?.players)
-    ? data.players
-    : [];
+      ? data.rows
+      : Array.isArray(data?.players)
+        ? data.players
+        : [];
 
   const rows = rawRows.map((row, i) => ({ id: i, ...row }));
 
+  // Wait for rows to exist before accessing load_datetime from first record
+  const lastUpdatedDate = rows.length > 0 ? rows[0].load_datetime : null;
+
   const squadOptions = Array.from(
-    new Set(rows.map((r) => r.squad).filter(Boolean))
+    new Set(rows.map((r) => r.squad).filter(Boolean)),
   ).sort((a, b) => a.localeCompare(b));
 
   const normalizedSearch = normalizeName(searchTerm);
@@ -344,7 +347,7 @@ export default function PlayersPage() {
   const totalPages = Math.ceil(filteredRows.length / pageSize);
   const paginatedRows = filteredRows.slice(
     (page - 1) * pageSize,
-    page * pageSize
+    page * pageSize,
   );
 
   // EXPORT
@@ -358,8 +361,8 @@ export default function PlayersPage() {
           [
             i + 1,
             ...header.slice(1).map((field) => JSON.stringify(row[field] || "")),
-          ].join(",")
-        )
+          ].join(","),
+        ),
       )
       .join("\n");
 
@@ -621,7 +624,7 @@ export default function PlayersPage() {
               <DataGrid
                 rows={paginatedRows}
                 columns={columns.filter(
-                  (col) => !hiddenColumns.includes(col.field)
+                  (col) => !hiddenColumns.includes(col.field),
                 )}
                 loading={isLoading}
                 onRowClick={(params) => setSelectedPlayer(params.row)}
@@ -884,7 +887,7 @@ export default function PlayersPage() {
               </Box>
             </Box>
 
-            <LastUpdated />
+            <LastUpdated lastUpdated={lastUpdatedDate} />
           </Box>
 
           {/* Filter Drawer */}
@@ -1033,6 +1036,7 @@ export default function PlayersPage() {
             selectedYear={selectedYear}
             updateSeason={updateSeason}
             players={players || []}
+            lastUpdated={lastUpdatedDate}
           />
         </Box>
       )}
