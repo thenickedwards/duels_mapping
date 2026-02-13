@@ -107,14 +107,18 @@ export default function PlayersPage() {
 
   // DATA YEARS
 
-  const currentYear = new Date().getFullYear();
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  // March 17th used bc this is a few weeks after the seasons start to get data from first few games.
+  const cutoffDate = new Date(currentYear, 2, 17);
 
-  // Update this when you add new data seasons
-  const maxYearWithData = 2025;
+  // If before March 17th, use previous year, otherwise use current year.
+  const maxYearWithData =
+    currentDate < cutoffDate ? currentYear - 1 : currentYear;
 
   const seasonFromUrl = parseInt(
-    searchParams.get("season") || currentYear.toString(),
-    10
+    searchParams.get("season") || maxYearWithData.toString(),
+    10,
   );
 
   // Prevent defaulting to a year with no data
@@ -122,8 +126,17 @@ export default function PlayersPage() {
 
   const [selectedYear, setSelectedYear] = useState(safeSeason.toString());
 
-  const hardcodedYears = ["2025", "2024"];
-  const dropdownYears = ["2023", "2022", "2021", "2020", "2019", "2018"];
+  // Hardcoded season = current and previous year
+  const hardcodedYears = [
+    maxYearWithData.toString(),
+    (maxYearWithData - 1).toString(),
+  ];
+
+  // Dropdown seasons = 2 years ago through 2018
+  const dropdownYears = [];
+  for (let year = maxYearWithData - 2; year >= 2018; year--) {
+    dropdownYears.push(year.toString());
+  }
 
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [filters, setFilters] = useState({
@@ -148,7 +161,7 @@ export default function PlayersPage() {
 
   const { data: players } = useSWR(
     `/api/schmetzer_scores?season=${selectedYear}`,
-    fetcher
+    fetcher,
   );
 
   const query = new URLSearchParams({ season: selectedYear.toString() });
@@ -158,7 +171,7 @@ export default function PlayersPage() {
 
   const { data, error, isLoading } = useSWR(
     `/api/schmetzer_scores?${query.toString()}`,
-    fetcher
+    fetcher,
   );
 
   const updateSeason = (year) => {
@@ -177,7 +190,7 @@ export default function PlayersPage() {
 
   const toggleColumnVisibility = (field) => {
     setHiddenColumns((prev) =>
-      prev.includes(field) ? prev.filter((f) => f !== field) : [...prev, field]
+      prev.includes(field) ? prev.filter((f) => f !== field) : [...prev, field],
     );
   };
 
@@ -307,15 +320,15 @@ export default function PlayersPage() {
   const rawRows = Array.isArray(data)
     ? data
     : Array.isArray(data?.rows)
-    ? data.rows
-    : Array.isArray(data?.players)
-    ? data.players
-    : [];
+      ? data.rows
+      : Array.isArray(data?.players)
+        ? data.players
+        : [];
 
   const rows = rawRows.map((row, i) => ({ id: i, ...row }));
 
   const squadOptions = Array.from(
-    new Set(rows.map((r) => r.squad).filter(Boolean))
+    new Set(rows.map((r) => r.squad).filter(Boolean)),
   ).sort((a, b) => a.localeCompare(b));
 
   const normalizedSearch = normalizeName(searchTerm);
@@ -344,7 +357,7 @@ export default function PlayersPage() {
   const totalPages = Math.ceil(filteredRows.length / pageSize);
   const paginatedRows = filteredRows.slice(
     (page - 1) * pageSize,
-    page * pageSize
+    page * pageSize,
   );
 
   // EXPORT
@@ -358,8 +371,8 @@ export default function PlayersPage() {
           [
             i + 1,
             ...header.slice(1).map((field) => JSON.stringify(row[field] || "")),
-          ].join(",")
-        )
+          ].join(","),
+        ),
       )
       .join("\n");
 
@@ -621,7 +634,7 @@ export default function PlayersPage() {
               <DataGrid
                 rows={paginatedRows}
                 columns={columns.filter(
-                  (col) => !hiddenColumns.includes(col.field)
+                  (col) => !hiddenColumns.includes(col.field),
                 )}
                 loading={isLoading}
                 onRowClick={(params) => setSelectedPlayer(params.row)}
