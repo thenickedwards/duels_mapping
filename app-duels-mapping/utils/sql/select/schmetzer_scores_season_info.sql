@@ -14,4 +14,4 @@ SELECT
 	MAX(schmetzer_score) as smetz_max,
 	AVG(schmetzer_score) as smetz_avg
 FROM "schmetzer_scores_{year}"
-	WHERE nineties >= 1;
+	WHERE nineties >= 5;

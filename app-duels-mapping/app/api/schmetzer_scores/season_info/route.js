@@ -9,7 +9,7 @@ Example when hosted locally:
 http://localhost:3000/api/schmetzer_scores/season_info?season=2024
 Note: the season query parameter is required (no other parameters are accepted).
 
-The API response returned will be an array with one object containing the highest and average values for individual stats and the Schmetzer Score, a count of total players, and the distinct count of Schmetzer Score ranks for the requested season.
+The API response returned will be an array with one object containing the highest and average values for individual stats and the Schmetzer Score, a count of total players, and the distinct count of Schmetzer Score ranks for the requested season. 
 */
 
 // Hold the db instance across requests
@@ -29,7 +29,7 @@ export async function GET(req) {
       {
         status: 400,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -45,7 +45,7 @@ export async function GET(req) {
       });
 
       const sqlTemplate = await getSqlSelect(
-        "schmetzer_scores_season_info.sql"
+        "schmetzer_scores_season_info.sql",
       );
       let sql = "";
       // Load and interpolate the SQL with the requested season
@@ -62,7 +62,7 @@ export async function GET(req) {
       console.log("In deployment, using Supabase DB");
       const supabase = createClient(
         process.env.SUPABASE_URL,
-        process.env.SUPABASE_ANON_KEY
+        process.env.SUPABASE_ANON_KEY,
       );
       if (!supabase) console.log("Could NOT create Supabase client!");
       if (
@@ -70,7 +70,7 @@ export async function GET(req) {
         supabase.supabaseKey == process.env.SUPABASE_ANON_KEY
       )
         console.log(
-          "Created Supabase client matches SUPABASE_URL && SUPABASE_ANON_KEY!"
+          "Created Supabase client matches SUPABASE_URL && SUPABASE_ANON_KEY!",
         );
       const table = `schmetzer_scores_${season}`;
 
@@ -92,7 +92,7 @@ export async function GET(req) {
           adl_avg:aerial_duels_lost.avg(),
           smetz_max:schmetzer_score.max(),
           smetz_avg:schmetzer_score.avg()
-          `
+          `,
         )
         .gte("nineties", 1);
 
@@ -115,3 +115,24 @@ export async function GET(req) {
     });
   }
 }
+
+/* Example response below:
+[
+  {
+    total_players: 577,
+    total_ranks: 374,
+    adw_max: 310,
+    adw_avg: 19.150779896013866,
+    tkw_max: 57,
+    tkw_avg: 15.92894280762565,
+    int_max: 57,
+    int_avg: 14.616984402079723,
+    recov_max: 243,
+    recov_avg: 72.75736568457539,
+    adl_max: 119,
+    adl_avg: 19.084922010398614,
+    smetz_max: 251.25,
+    smetz_avg: 68.10745233968804,
+  },
+];
+*/

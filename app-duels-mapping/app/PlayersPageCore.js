@@ -161,6 +161,12 @@ export default function PlayersPage() {
     fetcher,
   );
 
+  // Fetch season stats
+  const { data: seasonStats } = useSWR(
+    `/api/schmetzer_scores/season_info?season=${selectedYear}`,
+    fetcher,
+  );
+
   const updateSeason = (year) => {
     const newParams = new URLSearchParams(searchParams.toString());
     newParams.set("season", year);
@@ -1023,6 +1029,7 @@ export default function PlayersPage() {
                 player={selectedPlayer}
                 open={!!selectedPlayer}
                 onClose={() => setSelectedPlayer(null)}
+                seasonStats={seasonStats}
               />
             </DialogContent>
           </Dialog>
