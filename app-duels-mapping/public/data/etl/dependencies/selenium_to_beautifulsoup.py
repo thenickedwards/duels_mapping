@@ -10,7 +10,14 @@ BeautifulSoup doesn't handle JavaScript, so Selenium is used to simulate a brows
 '''
 
 def selenium_to_beautifulsoup(url):
-    browser = webdriver.Chrome()
+    chrome_options = Options()
+    chrome_options.add_argument("--headless=new") # Run without a visible UI
+    chrome_options.add_argument("--no-sandbox") # Bypass OS security model (required in Docker/CI)
+    chrome_options.add_argument("--disable-dev-shm-usage") # Overcome limited resource problems
+
+    browser = webdriver.Chrome(options=chrome_options)
+    # Chrome options to run headless from LLM above ⬆️, dbl check this
+    # browser = webdriver.Chrome()
     browser.get(url)
     
     # TODO: 

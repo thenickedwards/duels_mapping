@@ -188,7 +188,7 @@ class DataHandler:
                     normalize_row(r) for r in rows
                     if r['season'] is not None and isinstance(r['season'], int)
                 ]
-                response = supabase.table(t).upsert(data, default_to_null=True, on_conflict='player_name,player_yob,season,squad').execute()
+                response = supabase.table(t).upsert(data, default_to_null=True, on_conflict='id').execute()
                 print(f'Inserted data into Supbase table: {t}')
         except sqlite3.Error as e:
             print(e)
