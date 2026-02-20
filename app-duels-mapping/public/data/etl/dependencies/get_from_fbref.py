@@ -4,6 +4,9 @@ from dependencies.selenium_to_beautifulsoup import selenium_to_beautifulsoup, se
 from dependencies.parse_rows import parse_row_by_element, parse_nations
 
 def get_FBref_mls_player_misc_stats(year, url='https://FBref.com/en/comps/22/misc/Major-League-Soccer-Stats', verbose=1):
+    # TESTING GITHUB ACTIONS
+    url='http://fbref.com/en/comps/22/2025/misc/2025-Major-League-Soccer-Stats'
+    # overwriting URL
     '''
     This function accepts a URL from FBref's Major League Soccer Miscellaneous Stats page,
     parses the Player Miscellaneous Stats table, and
