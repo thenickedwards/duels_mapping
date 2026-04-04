@@ -16,17 +16,17 @@ ChartJS.register(
   LinearScale,
   BarElement,
   PointElement,
-  ChartTooltip
+  ChartTooltip,
 );
 
 export default function SchmetzerScoreBar({
   value,
-  average = 150,
+  average,
+  max,
   darkMode = false,
 }) {
   const theme = useTheme();
 
-  const max = 300;
   const percentage = (value / max) * 100;
   const avgPosition = (average / max) * 100;
 

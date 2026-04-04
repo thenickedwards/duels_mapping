@@ -27,7 +27,7 @@ export async function GET(req, verbose = 2) {
   if (verbose >= 2) console.log("season:", season, "playerName:", playerName);
   if (verbose >= 2)
     console.log(
-      `Retrieving data for player ${playerName}; season: ${season} and Schmetzer Scores YOY`
+      `Retrieving data for player ${playerName}; season: ${season} and Schmetzer Scores YOY`,
     );
 
   if (!season) {
@@ -36,7 +36,7 @@ export async function GET(req, verbose = 2) {
       {
         status: 400,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -46,7 +46,7 @@ export async function GET(req, verbose = 2) {
       {
         status: 400,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -68,10 +68,10 @@ export async function GET(req, verbose = 2) {
       });
 
       const playerSeasonSqlTemplate = await getSqlSelect(
-        "schmetzer_scores_season.sql"
+        "schmetzer_scores_season.sql",
       );
       const playerYoySqlTemplate = await getSqlSelect(
-        "schmetzer_scores_player_yoy.sql"
+        "schmetzer_scores_player_yoy.sql",
       );
       const whereClause = filters.length
         ? `WHERE ${filters.join(" AND ")}`
@@ -105,7 +105,7 @@ export async function GET(req, verbose = 2) {
       console.log("In deployment, using Supabase DB");
       const supabase = createClient(
         process.env.SUPABASE_URL,
-        process.env.SUPABASE_ANON_KEY
+        process.env.SUPABASE_ANON_KEY,
       );
       if (!supabase) console.log("Could NOT create Supabase client!");
       if (
@@ -113,19 +113,19 @@ export async function GET(req, verbose = 2) {
         supabase.supabaseKey == process.env.SUPABASE_ANON_KEY
       )
         console.log(
-          "Created Supabase client matches SUPABASE_URL && SUPABASE_ANON_KEY!"
+          "Created Supabase client matches SUPABASE_URL && SUPABASE_ANON_KEY!",
         );
       const table = `schmetzer_scores_${season}`;
       const playerNameNormalized = playerName.toLowerCase().replace(/\s/g, "");
       console.log(
-        `Table: ${table}, Params: season=${season}, playerNameNormalized=${playerNameNormalized}`
+        `Table: ${table}, Params: season=${season}, playerNameNormalized=${playerNameNormalized}`,
       );
       // Query for player scores from requested season
       const { data: playerSeasonScores, error: playerSeasonScoresErr } =
         await supabase
           .from(table)
           .select(
-            `id, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk, aerial_duels_won, aerial_duels_lost, aerial_duels_total, aerial_duels_won_pct, tackles_won, interceptions, recoveries`
+            `id, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk, aerial_duels_won, aerial_duels_lost, aerial_duels_total, aerial_duels_won_pct, tackles_won, interceptions, recoveries`,
           )
           .ilike("id", `${playerNameNormalized}%`);
 
@@ -140,7 +140,7 @@ export async function GET(req, verbose = 2) {
         await supabase
           .from("schmetzer_scores_all")
           .select(
-            `season, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk`
+            `season, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk`,
           )
           .ilike("id", `${playerNameNormalized}%`)
           .order("season", { ascending: true });
@@ -168,3 +168,124 @@ export async function GET(req, verbose = 2) {
     });
   }
 }
+
+/*
+Example response below:
+[
+   [
+      {
+         "id":"jordanmorris-1994-2024-seattlesounders-usa",
+         "player_name":"Jordan Morris",
+         "player_nationality":"USA",
+         "position":"FW",
+         "squad":"Seattle Sounders",
+         "player_age":29,
+         "player_yob":1994,
+         "nineties":31,
+         "schmetzer_score":58,
+         "schmetzer_rk":296,
+         "aerial_duels_won":61,
+         "aerial_duels_lost":54,
+         "aerial_duels_total":115,
+         "aerial_duels_won_pct":53,
+         "tackles_won":11,
+         "interceptions":6,
+         "recoveries":44,
+         "load_datetime":"2025-10-23 22:22:34"
+      }
+   ],
+   [
+      {
+         "season":2019,
+         "player_name":"Jordan Morris",
+         "player_nationality":"USA",
+         "position":"FW",
+         "squad":"Seattle Sounders",
+         "player_age":24,
+         "player_yob":1994,
+         "nineties":22.6,
+         "schmetzer_score":76,
+         "schmetzer_rk":216,
+         "load_datetime":"2025-10-23 22:22:34"
+      },
+      {
+         "season":2020,
+         "player_name":"Jordan Morris",
+         "player_nationality":"USA",
+         "position":"FW",
+         "squad":"Seattle Sounders",
+         "player_age":25,
+         "player_yob":1994,
+         "nineties":19.1,
+         "schmetzer_score":77,
+         "schmetzer_rk":129,
+         "load_datetime":"2025-10-23 22:22:34"
+      },
+      {
+         "season":2021,
+         "player_name":"Jordan Morris",
+         "player_nationality":"USA",
+         "position":"MF,FW",
+         "squad":"Seattle Sounders",
+         "player_age":26,
+         "player_yob":1994,
+         "nineties":0.8,
+         "schmetzer_score":2,
+         "schmetzer_rk":664,
+         "load_datetime":"2025-10-23 22:22:34"
+      },
+      {
+         "season":2022,
+         "player_name":"Jordan Morris",
+         "player_nationality":"USA",
+         "position":"FW",
+         "squad":"Seattle Sounders",
+         "player_age":27,
+         "player_yob":1994,
+         "nineties":25.7,
+         "schmetzer_score":73.25,
+         "schmetzer_rk":243,
+         "load_datetime":"2025-10-23 22:22:34"
+      },
+      {
+         "season":2023,
+         "player_name":"Jordan Morris",
+         "player_nationality":"USA",
+         "position":"FW",
+         "squad":"Seattle Sounders",
+         "player_age":28,
+         "player_yob":1994,
+         "nineties":22,
+         "schmetzer_score":52.75,
+         "schmetzer_rk":338,
+         "load_datetime":"2025-10-23 22:22:34"
+      },
+      {
+         "season":2024,
+         "player_name":"Jordan Morris",
+         "player_nationality":"USA",
+         "position":"FW",
+         "squad":"Seattle Sounders",
+         "player_age":29,
+         "player_yob":1994,
+         "nineties":31,
+         "schmetzer_score":58,
+         "schmetzer_rk":296,
+         "load_datetime":"2025-10-23 22:22:34"
+      },
+      {
+         "season":2025,
+         "player_name":"Jordan Morris",
+         "player_nationality":"USA",
+         "position":"FW",
+         "squad":"Seattle Sounders",
+         "player_age":30,
+         "player_yob":1994,
+         "nineties":4.5,
+         "schmetzer_score":9,
+         "schmetzer_rk":600,
+         "load_datetime":"2025-10-23 22:22:34"
+      }
+   ]
+]
+*/

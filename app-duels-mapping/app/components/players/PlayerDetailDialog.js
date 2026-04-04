@@ -20,7 +20,12 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import { getPlayerPic } from "@/utils/get-player-pics";
 
-export default function PlayerDetailDialog({ player, open, onClose }) {
+export default function PlayerDetailDialog({
+  player,
+  open,
+  onClose,
+  seasonStats,
+}) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [imgUrl, setImgUrl] = useState(null);
@@ -41,6 +46,27 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
 
   if (!player) return null;
 
+  // Route returns object in array
+  const stats = Array.isArray(seasonStats) ? seasonStats[0] : seasonStats;
+
+  const seasonAverages = {
+    ADW: stats?.adw_avg || 0,
+    ADL: stats?.adl_avg || 0,
+    TKW: stats?.tkw_avg || 0,
+    INT: stats?.int_avg || 0,
+    RECOV: stats?.recov_avg || 0,
+    smetz_avg: stats?.smetz_avg || 0,
+  };
+
+  const seasonMaxes = {
+    ADW: stats?.adw_max || 0,
+    ADL: stats?.adl_max || 0,
+    TKW: stats?.tkw_max || 0,
+    INT: stats?.int_max || 0,
+    RECOV: stats?.recov_max || 0,
+    smetz_max: stats?.smetz_max || 0,
+  };
+
   const schmetzerHistory = [
     { year: "2020", score: 75 },
     { year: "2021", score: 100.25 },
@@ -54,11 +80,19 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
       {/* Player Info */}
       <DialogTitle
         sx={{
-          backgroundColor: theme.palette.mode === "dark" ? "#17171B" : theme.palette.common.white,
+          backgroundColor:
+            theme.palette.mode === "dark"
+              ? "#17171B"
+              : theme.palette.common.white,
         }}
       >
         <Box display="flex" justifyContent="space-between" alignItems="start">
-          <Box display="flex" alignItems={isMobile ? "flex-start" : "center"} flexDirection={isMobile ? "column" : "row"} gap={2}>
+          <Box
+            display="flex"
+            alignItems={isMobile ? "flex-start" : "center"}
+            flexDirection={isMobile ? "column" : "row"}
+            gap={2}
+          >
             <Avatar
               src={imgUrl || undefined}
               sx={{
@@ -69,11 +103,13 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
                 bgcolor: imgUrl
                   ? "transparent"
                   : theme.palette.mode === "dark"
-                  ? "transparent"
-                  : theme.palette.common.black,
+                    ? "transparent"
+                    : theme.palette.common.black,
                 color: imgUrl ? "inherit" : theme.palette.common.white,
                 border: `1px solid ${
-                  theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black
+                  theme.palette.mode === "dark"
+                    ? theme.palette.common.white
+                    : theme.palette.common.black
                 }`,
                 fontFamily: "'Bebas Neue', sans-serif",
               }}
@@ -94,7 +130,7 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
               >
                 {player.schmetzer_rk} PLACE
               </Typography>
-      
+
               <Typography
                 sx={{
                   fontFamily: "'Bebas Neue', sans-serif",
@@ -114,14 +150,22 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
           </Box>
           <IconButton onClick={onClose} aria-label="close">
             <CloseIcon
-              sx={{ color: theme.palette.mode === "dark" ? "white" : theme.palette.common.black }}
+              sx={{
+                color:
+                  theme.palette.mode === "dark"
+                    ? "white"
+                    : theme.palette.common.black,
+              }}
             />
           </IconButton>
         </Box>
       </DialogTitle>
       <DialogContent
         sx={{
-          backgroundColor: theme.palette.mode === "dark" ? "#17171B" : theme.palette.common.white,
+          backgroundColor:
+            theme.palette.mode === "dark"
+              ? "#17171B"
+              : theme.palette.common.white,
         }}
       >
         <Grid container spacing={3}>
@@ -137,7 +181,8 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
             >
               <SchmetzerScoreBar
                 value={player.schmetzer_score}
-                average={150}
+                average={seasonAverages.smetz_avg}
+                max={seasonMaxes.smetz_max}
                 darkMode={theme.palette.mode === "dark"}
               />
             </Box>
@@ -162,7 +207,8 @@ export default function PlayerDetailDialog({ player, open, onClose }) {
                   INT: player.interceptions,
                   RECOV: player.recoveries,
                 }}
-                averages={{ ADW: 15, ADL: 5, TKW: 18, INT: 20, RECOV: 30 }}
+                averages={seasonAverages}
+                maxes={seasonMaxes}
               />
             </Box>
           </Grid>

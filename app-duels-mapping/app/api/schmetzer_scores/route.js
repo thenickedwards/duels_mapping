@@ -39,7 +39,7 @@ export async function GET(req) {
       {
         status: 400,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -93,7 +93,7 @@ export async function GET(req) {
       console.log("In deployment, using Supabase DB");
       const supabase = createClient(
         process.env.SUPABASE_URL,
-        process.env.SUPABASE_ANON_KEY
+        process.env.SUPABASE_ANON_KEY,
       );
       if (!supabase) console.error("Could NOT create Supabase client!");
       if (
@@ -106,7 +106,7 @@ export async function GET(req) {
       const { data, error } = await supabase
         .from(table)
         .select(
-          `id, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk, aerial_duels_won, aerial_duels_lost, aerial_duels_total, aerial_duels_won_pct, tackles_won, interceptions, recoveries `
+          `id, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk, aerial_duels_won, aerial_duels_lost, aerial_duels_total, aerial_duels_won_pct, tackles_won, interceptions, recoveries `,
         )
         .ilike("position", position ? `%${position}%` : "%")
         .ilike("squad", squad ? `%${squad}%` : "%")
@@ -133,3 +133,188 @@ export async function GET(req) {
     });
   }
 }
+
+/* Example response below:
+[
+   {
+      "id":"cristianroldan-1995-2024-seattlesounders-usa",
+      "player_name":"Cristian Roldan",
+      "player_nationality":"USA",
+      "position":"MF,FW",
+      "squad":"Seattle Sounders",
+      "player_age":28,
+      "player_yob":1995,
+      "nineties":31.5,
+      "schmetzer_score":188.25,
+      "schmetzer_rk":6,
+      "aerial_duels_won":41,
+      "aerial_duels_lost":29,
+      "aerial_duels_total":70,
+      "aerial_duels_won_pct":58.6,
+      "tackles_won":45,
+      "interceptions":24,
+      "recoveries":212,
+      "load_datetime":"2025-10-23 22:22:34"
+   },
+   {
+      "id":"obedvargas-2005-2024-seattlesounders-mex",
+      "player_name":"Obed Vargas",
+      "player_nationality":"MEX",
+      "position":"MF,FW",
+      "squad":"Seattle Sounders",
+      "player_age":18,
+      "player_yob":2005,
+      "nineties":28.2,
+      "schmetzer_score":134,
+      "schmetzer_rk":53,
+      "aerial_duels_won":12,
+      "aerial_duels_lost":18,
+      "aerial_duels_total":30,
+      "aerial_duels_won_pct":40,
+      "tackles_won":41,
+      "interceptions":36,
+      "recoveries":135,
+      "load_datetime":"2025-10-23 22:22:34"
+   },
+   {
+      "id":"joãopaulomior-1991-2024-seattlesounders-bra",
+      "player_name":"João Paulo Mior",
+      "player_nationality":"BRA",
+      "position":"MF",
+      "squad":"Seattle Sounders",
+      "player_age":32,
+      "player_yob":1991,
+      "nineties":14.2,
+      "schmetzer_score":84.75,
+      "schmetzer_rk":190,
+      "aerial_duels_won":10,
+      "aerial_duels_lost":13,
+      "aerial_duels_total":23,
+      "aerial_duels_won_pct":43.5,
+      "tackles_won":15,
+      "interceptions":28,
+      "recoveries":97,
+      "load_datetime":"2025-10-23 22:22:34"
+   },
+   {
+      "id":"joshuaatencio-2002-2024-seattlesounders-usa",
+      "player_name":"Joshua Atencio",
+      "player_nationality":"USA",
+      "position":"MF",
+      "squad":"Seattle Sounders",
+      "player_age":22,
+      "player_yob":2002,
+      "nineties":11.9,
+      "schmetzer_score":80.25,
+      "schmetzer_rk":211,
+      "aerial_duels_won":25,
+      "aerial_duels_lost":28,
+      "aerial_duels_total":53,
+      "aerial_duels_won_pct":47.2,
+      "tackles_won":19,
+      "interceptions":25,
+      "recoveries":77,
+      "load_datetime":"2025-10-23 22:22:34"
+   },
+   {
+      "id":"albertrusnák-1994-2024-seattlesounders-svk",
+      "player_name":"Albert Rusnák",
+      "player_nationality":"SVK",
+      "position":"MF",
+      "squad":"Seattle Sounders",
+      "player_age":29,
+      "player_yob":1994,
+      "nineties":28.1,
+      "schmetzer_score":70.75,
+      "schmetzer_rk":252,
+      "aerial_duels_won":5,
+      "aerial_duels_lost":15,
+      "aerial_duels_total":20,
+      "aerial_duels_won_pct":25,
+      "tackles_won":11,
+      "interceptions":18,
+      "recoveries":105,
+      "load_datetime":"2025-10-23 22:22:34"
+   },
+   {
+      "id":"léochú-2000-2024-seattlesounders-bra",
+      "player_name":"Léo Chú",
+      "player_nationality":"BRA",
+      "position":"FW,MF",
+      "squad":"Seattle Sounders",
+      "player_age":23,
+      "player_yob":2000,
+      "nineties":7.9,
+      "schmetzer_score":31.75,
+      "schmetzer_rk":423,
+      "aerial_duels_won":3,
+      "aerial_duels_lost":3,
+      "aerial_duels_total":6,
+      "aerial_duels_won_pct":50,
+      "tackles_won":10,
+      "interceptions":4,
+      "recoveries":36,
+      "load_datetime":"2025-10-23 22:22:34"
+   },
+   {
+      "id":"pedrodelavega-2001-2024-seattlesounders-arg",
+      "player_name":"Pedro De la Vega",
+      "player_nationality":"ARG",
+      "position":"FW,MF",
+      "squad":"Seattle Sounders",
+      "player_age":22,
+      "player_yob":2001,
+      "nineties":7.2,
+      "schmetzer_score":27,
+      "schmetzer_rk":463,
+      "aerial_duels_won":2,
+      "aerial_duels_lost":8,
+      "aerial_duels_total":10,
+      "aerial_duels_won_pct":20,
+      "tackles_won":10,
+      "interceptions":0,
+      "recoveries":42,
+      "load_datetime":"2025-10-23 22:22:34"
+   },
+   {
+      "id":"codybaker-2004-2024-seattlesounders-usa",
+      "player_name":"Cody Baker",
+      "player_nationality":"USA",
+      "position":"DF,MF",
+      "squad":"Seattle Sounders",
+      "player_age":20,
+      "player_yob":2004,
+      "nineties":5.3,
+      "schmetzer_score":25.75,
+      "schmetzer_rk":479,
+      "aerial_duels_won":4,
+      "aerial_duels_lost":7,
+      "aerial_duels_total":11,
+      "aerial_duels_won_pct":36.4,
+      "tackles_won":14,
+      "interceptions":4,
+      "recoveries":20,
+      "load_datetime":"2025-10-23 22:22:34"
+   },
+   {
+      "id":"danielmusovski-1995-2024-seattlesounders-usa",
+      "player_name":"Daniel Musovski",
+      "player_nationality":"USA",
+      "position":"FW,MF",
+      "squad":"Seattle Sounders",
+      "player_age":28,
+      "player_yob":1995,
+      "nineties":5.7,
+      "schmetzer_score":16.75,
+      "schmetzer_rk":551,
+      "aerial_duels_won":17,
+      "aerial_duels_lost":24,
+      "aerial_duels_total":41,
+      "aerial_duels_won_pct":41.5,
+      "tackles_won":7,
+      "interceptions":1,
+      "recoveries":20,
+      "load_datetime":"2025-10-23 22:22:34"
+   }
+]
+*/
