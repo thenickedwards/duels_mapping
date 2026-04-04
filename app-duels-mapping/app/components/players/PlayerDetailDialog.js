@@ -14,7 +14,7 @@ import {
 import { getInitials } from "@/utils/getInitials";
 import SchmetzerScoreBar from "../charts/SchmetzerScoreBar";
 import PlayerMetricsBarChart from "../charts/PlayerMetricsBarChart";
-import PlayerRadarChart from "../charts/PlayerRadarChart";
+import PlayerPolarChart from "../charts/PlayerPolarChart";
 import SchmetzerTrendChart from "../charts/SchmetzerTrendChart";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
@@ -223,7 +223,7 @@ export default function PlayerDetailDialog({
                   theme.palette.mode === "dark" ? "#303034" : "#FAFAFA",
               }}
             >
-              <PlayerRadarChart player={player} />
+              <PlayerPolarChart player={player} />
             </Box>
           </Grid>
 

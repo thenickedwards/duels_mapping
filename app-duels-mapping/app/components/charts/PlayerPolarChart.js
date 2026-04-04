@@ -11,14 +11,9 @@ import {
 import { PolarArea } from "react-chartjs-2";
 import { baseChartTooltipOptions } from "./styles/chartTooltipOptions";
 
-ChartJS.register(
-  RadialLinearScale,
-  ArcElement,
-  Tooltip,
-  Legend
-);
+ChartJS.register(RadialLinearScale, ArcElement, Tooltip, Legend);
 
-export default function PlayerRadarChart({ player }) {
+export default function PlayerPolarChart({ player }) {
   const theme = useTheme();
   const labels = ["ADW", "TKW", "INT", "RECOV", "ADW%"];
   const data = [
@@ -29,7 +24,10 @@ export default function PlayerRadarChart({ player }) {
     player.aerial_duels_won_pct ?? 0,
   ];
 
-  const baseColor = theme.palette.mode === "dark" ? theme.palette.common.limegreen : theme.palette.common.blue;
+  const baseColor =
+    theme.palette.mode === "dark"
+      ? theme.palette.common.limegreen
+      : theme.palette.common.blue;
   const bgColor =
     theme.palette.mode === "dark"
       ? "rgba(183, 240, 142, 0.4)"
@@ -98,7 +96,10 @@ export default function PlayerRadarChart({ player }) {
                   size: 16,
                   weight: "400",
                 },
-                color: theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                color:
+                  theme.palette.mode === "dark"
+                    ? theme.palette.common.white
+                    : theme.palette.common.black,
                 padding: 8,
               },
               grid: {
