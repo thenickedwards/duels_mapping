@@ -82,7 +82,7 @@ export default function PlayerRadarChart({ player }) {
               suggestedMax: 100,
               ticks: {
                 display: true,
-                stepSize: 10,
+                stepSize: 25,
                 font: {
                   family: "'Nunito Sans', sans-serif",
                   size: 10,
