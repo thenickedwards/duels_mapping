@@ -4,20 +4,16 @@ import { Box, useTheme, Typography } from "@mui/material";
 import {
   Chart as ChartJS,
   RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
+  ArcElement,
   Tooltip,
   Legend,
 } from "chart.js";
-import { Radar } from "react-chartjs-2";
+import { PolarArea } from "react-chartjs-2";
 import { baseChartTooltipOptions } from "./styles/chartTooltipOptions";
 
 ChartJS.register(
   RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
+  ArcElement,
   Tooltip,
   Legend
 );
@@ -34,6 +30,10 @@ export default function PlayerRadarChart({ player }) {
   ];
 
   const baseColor = theme.palette.mode === "dark" ? theme.palette.common.limegreen : theme.palette.common.blue;
+  const bgColor =
+    theme.palette.mode === "dark"
+      ? "rgba(183, 240, 142, 0.4)"
+      : "rgba(59, 91, 132, 0.4)";
 
   return (
     <Box>
@@ -52,19 +52,16 @@ export default function PlayerRadarChart({ player }) {
         </Typography>
       </Box>
 
-      <Radar
+      <PolarArea
         data={{
           labels,
           datasets: [
             {
               label: player.player_name,
               data,
-              backgroundColor:
-                theme.palette.mode === "dark"
-                  ? "rgba(183, 240, 142, 0.2)"
-                  : "rgba(25, 118, 210, 0.2)",
-              borderColor: baseColor,
-              pointBackgroundColor: baseColor,
+              backgroundColor: Array(5).fill(bgColor),
+              borderColor: Array(5).fill(baseColor),
+              borderWidth: 1,
             },
           ],
         }}
@@ -83,9 +80,19 @@ export default function PlayerRadarChart({ player }) {
             r: {
               suggestedMin: 0,
               suggestedMax: 100,
-              ticks: { display: false },
-
+              ticks: {
+                display: true,
+                stepSize: 25,
+                font: {
+                  family: "'Nunito Sans', sans-serif",
+                  size: 10,
+                },
+                color: theme.palette.mode === "dark" ? "#888" : "#aaa",
+                backdropColor: "transparent",
+              },
               pointLabels: {
+                display: true,
+                centerPointLabels: true,
                 font: {
                   family: "'Bebas Neue', sans-serif",
                   size: 16,
