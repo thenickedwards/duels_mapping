@@ -80,7 +80,16 @@ export default function PlayerRadarChart({ player }) {
             r: {
               suggestedMin: 0,
               suggestedMax: 100,
-              ticks: { display: false },
+              ticks: {
+                display: true,
+                stepSize: 10,
+                font: {
+                  family: "'Nunito Sans', sans-serif",
+                  size: 10,
+                },
+                color: theme.palette.mode === "dark" ? "#888" : "#aaa",
+                backdropColor: "transparent",
+              },
               pointLabels: {
                 display: true,
                 centerPointLabels: true,
