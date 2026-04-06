@@ -106,7 +106,7 @@ export async function GET(req) {
       const { data, error } = await supabase
         .from(table)
         .select(
-          `id, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk, aerial_duels_won, aerial_duels_lost, aerial_duels_total, aerial_duels_won_pct, tackles_won, interceptions, recoveries `,
+          `id, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk, aerial_duels_won, aerial_duels_lost, aerial_duels_total, aerial_duels_won_pct, tackles_won, interceptions, recoveries, load_datetime`,
         )
         .ilike("position", position ? `%${position}%` : "%")
         .ilike("squad", squad ? `%${squad}%` : "%")
