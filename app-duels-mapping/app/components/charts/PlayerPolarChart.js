@@ -46,7 +46,7 @@ export default function PlayerPolarChart({ player }) {
           component={"div"}
           sx={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.25rem" }}
         >
-          Chart Label
+          Player Stats
         </Typography>
       </Box>
 

@@ -23,6 +23,8 @@ export default function SchmetzerScoreBar({
   value,
   average,
   max,
+  rank,
+  totalRanks,
   darkMode = false,
 }) {
   const theme = useTheme();
@@ -40,6 +42,12 @@ export default function SchmetzerScoreBar({
 
   const tooltipSlotProps = getMuiChartTooltipSlotProps(theme);
 
+  const statLabelStyle = {
+    fontFamily: "'Bebas Neue', sans-serif",
+    fontSize: "1.25rem",
+    lineHeight: 1,
+  };
+
   return (
     <Box>
       <Typography variant="h2" component="div" fontSize="1.6rem">
@@ -48,7 +56,7 @@ export default function SchmetzerScoreBar({
 
       <Typography
         fontFamily="'Bebas Neue', sans-serif"
-        textAlign="left"
+        textAlign="center"
         fontSize="6rem"
         fontWeight="bold"
         mb={1}
@@ -117,6 +125,46 @@ export default function SchmetzerScoreBar({
             }}
           />
         </Tooltip>
+      </Box>
+
+      {/* Three-item row: Avg | Rank | Max */}
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="flex-start"
+        mt={2}
+      >
+        <Box textAlign="center">
+          <Typography sx={statLabelStyle}>AVG</Typography>
+          <Typography sx={statLabelStyle}>{Math.round(average)}</Typography>
+        </Box>
+
+        <Box textAlign="center">
+          <Typography
+            sx={{
+              fontFamily: "'Bebas Neue', sans-serif",
+              fontSize: "1.25rem",
+              lineHeight: 1,
+            }}
+          >
+            #{rank}
+          </Typography>
+          <Typography
+            sx={{
+              fontFamily: "'Nunito Sans', sans-serif",
+              fontSize: "0.7rem",
+              opacity: 0.6,
+              lineHeight: 1.3,
+            }}
+          >
+            of {totalRanks} rankings
+          </Typography>
+        </Box>
+
+        <Box textAlign="center">
+          <Typography sx={statLabelStyle}>MAX</Typography>
+          <Typography sx={statLabelStyle}>{max}</Typography>
+        </Box>
       </Box>
     </Box>
   );

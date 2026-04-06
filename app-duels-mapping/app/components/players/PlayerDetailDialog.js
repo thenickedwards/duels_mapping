@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { getInitials } from "@/utils/getInitials";
 import SchmetzerScoreBar from "../charts/SchmetzerScoreBar";
-import PlayerMetricsBarChart from "../charts/PlayerMetricsBarChart";
+import PlayerMetricsLineChart from "../charts/PlayerMetricsLineChart";
 import PlayerPolarChart from "../charts/PlayerPolarChart";
 import SchmetzerTrendChart from "../charts/SchmetzerTrendChart";
 import IconButton from "@mui/material/IconButton";
@@ -137,20 +137,6 @@ export default function PlayerDetailDialog({
             </Avatar>
             <Box>
               <Typography
-                variant="overline"
-                sx={{
-                  fontFamily: "'Bebas Neue', sans-serif",
-                  fontWeight: "400",
-                  textTransform: "uppercase",
-                  fontSize: "1rem",
-                  letterSpacing: "0.03em",
-                  lineHeight: "1em",
-                }}
-              >
-                {player.schmetzer_rk} PLACE
-              </Typography>
-
-              <Typography
                 sx={{
                   fontFamily: "'Bebas Neue', sans-serif",
                   fontWeight: "600",
@@ -202,32 +188,9 @@ export default function PlayerDetailDialog({
                 value={player.schmetzer_score}
                 average={seasonAverages.smetz_avg}
                 max={seasonMaxes.smetz_max}
+                rank={player.schmetzer_rk}
+                totalRanks={stats?.total_ranks}
                 darkMode={theme.palette.mode === "dark"}
-              />
-            </Box>
-          </Grid>
-
-          <Grid item size={{ xs: 12, sm: 6 }}>
-            <Box
-              p={4}
-              borderRadius={0}
-              height="100%"
-              width="100%"
-              sx={{
-                backgroundColor:
-                  theme.palette.mode === "dark" ? "#303034" : "#FAFAFA",
-              }}
-            >
-              <PlayerMetricsBarChart
-                metrics={{
-                  ADW: player.aerial_duels_won,
-                  ADL: player.aerial_duels_lost,
-                  TKW: player.tackles_won,
-                  INT: player.interceptions,
-                  RECOV: player.recoveries,
-                }}
-                averages={seasonAverages}
-                maxes={seasonMaxes}
               />
             </Box>
           </Grid>
@@ -243,6 +206,31 @@ export default function PlayerDetailDialog({
               }}
             >
               <PlayerPolarChart player={player} />
+            </Box>
+          </Grid>
+
+          <Grid item size={{ xs: 12, sm: 6 }}>
+            <Box
+              p={4}
+              borderRadius={0}
+              height="100%"
+              width="100%"
+              sx={{
+                backgroundColor:
+                  theme.palette.mode === "dark" ? "#303034" : "#FAFAFA",
+              }}
+            >
+              <PlayerMetricsLineChart
+                metrics={{
+                  ADW: player.aerial_duels_won,
+                  ADL: player.aerial_duels_lost,
+                  TKW: player.tackles_won,
+                  INT: player.interceptions,
+                  RECOV: player.recoveries,
+                }}
+                averages={seasonAverages}
+                maxes={seasonMaxes}
+              />
             </Box>
           </Grid>
 
