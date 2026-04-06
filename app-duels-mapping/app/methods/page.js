@@ -192,13 +192,13 @@ export default function MethodsPage() {
             </Link>
             &nbsp;page.
           </Typography>
-
+        </Box>
+        <Box my={"60px"} sx={{ "& > *:not(:last-child)": { mb: 2 } }}>
           <Typography variant="h2" fontSize={"1.25rem"}>
             Update: March 2026
           </Typography>
-
           <Typography variant="body1">
-            Unfortunately,
+            Unfortunately,&nbsp;
             <Link
               href="https://www.sports-reference.com/blog/2026/01/fbref-stathead-data-update/"
               style={{ textDecoration: "underline", color: "inherit" }}
