@@ -25,10 +25,36 @@ export default function PlayerDetailDialog({
   open,
   onClose,
   seasonStats,
+  season,
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [imgUrl, setImgUrl] = useState(null);
+  const [schmetzerHistory, setSchmetzerHistory] = useState([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    if (player?.player_name && season) {
+      const playerNameParam = player.player_name.replace(/\s/g, "");
+      fetch(
+        `/api/schmetzer_scores/player?season=${season}&playerName=${playerNameParam}`,
+      )
+        .then((r) => r.json())
+        .then((data) => {
+          if (isMounted && Array.isArray(data[1])) {
+            setSchmetzerHistory(
+              data[1].map((item) => ({
+                year: String(item.season),
+                score: item.schmetzer_score,
+              })),
+            );
+          }
+        });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [player, season]);
 
   useEffect(() => {
     let isMounted = true;
@@ -67,13 +93,6 @@ export default function PlayerDetailDialog({
     smetz_max: stats?.smetz_max || 0,
   };
 
-  const schmetzerHistory = [
-    { year: "2020", score: 75 },
-    { year: "2021", score: 100.25 },
-    { year: "2022", score: 90 },
-    { year: "2023", score: 95 },
-    { year: "2024", score: 102 },
-  ];
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">

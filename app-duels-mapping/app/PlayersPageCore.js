@@ -1030,6 +1030,7 @@ export default function PlayersPage() {
                 open={!!selectedPlayer}
                 onClose={() => setSelectedPlayer(null)}
                 seasonStats={seasonStats}
+                season={selectedYear}
               />
             </DialogContent>
           </Dialog>
