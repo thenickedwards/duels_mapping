@@ -170,7 +170,9 @@ class DataHandler:
     def insert_SQLite_to_Supabase(self, supabase_url, supabase_key):
         tables = [
             self.schmetzer_scores_tables["all"]] + [
-            self.schmetzer_scores_tables["season"].replace("YEAR", str(year)) for year in range(2018, self.current_year + 1)
+            # self.schmetzer_scores_tables["season"].replace("YEAR", str(year)) for year in range(2018, self.current_year + 1)
+            # REMOVED ABOVE bc of data source issue (only 2018 - 2025 data available)
+            self.schmetzer_scores_tables["season"].replace("YEAR", str(year)) for year in range(2018, 2026)
         ]
         # Supabase client
         supabase: Client = create_client(supabase_url, supabase_key)
