@@ -5,8 +5,14 @@ import { useTheme } from "@mui/material/styles";
 
 export default function MethodsPage() {
   const theme = useTheme();
-  const dividerColor = theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black;
-  const rectColor = theme.palette.mode === "dark" ? theme.palette.common.blue : theme.palette.common.limegreen;
+  const dividerColor =
+    theme.palette.mode === "dark"
+      ? theme.palette.common.white
+      : theme.palette.common.black;
+  const rectColor =
+    theme.palette.mode === "dark"
+      ? theme.palette.common.blue
+      : theme.palette.common.limegreen;
 
   return (
     <main style={{ padding: "2rem" }}>
@@ -185,6 +191,35 @@ export default function MethodsPage() {
               Team
             </Link>
             &nbsp;page.
+          </Typography>
+
+          <Typography variant="h2" fontSize={"1.25rem"}>
+            Update: March 2026
+          </Typography>
+
+          <Typography variant="body1">
+            Unfortunately,
+            <Link
+              href="https://www.sports-reference.com/blog/2026/01/fbref-stathead-data-update/"
+              style={{ textDecoration: "underline", color: "inherit" }}
+            >
+              as of January 2026
+            </Link>
+            , the advanced statistics that made this project possible are no
+            longer publicly available. Opta terminated Sports Reference&apos;s
+            access to its data feeds, citing an alleged agreement violation,
+            ending free access to the advanced statistics that aspiring sports
+            data analysts and soccer fans had come to love.
+          </Typography>
+
+          <Typography variant="body1">
+            As a result, further development beyond the 2025 MLS season will not
+            be possible until a new data source can be identified. We&apos;re
+            exploring alternatives, and the modular architecture of the ETL
+            pipeline means the platform can be repointed at a new source without
+            a full rebuild. In the meantime, Duels Mapping remains fully
+            functional as a historical record, offering insights into player
+            performance and league trends from 2018&ndash;2025.
           </Typography>
         </Box>
       </Container>

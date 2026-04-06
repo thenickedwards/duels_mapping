@@ -12,6 +12,10 @@ Welcome to **_duels_mapping_**, a code repository which supports a new composite
 
 The Duels Mapping repo powers the custom **Schmetzer Score** — a composite statistic for MLS players — by transforming raw FBref data through a lightweight, extensible SQLite-based ETL pipeline primarily written in Python, delivering that data to a Postgres database in the cloud and finally visualizing this data in an intuitive and interactive Next.js front end dashboard.
 
+### Update 03/2026
+
+Unfortunately, as you may have already read [here](https://www.sports-reference.com/blog/2026/01/fbref-stathead-data-update/) or [here](https://www.nytimes.com/athletic/7002196/2026/01/28/fbref-opta-football-data-soccer-analytics/), the FBref advanced data this project relies on is no longer publicly available. In January 2026, Opta terminated Sports Reference's access to its data feeds, citing an alleged agreement violation ending free access to the advanced statistics that aspiring sports data analysts and soccer fans had come to love. As a result, further development beyond the 2025 season will not be possible until we find a new data source. In the meantime, Duels Mapping remains fully functional as a historical record, offering insights into player performance and league trends from 2018–2025.
+
 ## Table of Contents
 
 [Quick Setup](#quick-setup)  
@@ -62,26 +66,22 @@ SUPABASE_ANON_KEY=#####
 _Note: you will need to adjust the path below as appropriate on your machine. I use [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/). You may need to adjust if you use [venv](https://docs.python.org/3/library/venv.html)._
 
 - If this is the first time you are using this app, run the "setup" command from a terminal at the root of the project. Bear in mind this will overwrite your databases (you will need to setup a database and tables in Supabase for the last step in the pipeline) and leverage your machine for computing (e.g. extracting data through a browser, utilizing the file system for SQLite, etc).
-
   - `source ./duels_mapping.sh setup` OR `. ./duels_mapping.sh setup`
   - First the virtual environment will be activated.
   - Next the dependencies from the `requirements.txt` file will be installed.
   - Finally the terminal will navigate to the the Next.js app `cd app-duels-mapping`, run the `npm run dev` command, open a browser at <http://localhost:3000/api/schmetzer_scores/2025>, and send you on your way.
 
 - If the data for the current season needs to be updated, run the "update" command from a terminal at the root of the project.
-
   - `source ./duels_mapping.sh update` OR `. ./duels_mapping.sh update`
   - First the virtual environment will be activated.
   - The `pipeline_cur_FBref_misc_stats_to_schmetzer_scores_players.py` script will be run to update the current season's data.
   - Finally the terminal will navigate to the the Next.js app `cd app-duels-mapping`, run the `npm run dev` command, open a browser at <http://localhost:3000/api/schmetzer_scores/2025>, and send you on your way.
 
 - To start further development, run the "start" command from a terminal at the root of the project.
-
   - `source ./duels_mapping.sh start` OR `. ./duels_mapping.sh start`
   - This command will simply activate the virtual environment and send you on your way.
 
 - Similarly to deactivate the virtual environment, run the "stop" command from a terminal at the root of the project.
-
   - `source ./duels_mapping.sh stop` OR `. ./duels_mapping.sh stop`
   - This command will simply deactivate the virtual environment and send you on your way.
 
@@ -359,4 +359,4 @@ One possible avenue for future development could be creating a set of composite 
 
 ### Shout Outs
 
-I have to start by thanking my front end partner in crime and bootcamp buddy, Juanita Samborski, for her incredible UX/UI and sleek, cool design scheme. The amazing folks at [FBref](https://fbref.com/en/) (the source data set for this project) and [Sports Reference](https://www.sports-reference.com/about.html) are doing God's work, democratizing sports data by making it publicly available. Also instrumental as a guide and inspiration for getting this app off the ground, Nathan Braun and his book [Learn to Code with Soccer](https://codesoccer.com/). Huge thanks to my buddy Kai Curtis who put me on it. More thanks in no particular order: Alan Graham, Jeff Pendleton, Bide Alabi, Henry Tremblay, Tyler Cox, Nathan Cox (no relation), and Jesse Smith. Thanks and love to Claudine Mboligikpelani Nako who makes the sun rise and set every day.
+I have to start by thanking my front end partner in crime and bootcamp buddy, [Juanita Samborski](https://github.com/jsamborski310), for her incredible UX/UI and sleek, cool design scheme. The amazing folks at [FBref](https://fbref.com/en/) (the source data set for this project) and [Sports Reference](https://www.sports-reference.com/about.html) are doing God's work, democratizing sports data by making it publicly available. Also instrumental as a guide and inspiration for getting this app off the ground, [Nathan Braun](https://github.com/nathanbraun) and his book [Learn to Code with Soccer](https://codesoccer.com/). Huge thanks to my buddy Kai Curtis who put me on it. More thanks in no particular order: Alan Graham, Jeff Pendleton, Bide Alabi, Henry Tremblay, Tyler Cox, Nathan Cox (no relation), and Jesse Smith. Thanks and love to Claudine Mboligikpelani Nako who makes the sun rise and set every day.
