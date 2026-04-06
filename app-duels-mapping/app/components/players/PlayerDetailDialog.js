@@ -14,7 +14,7 @@ import {
 import { getInitials } from "@/utils/getInitials";
 import SchmetzerScoreBar from "../charts/SchmetzerScoreBar";
 import PlayerMetricsLineChart from "../charts/PlayerMetricsLineChart";
-import PlayerPolarChart from "../charts/PlayerPolarChart";
+import PlayerDuelsPieChart from "../charts/PlayerDuelsPieChart";
 import SchmetzerTrendChart from "../charts/SchmetzerTrendChart";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
@@ -199,20 +199,6 @@ export default function PlayerDetailDialog({
             <Box
               p={4}
               borderRadius={0}
-              height={"100%"}
-              sx={{
-                backgroundColor:
-                  theme.palette.mode === "dark" ? "#303034" : "#FAFAFA",
-              }}
-            >
-              <PlayerPolarChart player={player} />
-            </Box>
-          </Grid>
-
-          <Grid item size={{ xs: 12, sm: 6 }}>
-            <Box
-              p={4}
-              borderRadius={0}
               height="100%"
               width="100%"
               sx={{
@@ -231,6 +217,20 @@ export default function PlayerDetailDialog({
                 averages={seasonAverages}
                 maxes={seasonMaxes}
               />
+            </Box>
+          </Grid>
+
+          <Grid item size={{ xs: 12, sm: 6 }}>
+            <Box
+              p={4}
+              borderRadius={0}
+              height={"100%"}
+              sx={{
+                backgroundColor:
+                  theme.palette.mode === "dark" ? "#303034" : "#FAFAFA",
+              }}
+            >
+              <PlayerDuelsPieChart player={player} />
             </Box>
           </Grid>
 

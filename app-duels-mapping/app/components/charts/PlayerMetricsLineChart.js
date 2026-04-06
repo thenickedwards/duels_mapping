@@ -51,7 +51,7 @@ export default function PlayerMetricsLineChart({
   const labels = ["ADW", "ADL", "TKW", "INT", "RECOV"];
 
   const dataValues = labels.map((label) => metrics[label] ?? 0);
-  const averageValues = labels.map((label) => averages[label] ?? 0);
+  const averageValues = labels.map((label) => Math.round(averages[label] ?? 0));
   const maxValues = labels.map((label) => maxes[label] ?? 0);
 
   // Colors
