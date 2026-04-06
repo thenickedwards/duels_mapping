@@ -20,7 +20,7 @@ ChartJS.register(
   PointElement,
   LineElement,
   Tooltip,
-  Legend
+  Legend,
 );
 
 Tooltip.positioners.customBelow = function (elements, eventPosition) {
@@ -60,7 +60,7 @@ export default function SchmetzerTrendChart({ history = [] }) {
           component={"div"}
           sx={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.25rem" }}
         >
-          SCHMETZER TREND
+          YOY SCHMETZER TREND
         </Typography>
         <Box display="flex" alignItems="center" gap={1}>
           <Typography
@@ -68,7 +68,10 @@ export default function SchmetzerTrendChart({ history = [] }) {
             sx={{
               fontFamily: "Nunito Sans, sans-serif",
               fontSize: "0.875rem",
-              color: theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+              color:
+                theme.palette.mode === "dark"
+                  ? theme.palette.common.white
+                  : theme.palette.common.black,
             }}
           >
             {percentChange}%
@@ -88,12 +91,18 @@ export default function SchmetzerTrendChart({ history = [] }) {
             {isIncrease ? (
               <ArrowUpward
                 fontSize="inherit"
-                sx={{ color: `${theme.palette.common.black} !important`, fontSize: 16 }}
+                sx={{
+                  color: `${theme.palette.common.black} !important`,
+                  fontSize: 16,
+                }}
               />
             ) : (
               <ArrowDownward
                 fontSize="inherit"
-                sx={{ color: `${theme.palette.common.black} !important`, fontSize: 16 }}
+                sx={{
+                  color: `${theme.palette.common.black} !important`,
+                  fontSize: 16,
+                }}
               />
             )}
           </Box>
@@ -107,16 +116,23 @@ export default function SchmetzerTrendChart({ history = [] }) {
             {
               label: "Score",
               data: scores,
-              borderColor: theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+              borderColor:
+                theme.palette.mode === "dark"
+                  ? theme.palette.common.white
+                  : theme.palette.common.black,
               borderWidth: 2,
               tension: 0.2,
               pointRadius: 2.5,
               pointHoverRadius: 10,
               pointBackgroundColor:
-                theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                theme.palette.mode === "dark"
+                  ? theme.palette.common.white
+                  : theme.palette.common.black,
               pointHoverBackgroundColor: theme.palette.common.limegreen,
               pointBorderColor:
-                theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                theme.palette.mode === "dark"
+                  ? theme.palette.common.white
+                  : theme.palette.common.black,
               pointBorderWidth: 0,
               pointHoverBorderWidth: 2,
             },
