@@ -348,7 +348,10 @@ export default function PlayersPage() {
 
   // CUSTOM STYLED PAGINATION
   const handlePageChange = (event, value) => setPage(value);
-  const handlePageSizeChange = (event) => setPageSize(event.target.value);
+  const handlePageSizeChange = (event) => {
+    setPageSize(event.target.value);
+    setPage(1);
+  };
 
   const totalPages = Math.ceil(filteredRows.length / pageSize);
   const paginatedRows = filteredRows.slice(
@@ -767,7 +770,7 @@ export default function PlayersPage() {
                   variant="body2"
                   fontFamily="'Bebas Neue', sans-serif"
                 >
-                  Players by Page
+                  Players per Page
                 </Typography>
 
                 <Select
@@ -864,7 +867,7 @@ export default function PlayersPage() {
                     },
                   }}
                 >
-                  {[5, 10, 25, 50].map((size) => (
+                  {[5, 10, 25, 100].map((size) => (
                     <MenuItem
                       key={size}
                       value={size}
