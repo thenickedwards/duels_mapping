@@ -867,7 +867,7 @@ export default function PlayersPage() {
                     },
                   }}
                 >
-                  {[5, 10, 25, 100].map((size) => (
+                  {[5, 10, 25, 50, 100].map((size) => (
                     <MenuItem
                       key={size}
                       value={size}
