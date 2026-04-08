@@ -17,5 +17,5 @@ def connect_db(database_name, database_path, timeout=10.0):
         
 # if __name__ == "__main__":
 #     database_name = "mls_stats.db"
-#     database_path = f"data/database/{database_name}"
+#     database_path = f"duels_mapping_data/database/{database_name}"
 #     connect_db(database_name, database_path)

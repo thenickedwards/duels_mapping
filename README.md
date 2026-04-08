@@ -92,7 +92,7 @@ _Note: you will need to adjust the path below as appropriate on your machine. I 
 
 ## Data Environment
 
-The duels_mapping data environment is contained within the [app-duels-mapping/public/data](app-duels-mapping/public/data) directory and includes the SQLite database which serves as a data warehouse, ETL pipelines for sourcing and delivery of statistics, and the SQL scripts that set up the data environment, ingest and transform data, and generate the statistics consumed by the Next.js frontend dashboard which rates MLS players based on aerial duels won vs lost, tackles won, interceptions, and recoveries.
+The duels_mapping data environment is contained within the [app-duels-mapping/public/duels_mapping_data](app-duels-mapping/public/duels_mapping_data) directory and includes the SQLite database which serves as a data warehouse, ETL pipelines for sourcing and delivery of statistics, and the SQL scripts that set up the data environment, ingest and transform data, and generate the statistics consumed by the Next.js frontend dashboard which rates MLS players based on aerial duels won vs lost, tackles won, interceptions, and recoveries.
 
 The original concept of this application was as an app proprietary to the club and installed on the tablets, laptops, and mobile devices of coaching staff. To make the application publicly available I've extended the data pipelines to upload to a Postgres database in the cloud using Supabase and deployed to Vercel: <https://duels-mapping.vercel.app/>.
 
@@ -102,10 +102,10 @@ If you're this deep in the project, you're my kind of people ⚽️
 
 As you may have guessed football tactics have been a major driver in this project and in fact part of the architecture was lifted right off the pitch. In soccer, a double pivot refers to a pairing of central defensive midfielders who play a key role to both defense and offense--winning possession, progressing the ball up the field, and providing tactical versatility. This data architecture adopts that same concept. It features two core pivot components that orchestrate the flow of data.
 
-1. [`data_vars.json`](app-duels-mapping/public/data/data_vars.json)  
+1. [`data_vars.json`](app-duels-mapping/public/duels_mapping_data/data_vars.json)  
    This JSON file stores the values used to calculate the Schmetzer Score metric. The stats can be weighted differently to allow flexible experimentation and tuning of how each individual statistic influences the overall score. This access point supports extension to include more data sources, additional ETL pipelines, and the creation of new composite metrics built off other advanced sports statistics.
 
-2. [`DataHandler`](app-duels-mapping/public/data/etl/data_handler.py)
+2. [`DataHandler`](app-duels-mapping/public/duels_mapping_data/etl/data_handler.py)
 
    This class handles and executes the ETL workflow, including extracting, parsing, loading, and transforming the data. Inspired by Apache Airflow DAGs, its modular methods make it easy to plug in additional pipelines and customize workflows.
 
@@ -178,9 +178,9 @@ flowchart TD
 
 ### Data Modeling & ETL Pipeline Development
 
-All tables are created using the SQL in the [app-duels-mapping/public/data/etl/sql/create](app-duels-mapping/public/data/etl/sql/create) directory. For simplicity, readability, extensibility the filename matches the name of the table.
+All tables are created using the SQL in the [app-duels-mapping/public/duels_mapping_data/etl/sql/create](app-duels-mapping/public/duels_mapping_data/etl/sql/create) directory. For simplicity, readability, extensibility the filename matches the name of the table.
 
-`dim_schmetzer_score_points` - This is the only **dim table** leveraged by the Schmetzer Score metric. While the values are static as seen below, they are controlled by the aforementioned [data_vars.json](app-duels-mapping/public/data/data_vars.json) and are inserted using Python subsequent to all table creation. Below is the table in full for visibility into individual stat values and because it's a pretty small table 🙃
+`dim_schmetzer_score_points` - This is the only **dim table** leveraged by the Schmetzer Score metric. While the values are static as seen below, they are controlled by the aforementioned [data_vars.json](app-duels-mapping/public/duels_mapping_data/data_vars.json) and are inserted using Python subsequent to all table creation. Below is the table in full for visibility into individual stat values and because it's a pretty small table 🙃
 
 | stat_name         | point_value | abbrev        |
 | ----------------- | ----------- | ------------- |
@@ -284,11 +284,11 @@ In the source data a player may be listed twice if they played for multiple team
 | aerial_duels_won_pct | Real      | Percent of aerial duels won (duels as percentage)                                              |
 | load_datetime        | Timestamp | Load timestamp with time zone (continued tracking of data reliability and ETL pipeline health) |
 
-All pipelines are contained within the [app-duels-mapping/public/data/etl](app-duels-mapping/public/data/etl) directory. Again, this architecture supports for extendibility (as exampled by the upsert to the cloud database), allowing for the build out of additional pipelines, expansion of the project to include other leagues, and development of new composite metrics. The order of the tables as listed above documents the process and flow of the data.
+All pipelines are contained within the [app-duels-mapping/public/duels_mapping_data/etl](app-duels-mapping/public/duels_mapping_data/etl) directory. Again, this architecture supports for extendibility (as exampled by the upsert to the cloud database), allowing for the build out of additional pipelines, expansion of the project to include other leagues, and development of new composite metrics. The order of the tables as listed above documents the process and flow of the data.
 
 ### File Structure & Directory Layout
 
-Below is an outline of the data environment. Initially, this project's goal was a functional data platform for ingesting, processing, and delivering insights on player and team data. Essentially, that is everything contained within the [data](app-duels-mapping/public/data) directory. As such, this data architecture could be used as a framework for other projects.
+Below is an outline of the data environment. Initially, this project's goal was a functional data platform for ingesting, processing, and delivering insights on player and team data. Essentially, that is everything contained within the [data](app-duels-mapping/public/duels_mapping_data) directory. As such, this data architecture could be used as a framework for other projects.
 
 ```bash
 ├── app-duels-mapping   # Next.js app and front end components

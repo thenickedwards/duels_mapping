@@ -36,7 +36,7 @@ class DataHandler:
         conn = connect_db(self.database_name, self.database_path)
         c = conn.cursor()
         try:
-            for sql_file in glob.glob('app-duels-mapping/public/data/etl/sql/create/*.sql'):
+            for sql_file in glob.glob('app-duels-mapping/public/duels_mapping_data/etl/sql/create/*.sql'):
                 with open(sql_file, 'r') as f:
                     table_name = os.path.splitext(os.path.basename(sql_file))[0]
                     sql = f.read()
@@ -106,7 +106,7 @@ class DataHandler:
         conn = connect_db(self.database_name, self.database_path)
         c = conn.cursor()
         try:
-            sql_file = glob.glob('app-duels-mapping/public/data/etl/sql/transform/load_stg_FBref_mls_players_all_stats_misc.sql')[0]
+            sql_file = glob.glob('app-duels-mapping/public/duels_mapping_data/etl/sql/transform/load_stg_FBref_mls_players_all_stats_misc.sql')[0]
             with open(sql_file, 'r') as f:
                 table_name = os.path.splitext(os.path.basename(sql_file))[0].replace('load_', '')
                 sql = f.read()
@@ -122,7 +122,7 @@ class DataHandler:
         conn = connect_db(self.database_name, self.database_path)
         c = conn.cursor()
         try:
-            sql_file = glob.glob('app-duels-mapping/public/data/etl/sql/z_schmetzer_scores/schmetzer_scores_players.sql')[0]
+            sql_file = glob.glob('app-duels-mapping/public/duels_mapping_data/etl/sql/z_schmetzer_scores/schmetzer_scores_players.sql')[0]
             for year in range(2018, self.current_year + 1):            
                 with open(sql_file, 'r') as f:
                     table_name = f'schmetzer_scores_{year}'
@@ -147,7 +147,7 @@ class DataHandler:
             """)
             schmetzer_season_tables = [row[0] for row in c.fetchall()]
             
-            sql_file = glob.glob('app-duels-mapping/public/data/etl/sql/z_schmetzer_scores/schmetzer_scores_all.sql')[0]
+            sql_file = glob.glob('app-duels-mapping/public/duels_mapping_data/etl/sql/z_schmetzer_scores/schmetzer_scores_all.sql')[0]
             with open(sql_file, 'r') as f:
                 sql_template = f.read()
 
