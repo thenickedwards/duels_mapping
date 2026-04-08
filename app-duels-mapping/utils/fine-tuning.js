@@ -5,7 +5,7 @@ function getDefaultSchmetzerScoreConfig(verbose = 1) {
   // Read and parse data_vars JSON
   const jsonPath = path.join(
     process.cwd(),
-    "app-duels-mapping/public/data/data_vars.json"
+    "app-duels-mapping/public/duels_mapping_data/data_vars.json"
   );
 
   const rawData = fs.readFileSync(jsonPath, "utf-8");

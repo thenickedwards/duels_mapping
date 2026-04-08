@@ -3,7 +3,7 @@ const path = require("path");
 const sqlite3 = require("sqlite3").verbose();
 
 // Load and parse the config JSON
-const configPath = path.join(__dirname, "public", "data", "data_vars.json");
+const configPath = path.join(__dirname, "public", "duels_mapping_data", "data_vars.json");
 const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
 
 // Extract database path and name

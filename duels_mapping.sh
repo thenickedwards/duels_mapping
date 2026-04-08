@@ -103,7 +103,7 @@ elif [ "$action" = "update" ]; then
     activate_venv
 
     echo -e "\n🧬 Running ETL pipeline to update current season data..."
-    python "$SCRIPT_DIR/app-duels-mapping/public/data/etl/pipeline_cur_FBref_misc_stats_to_schmetzer_scores_players.py" || {
+    python "$SCRIPT_DIR/app-duels-mapping/public/duels_mapping_data/etl/pipeline_cur_FBref_misc_stats_to_schmetzer_scores_players.py" || {
         echo "❌ ETL pipeline execution failed."; return 1; }
 
     # run_nextjs_app
@@ -115,7 +115,7 @@ elif [ "$action" = "sync" ]; then
     activate_venv
 
     echo -e "\n🚰 Syncing local SQLite database to remote Postres database (Supabase)..."
-    python "$SCRIPT_DIR/app-duels-mapping/public/data/etl/pipeline_SQLite_to_Supabase.py" || {
+    python "$SCRIPT_DIR/app-duels-mapping/public/duels_mapping_data/etl/pipeline_SQLite_to_Supabase.py" || {
         echo "❌ Sync to Supabase failed."; return 1; }
     
     send_off
@@ -125,7 +125,7 @@ elif [ "$action" = "restore" ]; then
     activate_venv
 
     echo -e "\n🧬 Running ETL pipeline to backfill all historical season data..."
-    python "$SCRIPT_DIR/app-duels-mapping/public/data/etl/pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players.py" || {
+    python "$SCRIPT_DIR/app-duels-mapping/public/duels_mapping_data/etl/pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players.py" || {
         echo -e "❌ ETL pipeline execution failed."; return 1; }
 
     run_nextjs_app

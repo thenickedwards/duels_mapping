@@ -6,7 +6,7 @@ export async function getDatabasePath(verbose = 1) {
   const dataVarsPath = path.join(
     process.cwd(),
     "public",
-    "data",
+    "duels_mapping_data",
     "data_vars.json"
   );
   const dataVars = JSON.parse(fs.readFileSync(dataVarsPath, "utf-8"));
