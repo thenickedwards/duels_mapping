@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { getInitials } from "@/utils/getInitials";
 import SchmetzerScoreBar from "../charts/SchmetzerScoreBar";
-import PlayerMetricsLineChart from "../charts/PlayerMetricsLineChart";
+import PlayerMetricsVerticalBarChart from "../charts/PlayerMetricsVerticalBarChart";
 import PlayerDuelsPieChart from "../charts/PlayerDuelsPieChart";
 import SchmetzerTrendChart from "../charts/SchmetzerTrendChart";
 import IconButton from "@mui/material/IconButton";
@@ -206,7 +206,7 @@ export default function PlayerDetailDialog({
                   theme.palette.mode === "dark" ? "#303034" : "#FAFAFA",
               }}
             >
-              <PlayerMetricsLineChart
+              <PlayerMetricsVerticalBarChart
                 metrics={{
                   ADW: player.aerial_duels_won,
                   ADL: player.aerial_duels_lost,

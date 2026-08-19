@@ -63,43 +63,60 @@ export default function PlayerDuelsPieChart({ player }) {
       </Box>
 
       <Box sx={{ flexGrow: 1, position: "relative" }}>
-      <Pie
-        data={{
-          labels,
-          datasets: [
-            {
-              label: player.player_name,
-              data,
-              backgroundColor: [adlBgColor, adwBgColor],
-              borderColor: [adlColor, adwColor],
-              borderWidth: 2,
-            },
-          ],
-        }}
-        options={{
-          responsive: true,
-          maintainAspectRatio: false,
-          rotation: Math.PI / 2,
-          plugins: {
-            legend: {
-              display: true,
-              position: "bottom",
-              reverse: true,
-              labels: {
-                color: isDark
-                  ? theme.palette.common.white
-                  : theme.palette.common.black,
-                font: {
-                  family: "'Nunito Sans', sans-serif",
-                  size: 12,
-                },
-                padding: 16,
+        <Pie
+          data={{
+            labels,
+            datasets: [
+              {
+                label: player.player_name,
+                data,
+                backgroundColor: [adlBgColor, adwBgColor],
+                borderColor: [adlColor, adwColor],
+                borderWidth: 2,
               },
+            ],
+          }}
+          options={{
+            responsive: true,
+            maintainAspectRatio: false,
+            rotation: Math.PI / 2,
+            plugins: {
+              legend: {
+                display: true,
+                position: "bottom",
+                reverse: true,
+                labels: {
+                  color: isDark
+                    ? theme.palette.common.white
+                    : theme.palette.common.black,
+                  font: {
+                    family: "'Nunito Sans', sans-serif",
+                    size: 12,
+                  },
+                  padding: 16,
+                },
+              },
+              tooltip: baseChartTooltipOptions(theme),
             },
-            tooltip: baseChartTooltipOptions(theme),
-          },
-        }}
-      />
+          }}
+        />
+
+        <Typography
+          sx={{
+            position: "absolute",
+            top: "22%",
+            left: "16%",
+            transform: "translate(-50%, -50%)",
+            fontFamily: "'Bebas Neue', sans-serif",
+            fontSize: "1.75rem",
+            fontWeight: 700,
+            lineHeight: 1,
+            color: adwColor,
+            pointerEvents: "none",
+          }}
+        >
+          {player.aerial_duels_won_pct ?? 0}%
+        </Typography>
       </Box>
     </Box>
   );
