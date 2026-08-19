@@ -30,6 +30,10 @@ Unfortunately, as you may have already read [here](https://www.sports-reference.
 
 ## Quick Setup
 
+This repo uses a git submodule for the data environment. After cloning, initialize it with:
+
+`git submodule update --init`
+
 The Next.js app are within a subdirectory, so to install the node package modules, run the command:
 
 `( cd app-duels-mapping ; npm install )`
@@ -297,7 +301,7 @@ Below is an outline of the data environment. Initially, this project's goal was 
 │   │   ├── components
 │   ├── package.json    # node package modules to install
 │   ├── public
-│   │   ├── data        # data environment
+│   │   ├── duels_mapping_data   # data environment (git submodule)
 │   │   │   ├── data_vars.json        # Config which controls algorithm scoring weights and stores data sources and destination tables
 │   │   │   ├── database
 │   │   │   │   └── mls_stats.db      # SQLite database

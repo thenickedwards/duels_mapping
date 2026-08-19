@@ -6,12 +6,11 @@ const sqlite3 = require("sqlite3").verbose();
 const configPath = path.join(__dirname, "public", "duels_mapping_data", "data_vars.json");
 const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
 
-// Extract database path and name
-const databaseDir = config.database.path;
+// Extract database name
 const databaseName = config.database.name;
 
 // Build the full absolute path to the database
-const fullDbPath = path.join(__dirname, databaseDir, databaseName);
+const fullDbPath = path.join(__dirname, "public", "duels_mapping_data", "database", databaseName);
 
 // Connect to SQLite database in read-only mode
 const db = new sqlite3.Database(fullDbPath, sqlite3.OPEN_READONLY, (err) => {
