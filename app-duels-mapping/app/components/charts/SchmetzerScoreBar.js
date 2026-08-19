@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Box, Tooltip, Typography, useTheme } from "@mui/material";
 import {
   Chart as ChartJS,
@@ -28,6 +29,7 @@ export default function SchmetzerScoreBar({
   darkMode = false,
 }) {
   const theme = useTheme();
+  const [isAvgHovered, setIsAvgHovered] = useState(false);
 
   const percentage = (value / max) * 100;
   const avgPosition = (average / max) * 100;
@@ -101,27 +103,33 @@ export default function SchmetzerScoreBar({
 
         {/* Average dot + its own tooltip */}
         <Tooltip
-          title={`League Avg: ${average}`}
+          title={`League Avg: ${Math.round(average)}`}
           arrow
+          placement="top"
           slotProps={tooltipSlotProps}
         >
           <Box
+            onMouseEnter={() => setIsAvgHovered(true)}
+            onMouseLeave={() => setIsAvgHovered(false)}
             sx={{
               position: "absolute",
               top: "50%",
               left: `${avgPosition}%`,
-              transform: "translate(-50%, -50%)",
+              transform: isAvgHovered
+                ? "translate(-50%, -50%) scale(1.7)"
+                : "translate(-50%, -50%)",
               width: 12,
               height: 12,
               borderRadius: "50%",
-              border: darkMode
-                ? `1px solid ${theme.palette.common.white}`
-                : "1px solid #3B5B84",
+              borderWidth: isAvgHovered ? 2 : 1,
+              borderStyle: "solid",
+              borderColor: darkMode ? theme.palette.common.white : "#3B5B84",
               backgroundColor: darkMode
                 ? theme.palette.common.white
                 : theme.palette.common.limegreen,
               zIndex: 2,
               cursor: "pointer",
+              transition: "transform 0.15s ease, border-width 0.15s ease",
             }}
           />
         </Tooltip>
@@ -135,7 +143,27 @@ export default function SchmetzerScoreBar({
         mt={2}
       >
         <Box textAlign="center">
-          <Typography sx={statLabelStyle}>AVG</Typography>
+          <Box display="flex" alignItems="center" justifyContent="center" gap={0.75}>
+            <Box
+              onMouseEnter={() => setIsAvgHovered(true)}
+              onMouseLeave={() => setIsAvgHovered(false)}
+              sx={{
+                width: 10,
+                height: 10,
+                borderRadius: "50%",
+                borderWidth: isAvgHovered ? 2 : 1,
+                borderStyle: "solid",
+                borderColor: darkMode ? theme.palette.common.white : "#3B5B84",
+                backgroundColor: darkMode
+                  ? theme.palette.common.white
+                  : theme.palette.common.limegreen,
+                cursor: "pointer",
+                transform: isAvgHovered ? "scale(1.7)" : "none",
+                transition: "transform 0.15s ease, border-width 0.15s ease",
+              }}
+            />
+            <Typography sx={statLabelStyle}>AVG</Typography>
+          </Box>
           <Typography sx={statLabelStyle}>{Math.round(average)}</Typography>
         </Box>
 
