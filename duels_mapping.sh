@@ -5,6 +5,9 @@
 # To start the virtual environment for development and run the app:
 # >> source ./duels_mapping.sh start    OR  >> . ./duels_mapping.sh start
 
+# To start the Syncalir hub for development and run the app:
+# >> source ./duels_mapping.sh synclair    OR  >> . ./duels_mapping.sh synclair
+
 # To set up the data environment for the first time:
 # >> source ./duels_mapping.sh setup    OR  >> . ./duels_mapping.sh setup
 
