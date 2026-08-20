@@ -56,6 +56,21 @@ run_nextjs_app() {
     fi
 }
 
+# Function: Run Synclair app and open browser
+run_synclair() {
+    echo -e "\n⚙️ Starting Synclair development server (press Ctrl+C to stop)..."
+    (cd app-duels-mapping/synclair-duels-mapping && npm run dev) &
+    sleep 5
+    echo -e "\n🌐 Opening browser at http://localhost:4100/synclair"
+    if command -v xdg-open &> /dev/null; then
+        xdg-open "http://localhost:4100/synclair"
+    elif command -v open &> /dev/null; then
+        open "http://localhost:4100/synclair"
+    else
+        echo -e "🔗 Please open http://localhost:4100/synclair in your browser."
+    fi
+}
+
 # Function: Bonne chance et bon courage! 🔥💪🧑‍💻
 send_off() {
     echo -e "\n༼ つ ◕◕ ༽つ SENDING THE GOODEST OF VIBES ༼ つ ◕◕ ༽つ\n\n"
@@ -76,6 +91,14 @@ if [ "$action" = "start" ]; then
     activate_venv
     echo -e "Happy coding you beautiful and strong genius, you 🧑‍💻"
     run_nextjs_app
+    run_synclair
+    send_off
+
+## synclair
+elif [ "$action" = "synclair" ]; then
+    activate_venv
+    echo -e "Let's squash some bugs, you beautiful and strong genius, you 🧑‍💻"
+    run_synclair
     send_off
 
 ## stop
