@@ -14,4 +14,7 @@ SELECT
 	MAX(schmetzer_score) as smetz_max,
 	AVG(schmetzer_score) as smetz_avg
 FROM "schmetzer_scores_{year}"
-	WHERE nineties >= 5;
+	-- Season averages exclude players below {min_nineties} 90s (see
+	-- utils/request-context.js). They are still scored and ranked on the
+	-- leaderboard; they are just kept out of the league mean.
+	WHERE nineties >= {min_nineties};

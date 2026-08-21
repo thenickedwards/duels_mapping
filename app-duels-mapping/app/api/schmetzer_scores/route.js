@@ -1,5 +1,6 @@
 export const runtime = "nodejs";
 import { getDatabasePath, getSqlSelect } from "@/utils/db-utils";
+import { isLocalHost } from "@/utils/request-context";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
 import { createClient } from "@supabase/supabase-js";
@@ -23,10 +24,7 @@ let db = null;
 export async function GET(req) {
   const { searchParams, host } = new URL(req.url);
 
-  const isLocal =
-    host.includes("localhost") ||
-    host.includes("127.0.0.1") ||
-    host.includes("192.168.");
+  const isLocal = isLocalHost(host);
   // const isLocal = false; // for testing Supabase connection
   const season = searchParams.get("season");
   const position = searchParams.get("position");
@@ -110,7 +108,12 @@ export async function GET(req) {
         )
         .ilike("position", position ? `%${position}%` : "%")
         .ilike("squad", squad ? `%${squad}%` : "%")
-        .gte("nineties", Number(minNineties) || 1)
+        // No default floor: every player is ranked regardless of minutes played
+        // (see the Methods page). The SQLite branch above only filters when
+        // minNineties is supplied, so this must match or the deployed grid
+        // silently drops the players local dev shows. The >= 5 floor belongs to
+        // season AVERAGES only -- see utils/request-context.js.
+        .gte("nineties", Number(minNineties) || 0)
         .order("schmetzer_score", { ascending: false });
 
       if (error) console.error("Supabase error:", error);
