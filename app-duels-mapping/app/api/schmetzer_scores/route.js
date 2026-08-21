@@ -1,6 +1,6 @@
 export const runtime = "nodejs";
 import { getDatabasePath, getSqlSelect } from "@/utils/db-utils";
-import { isLocalHost } from "@/utils/request-context";
+import { isLocalHost, resolveMinNineties } from "@/utils/request-context";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
 import { createClient } from "@supabase/supabase-js";
@@ -10,9 +10,11 @@ Example when hosted locally:
 http://localhost:3000/api/schmetzer_scores?season=2024
 Note: the season query parameter is required.
 
-Other parameters are also accepted as optional including position, squad and minNineties (i.e. minimum number of minutes played divided by 90 -- roughly offers approximate time/games played over a season).
-Example when hosted locally using all possible parameters: 
+Other parameters are also accepted as optional including position, squad, and a minimum playing time expressed EITHER as minNineties (minutes played divided by 90 -- roughly games played over a season) OR as minMinutes (raw minutes, which is what the dashboard's "Minimum Minutes Played" control collects). Both resolve to the same 90s floor; minNineties wins if both are given. There is no default floor -- every player is ranked regardless of minutes played.
+Example when hosted locally using all possible parameters:
 http://localhost:3000/api/schmetzer_scores?season=2024&position=MF&squad=SeattleSounders&minNineties=3
+The equivalent using minutes (3 * 90 = 270):
+http://localhost:3000/api/schmetzer_scores?season=2024&position=MF&squad=SeattleSounders&minMinutes=270
 
 The API response returned will be an array with one object per player containing players stats for the requested season.
 */
@@ -29,7 +31,12 @@ export async function GET(req) {
   const season = searchParams.get("season");
   const position = searchParams.get("position");
   const squad = searchParams.get("squad");
-  const minNineties = searchParams.get("minNineties");
+  // Accepts either unit: minNineties (90s) or minMinutes (raw minutes, what the
+  // dashboard's "Minimum Minutes Played" control collects). See utils/request-context.js.
+  const minNineties = resolveMinNineties({
+    minNineties: searchParams.get("minNineties"),
+    minMinutes: searchParams.get("minMinutes"),
+  });
 
   if (!season) {
     return new Response(
@@ -54,9 +61,9 @@ export async function GET(req) {
     values.push(`%${squad.toLowerCase().replace(/\s/g, "")}%`);
   }
 
-  if (minNineties) {
+  if (minNineties !== null) {
     filters.push("nineties >= ?");
-    values.push(Number(minNineties));
+    values.push(minNineties);
   }
 
   try {
@@ -109,11 +116,11 @@ export async function GET(req) {
         .ilike("position", position ? `%${position}%` : "%")
         .ilike("squad", squad ? `%${squad}%` : "%")
         // No default floor: every player is ranked regardless of minutes played
-        // (see the Methods page). The SQLite branch above only filters when
-        // minNineties is supplied, so this must match or the deployed grid
-        // silently drops the players local dev shows. The >= 5 floor belongs to
-        // season AVERAGES only -- see utils/request-context.js.
-        .gte("nineties", Number(minNineties) || 0)
+        // (see the Methods page). The SQLite branch above only filters when a
+        // floor is supplied, so this must match or the deployed grid silently
+        // drops the players local dev shows. The >= 5 floor belongs to season
+        // AVERAGES only -- see utils/request-context.js.
+        .gte("nineties", minNineties ?? 0)
         .order("schmetzer_score", { ascending: false });
 
       if (error) console.error("Supabase error:", error);

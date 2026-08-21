@@ -16,6 +16,36 @@ export function isLocalHost(host) {
   return LOCAL_HOST_PATTERNS.some((pattern) => host.includes(pattern));
 }
 
+// // One "90" is one game's worth of minutes -- the unit the warehouse stores //
+export const MINUTES_PER_NINETY = 90;
+
+// // Resolve the leaderboard's optional minimum-playing-time filter to 90s //
+//
+// The warehouse stores `nineties` (minutes / 90), but the dashboard control is
+// labelled "Minimum Minutes Played" and collects MINUTES, so the two speak
+// different units. The UI sent `minMinutes` while the route only ever read
+// `minNineties`, which meant the filter was accepted, shown as an active filter
+// chip, and then silently ignored.
+//
+// Accept both spellings and normalise here: `minNineties` is the documented API
+// contract and wins when supplied; `minMinutes` is what the UI asks for and is
+// converted. Returns null when there is no usable floor, so callers can tell
+// "no filter" apart from a floor of 0.
+export function resolveMinNineties({ minNineties, minMinutes } = {}) {
+  const parse = (raw) => {
+    if (raw === null || raw === undefined || String(raw).trim() === "")
+      return null;
+    const n = Number(raw);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  };
+
+  const explicit = parse(minNineties);
+  if (explicit !== null) return explicit;
+
+  const minutes = parse(minMinutes);
+  return minutes === null ? null : minutes / MINUTES_PER_NINETY;
+}
+
 // // Minimum 90s (games' worth of minutes) a player must have logged to be
 // // included in any SEASON AVERAGE or league aggregate.
 // //
