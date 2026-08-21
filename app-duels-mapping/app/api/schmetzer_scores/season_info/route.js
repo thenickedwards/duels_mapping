@@ -3,13 +3,19 @@ import { getDatabasePath, getSqlSelect } from "@/utils/db-utils";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
 import { createClient } from "@supabase/supabase-js";
+import {
+  isLocalHost,
+  MIN_NINETIES_FOR_AVERAGES,
+} from "@/utils/request-context";
 /*
 The path for this API route is below.
-Example when hosted locally: 
+Example when hosted locally:
 http://localhost:3000/api/schmetzer_scores/season_info?season=2024
 Note: the season query parameter is required (no other parameters are accepted).
 
-The API response returned will be an array with one object containing the highest and average values for individual stats and the Schmetzer Score, a count of total players, and the distinct count of Schmetzer Score ranks for the requested season. 
+The API response returned will be an array with one object containing the highest and average values for individual stats and the Schmetzer Score, a count of total players, and the distinct count of Schmetzer Score ranks for the requested season.
+
+Only players with at least MIN_NINETIES_FOR_AVERAGES 90s (5 games' worth of minutes) are included, so a handful of cameo appearances cannot drag the league averages down. The SQLite template and the Supabase query below must apply the same floor -- see utils/request-context.js.
 */
 
 // Hold the db instance across requests
@@ -19,7 +25,7 @@ let db = null;
 export async function GET(req) {
   const { searchParams, host } = new URL(req.url);
 
-  const isLocal = host.includes("localhost") || host.includes("127.0.0.1");
+  const isLocal = isLocalHost(host);
   // const isLocal = false; // for testing Supabase connection
   const season = searchParams.get("season");
 
@@ -48,8 +54,11 @@ export async function GET(req) {
         "schmetzer_scores_season_info.sql",
       );
       let sql = "";
-      // Load and interpolate the SQL with the requested season
-      sql = sqlTemplate.replace("{year}", season);
+      // Load and interpolate the SQL with the requested season and the shared
+      // averages floor, so this and the Supabase branch below cannot diverge.
+      sql = sqlTemplate
+        .replace("{year}", season)
+        .replaceAll("{min_nineties}", String(MIN_NINETIES_FOR_AVERAGES));
 
       const data = await db.all(sql);
 
@@ -94,7 +103,7 @@ export async function GET(req) {
           smetz_avg:schmetzer_score.avg()
           `,
         )
-        .gte("nineties", 1);
+        .gte("nineties", MIN_NINETIES_FOR_AVERAGES);
 
       if (error) console.error(error);
       if (data) {

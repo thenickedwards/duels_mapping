@@ -1,5 +1,6 @@
 export const runtime = "nodejs";
 import { getDatabasePath, getSqlSelect } from "@/utils/db-utils";
+import { isLocalHost } from "@/utils/request-context";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
 import { createClient } from "@supabase/supabase-js";
@@ -19,7 +20,7 @@ let db = null;
 export async function GET(req, verbose = 2) {
   const { searchParams, host } = new URL(req.url);
 
-  const isLocal = host.includes("localhost") || host.includes("127.0.0.1");
+  const isLocal = isLocalHost(host);
   // const isLocal = false; // for testing Supabase connection
   const season = searchParams.get("season");
   const playerName = searchParams.get("playerName");

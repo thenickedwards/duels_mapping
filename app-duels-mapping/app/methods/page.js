@@ -128,11 +128,13 @@ export default function MethodsPage() {
           </Typography>
           <Typography variant="body1">
             When tabulating the season average of any given statistic, we
-            decided to exclude players with less than 90 minutes in the season.
-            Though all players are ranked, regardless of how many minutes they
-            played. This decision was made to ensure that the season average is
-            a more accurate reflection of a the average for players who played
-            in a particular season.
+            exclude players with less than five games worth of minutes (450
+            minutes, or five 90s). Though all players are ranked, regardless of
+            how many minutes they played. This decision was made to ensure that
+            the season average is a more accurate reflection of the average for
+            players who genuinely featured in a particular season — a lower
+            threshold pulls in too many brief cameo appearances and drags the
+            league average down.
           </Typography>
         </Box>
         <Box my={"60px"} sx={{ "& > *:not(:last-child)": { mb: 2 } }}>
