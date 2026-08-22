@@ -2,20 +2,23 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
 
-const RightAlignedCenterCell = ({ value, className = "" }) => (
+// `align="right"` pushes the value to the cell's right edge instead of sitting it in a
+// fixed-width box at the left. Wide, variable-length values (currency especially) only
+// line up column-wise when they share a right edge.
+const RightAlignedCenterCell = ({ value, className = "", align = "left" }) => (
   <Box
     className={className}
     sx={{
       width: "100%",
       height: "100%",
       display: "flex",
-      justifyContent: "flex-start",
+      justifyContent: align === "right" ? "flex-end" : "flex-start",
       alignItems: "center",
     }}
   >
     <Box
       sx={{
-        minWidth: "52px",
+        minWidth: align === "right" ? "auto" : "52px",
         textAlign: "right",
       }}
     >
