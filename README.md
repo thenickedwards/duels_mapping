@@ -412,6 +412,20 @@ The weights dim table needs the same treatment. `insert_SQLite_to_Supabase()` ca
 
 The app never reads this table from either database -- the weights are baked into `schmetzer_score` long before a row leaves SQLite. It is synced as a record, not as an endpoint, so that a Supabase row and the weights behind it can be read together.
 
+#### Supabase write access
+
+The frontend reads Supabase with `SUPABASE_ANON_KEY`, which is **public by design** -- it ships to every browser that loads the deployed app. So while the Supabase tables accept anon writes, anyone who lifts that key out of the network tab can rewrite the scores.
+
+The sync therefore authenticates with the **service role** key, which bypasses row level security:
+
+- Copy it from Supabase: **Project Settings -> API -> `service_role`**, and add it to `.env` as `SUPABASE_SERVICE_ROLE_KEY`. It is a secret: it must never reach the frontend, a client bundle, or a commit. `.env` is gitignored.
+- `resolve_supabase_write_credentials()` in [`etl/data_handler.py`](app-duels-mapping/public/duels_mapping_data/etl/data_handler.py) picks it up. Every pipeline calls `insert_SQLite_to_Supabase()` with no credential arguments, so the choice of key lives in one place rather than in five pipeline scripts.
+- Without it the sync falls back to the anon key and prints a warning, so a checkout that has not set it keeps working against tables that still allow anon writes.
+
+Then run [`etl/sql/migrate/restrict_supabase_write_access.sql`](app-duels-mapping/public/duels_mapping_data/etl/sql/migrate/restrict_supabase_write_access.sql) in the Supabase SQL editor. It enables RLS on all ten tables with a read-only policy, leaving anon able to `SELECT` and nothing else. The script ends with a `SELECT` that reports the resulting state per table.
+
+**Order matters.** Add the key to `.env` *before* running that migration, or the next sync fails with `42501 - new row violates row-level security policy`. That is the same error the weights dim table produced when RLS was enabled on it ahead of the key.
+
 #### What is *not* synced, and why
 
 Only the nine score tables and the weights dim table go to Supabase. The raw and staging tables stay local by design:
