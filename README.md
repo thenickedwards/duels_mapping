@@ -217,10 +217,34 @@ All tables are created using the SQL in the [app-duels-mapping/public/duels_mapp
 | stat_name         | point_value | abbrev        |
 | ----------------- | ----------- | ------------- |
 | aerial duels won  | 1           | duels won     |
-| aerial duels lost | -0.75       | duels lost    |
-| tackles won       | 1           | tackles won   |
-| interceptions     | .75         | interceptions |
-| recoveries        | .5          | recoveries    |
+| aerial duels lost | -0.85       | duels lost    |
+| tackles won       | 1.5         | tackles won   |
+| interceptions     | .9          | interceptions |
+| recoveries        | .25         | recoveries    |
+
+#### Weight Fine-Tuning
+
+These are not the weights the project launched with. In 2026 every weight was reviewed against the full database -- 5,876 player-seasons across 2018-2025 -- and four of the five changed.
+
+| Stat              | Initial Weight | Fine-Tuned Weight |
+| ----------------- | -------------- | ----------------- |
+| Aerial duels won  | +1             | +1                |
+| Aerial duels lost | -0.75          | **-0.85**         |
+| Tackles won       | +1             | **+1.5**          |
+| Interceptions     | +0.75          | **+0.9**          |
+| Recoveries        | +0.5           | **+0.25**         |
+
+The finding driving the change is that **a weight is not an influence**. Recoveries carried the smallest weight and the largest effect, purely on volume: 339,947 recoveries in the database against 66,056 tackles won. More than half of every point the score awarded was a recovery, and score-per-90 correlated 0.78 with recoveries against 0.26 with aerial duels won -- a metric named for duels was not primarily measuring duels. Cutting recoveries to +0.25 takes them from 55% of all points awarded to 32%, and from the largest single influence on the score to the smallest.
+
+`tackles won` rises to +1.5 for the mirror-image reason. Tackles are both rarer and more tightly clustered than aerial duels (0.98 vs 1.25 per 90; standard deviations of 0.52 vs 0.99), so matching them at +1 gave them materially less pull on the ranking. Per-event parity would put the weight at 1.27 and fully equal influence at 1.89; +1.5 sits at the geometric middle of that range. The ceiling was deliberately avoided because tackles won is the least stable stat in the set -- its year-over-year correlation within position is 0.606 and falls a further 0.144 when a player changes clubs, the largest such drop of the five, indicating it travels with a team's defensive scheme.
+
+`aerial duels lost` moves to -0.85. League-wide, aerial duels won and lost are the same number (85,314 vs 85,318) because every duel has one winner and one loser, so the two aerial weights do not set a value -- they set a **break-even win rate** of `k / (1 + k)`. At -0.75 that was 42.9%, well under what an ordinary contested player manages, so the aerial term was effectively paying for volume. At -0.85 it is 45.9%: correlation with raw duel volume drops from 0.395 to 0.287 while correlation with actual win rate reaches its plateau. The original design intent survives -- the median outfielder with real aerial volume wins 49.2%, so a genuine coin-flip still nets positive.
+
+`interceptions` rises to +0.9 on the strength of the secondary "keeps possession" criterion, while staying clearly below tackles because no opponent is beaten in a contest. The restraint is also empirical: interceptions are the most positional and least individually discriminating stat in the set, with 37.5% of variance explained by position alone and a within-position year-over-year reliability of 0.559, the lowest of the five.
+
+Two consequences worth knowing. Rankings move less than the weights suggest -- Spearman correlation with the previous ranking is 0.990, because a season total is driven first by minutes played, and only four or five names change in a given season's top 25. And because four of five values fell, **every score in the database is now lower**: the league mean drops roughly 16%. That is a rescale, not a regression, but any figure quoted from a previous run is stale.
+
+Retuning the weights is a `data_vars.json` edit plus `insert_dim_schmetzer_score_points()`, which upserts on `stat_name`. Do **not** reach for `create_tables()` to refresh the dim table -- it drops every table including the FBref raw and staging tables, which can no longer be re-sourced. The rebuild path after a weight change is: `insert_dim_schmetzer_score_points()`, then `insert_schmetzer_scores_players(seasons=...)` passing the seasons already in the database, then `update_schmetzer_scores_players_salaries()`, and finally `insert_schmetzer_scores_all_seasons()` -- the all-seasons table must be rebuilt **after** the salary update or it copies null salary columns.
 
 `dim_mls_club_crosswalk` - The second **dim table**. Every source spells MLS clubs differently: FBref writes `Atlanta Utd` and `Vancouver W'caps`, the MLSPA writes `Atlanta United` and `Vancouver Whitecaps`, and both have renamed clubs over the years (`Montreal Impact` became `CF Montréal`). This table resolves any of those spellings to the one squad name the app displays, so a club reads identically whichever pipeline the row arrived through. See [Squad Name Standardization](#squad-name-standardization) below.
 
@@ -379,6 +403,24 @@ The `create/` scripts build the SQLite side. Supabase is a separate database, so
 - Skip it and the salary pipelines will complete their local work and then fail on upload with `PGRST204 - Could not find the 'base_salary' column ... in the schema cache`.
 
 An existing *local* database needs no manual step: the pipelines call `add_salary_columns_to_schmetzer_scores()`, which adds the columns in place. That matters because a full rebuild would drop the FBref raw and staging tables, and [as of January 2026](https://www.sports-reference.com/blog/2026/01/fbref-stathead-data-update/) that data can no longer be re-sourced.
+
+The weights dim table needs the same treatment. `insert_SQLite_to_Supabase()` carries `dim_schmetzer_score_points` alongside the score tables, so the cloud copy records which weights produced the scores sitting next to it:
+
+- Run [`etl/sql/migrate/create_dim_schmetzer_score_points_supabase.sql`](app-duels-mapping/public/duels_mapping_data/etl/sql/migrate/create_dim_schmetzer_score_points_supabase.sql) in the Supabase SQL editor.
+- Also safe to re-run; the table, RLS toggle, and read policy are all `IF NOT EXISTS`.
+- Skip it and the sync fails on its **last** step with `PGRST205 - Could not find the table 'public.dim_schmetzer_score_points' in the schema cache`. The score tables upload first precisely so a missing dim table cannot block the data the app serves.
+
+The app never reads this table from either database -- the weights are baked into `schmetzer_score` long before a row leaves SQLite. It is synced as a record, not as an endpoint, so that a Supabase row and the weights behind it can be read together.
+
+#### What is *not* synced, and why
+
+Only the nine score tables and the weights dim table go to Supabase. The raw and staging tables stay local by design:
+
+- **Nothing reads them.** The app queries `schmetzer_scores_*` and nothing else. Uploading `raw_FBref_*` (6,033 rows), `stg_FBref_*` (6,015), `raw_MLSPA_*` (7,627) and `stg_MLSPA_*` (7,627) would roughly quadruple the hosted row count to serve zero queries -- and this project runs on a free tier that pauses on inactivity.
+- **They are inputs, not outputs.** SQLite is the stated source of truth for the pipeline. Two copies of an input that only one of them can transform is a consistency problem waiting to happen, not a backup.
+- **`mls_stats.db` is already version-controlled**, so the irreplaceable FBref data has an off-machine copy on GitHub with history behind it. That is a better backup than an upsert-only mirror with no point-in-time recovery.
+
+The one argument for syncing them is disaster recovery for data [that can no longer be re-sourced](https://www.sports-reference.com/blog/2026/01/fbref-stathead-data-update/). Git already covers that. If the ETL ever moves off a single machine -- a hosted runner, or a second contributor -- revisit it then, and treat it as a backup strategy rather than a bigger sync.
 
 #### The value metric
 

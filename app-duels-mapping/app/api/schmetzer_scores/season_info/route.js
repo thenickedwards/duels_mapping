@@ -21,6 +21,28 @@ Only players with at least MIN_NINETIES_FOR_AVERAGES 90s (5 games' worth of minu
 // Hold the db instance across requests
 let db = null;
 
+/*
+Schmetzer figures are served at 2 decimal places.
+
+Weights such as -0.85 and 0.9 have no exact representation as binary floats, so a score
+summed from them lands on values like 121.39999999999998, and an average over those
+scores on 68.10745233968804. The stored scores are rounded by the scoring SQL, but an
+average is computed at query time -- by SQLite here and by PostgREST on Supabase, where
+it cannot be rounded server-side -- so both branches are normalized on the way out.
+*/
+const SMETZ_FIELDS = ["smetz_max", "smetz_avg"];
+
+const roundSmetzFields = (rows) =>
+  (rows ?? []).map((row) => {
+    const rounded = { ...row };
+    for (const field of SMETZ_FIELDS) {
+      if (typeof rounded[field] === "number") {
+        rounded[field] = Number(rounded[field].toFixed(2));
+      }
+    }
+    return rounded;
+  });
+
 // GET handler for specific season Schmetzer scores
 export async function GET(req) {
   const { searchParams, host } = new URL(req.url);
@@ -62,7 +84,7 @@ export async function GET(req) {
 
       const data = await db.all(sql);
 
-      return new Response(JSON.stringify(data), {
+      return new Response(JSON.stringify(roundSmetzFields(data)), {
         headers: { "Content-Type": "application/json" },
         status: 200,
       });
@@ -111,7 +133,7 @@ export async function GET(req) {
         console.log("Sample record: ", data[0]);
       }
 
-      return new Response(JSON.stringify(data), {
+      return new Response(JSON.stringify(roundSmetzFields(data)), {
         headers: { "Content-Type": "application/json" },
         status: 200,
       });
