@@ -20,7 +20,7 @@ import {
 import { styled } from "@mui/material/styles";
 import { DataGrid } from "@mui/x-data-grid";
 import useSWR from "swr";
-import { useState, Suspense } from "react";
+import { useState, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import PlayerComparison from "./components/comparisons/PlayerComparison";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
@@ -48,9 +48,22 @@ import PlayerFiltersRow from "./components/players/PlayerFiltersRow";
 import PlayerYearControls from "./components/players/PlayerYearControls";
 import SquadSelect from "./components/inputs/SquadSelect";
 import { textActionButtonStyle } from "./styles/buttonStyles";
+import { formatSalary, formatValueMetric } from "@/utils/format-salary";
 
 function removeAccents(str = "") {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+// Sentinel page size meaning "show every player in one page"
+const ALL_PLAYERS = -1;
+
+function isMissing(value) {
+  return value === null || value === undefined || value === "";
+}
+
+function compareValues(a, b) {
+  if (typeof a === "number" && typeof b === "number") return a - b;
+  return String(a).localeCompare(String(b), undefined, { numeric: true });
 }
 
 function normalizeName(str = "") {
@@ -143,6 +156,7 @@ export default function PlayersPage() {
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [sortModel, setSortModel] = useState([]);
 
   const [selectOpen, setSelectOpen] = useState(false);
 
@@ -219,7 +233,9 @@ export default function PlayersPage() {
       field: "squad",
       headerName: "Squad",
       displayName: "Squad",
-      width: 200,
+      // Fits the longest standardized names ("New England Revolution",
+      // "Vancouver Whitecaps FC") alongside the badge without clipping
+      width: 240,
       renderCell: (params) => <TeamBadgeCell squad={params.value} />,
     },
     {
@@ -258,6 +274,26 @@ export default function PlayersPage() {
         >
           <Typography fontSize="0.9rem">{params.value}</Typography>
         </Box>
+      ),
+    },
+    {
+      field: "guaranteed_comp",
+      headerName: "salary",
+      displayName: "Guaranteed Compensation",
+      width: 120,
+      headerAlign: "right",
+      renderCell: (params) => (
+        <RightAlignedCenterCell value={formatSalary(params.value)} align="right" />
+      ),
+    },
+    {
+      field: "schmetzer_score_per_million",
+      headerName: "smetz/$M",
+      displayName: "Schmetzer Score per $1M",
+      width: 120,
+      headerAlign: "right",
+      renderCell: (params) => (
+        <RightAlignedCenterCell value={formatValueMetric(params.value)} align="right" />
       ),
     },
     {
@@ -346,6 +382,35 @@ export default function PlayersPage() {
     return matchesSearch && matchesSquad;
   });
 
+  // SORTING
+  // The grid only ever receives one page of rows, so its own sorting would reorder that
+  // page alone. Sort the whole filtered set here and hand the grid the slice it should
+  // show, with sortingMode="server" so it does not sort again on top.
+  const sortedRows = useMemo(() => {
+    if (!sortModel.length) return filteredRows;
+    const { field, sort } = sortModel[0];
+    if (!field || !sort) return filteredRows;
+    const direction = sort === "desc" ? -1 : 1;
+    return [...filteredRows].sort((a, b) => {
+      const aValue = a[field];
+      const bValue = b[field];
+      // Missing values sort last in BOTH directions -- the salary columns are empty for
+      // any player the MLSPA release did not list, and a leaderboard sorted high-to-low
+      // should not open with a screen of blanks. So this sits outside the direction flip.
+      if (isMissing(aValue) || isMissing(bValue)) {
+        if (isMissing(aValue) && isMissing(bValue)) return 0;
+        return isMissing(aValue) ? 1 : -1;
+      }
+      return compareValues(aValue, bValue) * direction;
+    });
+  }, [filteredRows, sortModel]);
+
+  const handleSortModelChange = (model) => {
+    setSortModel(model);
+    // Re-sorting reorders the whole list, so send the user back to its top
+    setPage(1);
+  };
+
   // CUSTOM STYLED PAGINATION
   const handlePageChange = (event, value) => setPage(value);
   const handlePageSizeChange = (event) => {
@@ -353,11 +418,11 @@ export default function PlayersPage() {
     setPage(1);
   };
 
-  const totalPages = Math.ceil(filteredRows.length / pageSize);
-  const paginatedRows = filteredRows.slice(
-    (page - 1) * pageSize,
-    page * pageSize,
-  );
+  const showingAll = pageSize === ALL_PLAYERS;
+  const totalPages = showingAll ? 1 : Math.ceil(sortedRows.length / pageSize);
+  const paginatedRows = showingAll
+    ? sortedRows
+    : sortedRows.slice((page - 1) * pageSize, page * pageSize);
 
   // EXPORT
   function exportToCSV(data, filename) {
@@ -505,7 +570,7 @@ export default function PlayersPage() {
                   hiddenColumns={hiddenColumns}
                   toggleColumnVisibility={toggleColumnVisibility}
                   setHiddenColumns={setHiddenColumns}
-                  filteredRows={filteredRows}
+                  filteredRows={sortedRows}
                   selectedYear={selectedYear}
                   exportToCSV={exportToCSV}
                   showFilterCount={false}
@@ -533,7 +598,7 @@ export default function PlayersPage() {
                   hiddenColumns={hiddenColumns}
                   toggleColumnVisibility={toggleColumnVisibility}
                   setHiddenColumns={setHiddenColumns}
-                  filteredRows={filteredRows}
+                  filteredRows={sortedRows}
                   selectedYear={selectedYear}
                   exportToCSV={exportToCSV}
                   showFilterCount={true}
@@ -635,6 +700,14 @@ export default function PlayersPage() {
                 columns={columns.filter(
                   (col) => !hiddenColumns.includes(col.field),
                 )}
+                sortingMode="server"
+                sortModel={sortModel}
+                onSortModelChange={handleSortModelChange}
+                // Pagination is handled above, so the grid is told the rows it gets are
+                // already the page. Without this it slices again on top of ours and caps
+                // the view at its own 100-row page size, which "All" would silently hit.
+                paginationMode="server"
+                rowCount={sortedRows.length}
                 loading={isLoading}
                 onRowClick={(params) => setSelectedPlayer(params.row)}
                 components={{
@@ -867,7 +940,7 @@ export default function PlayersPage() {
                     },
                   }}
                 >
-                  {[5, 10, 25, 50, 100].map((size) => (
+                  {[10, 25, 50, 100, ALL_PLAYERS].map((size) => (
                     <MenuItem
                       key={size}
                       value={size}
@@ -876,7 +949,7 @@ export default function PlayersPage() {
                         fontFamily: "'Nunito Sans', sans-serif",
                       }}
                     >
-                      {size}
+                      {size === ALL_PLAYERS ? "All" : size}
                     </MenuItem>
                   ))}
                 </Select>

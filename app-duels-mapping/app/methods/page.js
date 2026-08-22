@@ -139,6 +139,54 @@ export default function MethodsPage() {
         </Box>
         <Box my={"60px"} sx={{ "& > *:not(:last-child)": { mb: 2 } }}>
           <Typography variant="h2" fontSize={"1.25rem"}>
+            Salary &amp; The Schmetzer Value Metric
+          </Typography>
+          <Typography variant="body1">
+            A Schmetzer Score says how much contested possession a player won.
+            It says nothing about what that work cost. So alongside each
+            player&apos;s score we carry their publicly disclosed compensation,
+            sourced from the&nbsp;
+            <Link
+              href="https://mlsplayers.org/resources/salary-guide"
+              style={{ textDecoration: "underline", color: "inherit" }}
+            >
+              MLS Players Association Salary Guide
+            </Link>
+            . The salary column shows annual average guaranteed compensation
+            &mdash; base salary plus all signing and guaranteed bonuses,
+            annualized over the term of the contract.
+          </Typography>
+          <Typography variant="body1">
+            The <strong>smetz/$M</strong> column divides a player&apos;s
+            Schmetzer Score by that compensation in millions of dollars: how
+            much contested possession a club bought with the money it committed
+            to that player. Players are ranked on it only once past the same
+            five 90s threshold used for season averages &mdash; without a floor,
+            a single substitute appearance on a league-minimum contract would
+            top the table on a handful of duels.
+          </Typography>
+          <Typography variant="body1">
+            Two things are worth keeping in mind when reading it. It measures
+            contested possession per dollar and nothing else, so a designated
+            player signed to score goals will always look poor on it &mdash;
+            that is a statement about what the Schmetzer Score counts, not about
+            the player. And clubs are not on a level field: MLS roster rules
+            mean a homegrown player on a league-minimum deal does the same work
+            for a fraction of the cap hit, so the metric tends to reward clubs
+            that develop and play their academy.
+          </Typography>
+          <Typography variant="body1">
+            The MLSPA publishes one release per season, compiled in the autumn,
+            and it does not share a player id with our statistics source, so
+            players are matched by name within their club. Roughly 91&ndash;97%
+            of ranked players in a given season carry a salary. A player showing
+            &ldquo;&mdash;&rdquo; either left the league before the release was
+            compiled or could not be matched with confidence; we show nothing
+            rather than a guess.
+          </Typography>
+        </Box>
+        <Box my={"60px"} sx={{ "& > *:not(:last-child)": { mb: 2 } }}>
+          <Typography variant="h2" fontSize={"1.25rem"}>
             Data Source, Limitations, & Further Development
           </Typography>
           <Typography variant="body1">

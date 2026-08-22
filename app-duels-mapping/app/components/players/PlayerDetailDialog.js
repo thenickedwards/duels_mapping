@@ -190,6 +190,8 @@ export default function PlayerDetailDialog({
                 max={seasonMaxes.smetz_max}
                 rank={player.schmetzer_rk}
                 totalRanks={stats?.total_ranks}
+                guaranteedComp={player.guaranteed_comp}
+                scorePerMillion={player.schmetzer_score_per_million}
                 darkMode={theme.palette.mode === "dark"}
               />
             </Box>

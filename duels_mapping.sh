@@ -14,6 +14,12 @@
 # To update the data environment:
 # >> source ./duels_mapping.sh update    OR  >> . ./duels_mapping.sh update
 
+# To load the current MLSPA salary release into the data environment:
+# >> source ./duels_mapping.sh salaries    OR  >> . ./duels_mapping.sh salaries
+
+# To backfill every season of MLSPA salary data:
+# >> source ./duels_mapping.sh salaries-restore    OR  >> . ./duels_mapping.sh salaries-restore
+
 # To sync the data environment (SQLite local to Postgres remote):
 # >> source ./duels_mapping.sh sync    OR  >> . ./duels_mapping.sh sync
 
@@ -85,7 +91,7 @@ send_off() {
 # Handle action argument
 ## If no argument
 if [ -z "$action" ]; then
-  echo "Usage: source ./duels_mapping.sh {start|stop|setup|update}"
+  echo "Usage: source ./duels_mapping.sh {start|stop|setup|update|salaries|salaries-restore|sync|restore}"
   return 0
 fi
 
@@ -136,6 +142,26 @@ elif [ "$action" = "update" ]; then
     
     send_off
 
+## salaries
+elif [ "$action" = "salaries" ]; then
+    activate_venv
+
+    echo -e "\n\U1F4B0 Running ETL pipeline to update the current season's MLSPA salaries..."
+    python "$SCRIPT_DIR/app-duels-mapping/public/duels_mapping_data/etl/pipeline_cur_MLSPA_salaries_to_schmetzer_scores_players.py" || {
+        echo "\u274c Salary ETL pipeline execution failed."; return 1; }
+
+    send_off
+
+## salaries-restore
+elif [ "$action" = "salaries-restore" ]; then
+    activate_venv
+
+    echo -e "\n\U1F4B0 Running ETL pipeline to backfill all MLSPA salary releases..."
+    python "$SCRIPT_DIR/app-duels-mapping/public/duels_mapping_data/etl/pipeline_hist_MLSPA_salaries_to_schmetzer_scores_players.py" || {
+        echo "\u274c Salary ETL pipeline execution failed."; return 1; }
+
+    send_off
+
 ## sync
 elif [ "$action" = "sync" ]; then
     activate_venv
@@ -154,13 +180,18 @@ elif [ "$action" = "restore" ]; then
     python "$SCRIPT_DIR/app-duels-mapping/public/duels_mapping_data/etl/pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players.py" || {
         echo -e "❌ ETL pipeline execution failed."; return 1; }
 
+    # Salaries decorate the Schmetzer Score tables the pipeline above builds, so they follow it
+    echo -e "\n\U1F4B0 Running ETL pipeline to backfill all MLSPA salary releases..."
+    python "$SCRIPT_DIR/app-duels-mapping/public/duels_mapping_data/etl/pipeline_hist_MLSPA_salaries_to_schmetzer_scores_players.py" || {
+        echo -e "❌ Salary ETL pipeline execution failed."; return 1; }
+
     run_nextjs_app
     
     send_off
 
 ## Unrecognized argument
 else
-    echo -e "⚠️  Unknown action: '$action'. Use 'start', 'stop','setup', or 'update'."
+    echo -e "⚠️  Unknown action: '$action'. Use 'start', 'stop', 'setup', 'update', 'salaries', 'salaries-restore', 'sync', or 'restore'."
     return 1
 fi
 

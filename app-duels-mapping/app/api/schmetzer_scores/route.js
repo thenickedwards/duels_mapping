@@ -111,7 +111,7 @@ export async function GET(req) {
       const { data, error } = await supabase
         .from(table)
         .select(
-          `id, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk, aerial_duels_won, aerial_duels_lost, aerial_duels_total, aerial_duels_won_pct, tackles_won, interceptions, recoveries, load_datetime`,
+          `id, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk, aerial_duels_won, aerial_duels_lost, aerial_duels_total, aerial_duels_won_pct, tackles_won, interceptions, recoveries, base_salary, guaranteed_comp, schmetzer_score_per_million, schmetzer_value_rk, load_datetime`,
         )
         .ilike("position", position ? `%${position}%` : "%")
         .ilike("squad", squad ? `%${squad}%` : "%")
@@ -147,11 +147,11 @@ export async function GET(req) {
 /* Example response below:
 [
    {
-      "id":"cristianroldan-1995-2024-seattlesounders-usa",
+      "id":"cristianroldan-1995-2024-seattlesoundersfc-usa",
       "player_name":"Cristian Roldan",
       "player_nationality":"USA",
       "position":"MF,FW",
-      "squad":"Seattle Sounders",
+      "squad":"Seattle Sounders FC",
       "player_age":28,
       "player_yob":1995,
       "nineties":31.5,
@@ -167,11 +167,11 @@ export async function GET(req) {
       "load_datetime":"2025-10-23 22:22:34"
    },
    {
-      "id":"obedvargas-2005-2024-seattlesounders-mex",
+      "id":"obedvargas-2005-2024-seattlesoundersfc-mex",
       "player_name":"Obed Vargas",
       "player_nationality":"MEX",
       "position":"MF,FW",
-      "squad":"Seattle Sounders",
+      "squad":"Seattle Sounders FC",
       "player_age":18,
       "player_yob":2005,
       "nineties":28.2,
@@ -187,11 +187,11 @@ export async function GET(req) {
       "load_datetime":"2025-10-23 22:22:34"
    },
    {
-      "id":"joãopaulomior-1991-2024-seattlesounders-bra",
+      "id":"joãopaulomior-1991-2024-seattlesoundersfc-bra",
       "player_name":"João Paulo Mior",
       "player_nationality":"BRA",
       "position":"MF",
-      "squad":"Seattle Sounders",
+      "squad":"Seattle Sounders FC",
       "player_age":32,
       "player_yob":1991,
       "nineties":14.2,
@@ -207,11 +207,11 @@ export async function GET(req) {
       "load_datetime":"2025-10-23 22:22:34"
    },
    {
-      "id":"joshuaatencio-2002-2024-seattlesounders-usa",
+      "id":"joshuaatencio-2002-2024-seattlesoundersfc-usa",
       "player_name":"Joshua Atencio",
       "player_nationality":"USA",
       "position":"MF",
-      "squad":"Seattle Sounders",
+      "squad":"Seattle Sounders FC",
       "player_age":22,
       "player_yob":2002,
       "nineties":11.9,
@@ -227,11 +227,11 @@ export async function GET(req) {
       "load_datetime":"2025-10-23 22:22:34"
    },
    {
-      "id":"albertrusnák-1994-2024-seattlesounders-svk",
+      "id":"albertrusnák-1994-2024-seattlesoundersfc-svk",
       "player_name":"Albert Rusnák",
       "player_nationality":"SVK",
       "position":"MF",
-      "squad":"Seattle Sounders",
+      "squad":"Seattle Sounders FC",
       "player_age":29,
       "player_yob":1994,
       "nineties":28.1,
@@ -247,11 +247,11 @@ export async function GET(req) {
       "load_datetime":"2025-10-23 22:22:34"
    },
    {
-      "id":"léochú-2000-2024-seattlesounders-bra",
+      "id":"léochú-2000-2024-seattlesoundersfc-bra",
       "player_name":"Léo Chú",
       "player_nationality":"BRA",
       "position":"FW,MF",
-      "squad":"Seattle Sounders",
+      "squad":"Seattle Sounders FC",
       "player_age":23,
       "player_yob":2000,
       "nineties":7.9,
@@ -267,11 +267,11 @@ export async function GET(req) {
       "load_datetime":"2025-10-23 22:22:34"
    },
    {
-      "id":"pedrodelavega-2001-2024-seattlesounders-arg",
+      "id":"pedrodelavega-2001-2024-seattlesoundersfc-arg",
       "player_name":"Pedro De la Vega",
       "player_nationality":"ARG",
       "position":"FW,MF",
-      "squad":"Seattle Sounders",
+      "squad":"Seattle Sounders FC",
       "player_age":22,
       "player_yob":2001,
       "nineties":7.2,
@@ -287,11 +287,11 @@ export async function GET(req) {
       "load_datetime":"2025-10-23 22:22:34"
    },
    {
-      "id":"codybaker-2004-2024-seattlesounders-usa",
+      "id":"codybaker-2004-2024-seattlesoundersfc-usa",
       "player_name":"Cody Baker",
       "player_nationality":"USA",
       "position":"DF,MF",
-      "squad":"Seattle Sounders",
+      "squad":"Seattle Sounders FC",
       "player_age":20,
       "player_yob":2004,
       "nineties":5.3,
@@ -307,11 +307,11 @@ export async function GET(req) {
       "load_datetime":"2025-10-23 22:22:34"
    },
    {
-      "id":"danielmusovski-1995-2024-seattlesounders-usa",
+      "id":"danielmusovski-1995-2024-seattlesoundersfc-usa",
       "player_name":"Daniel Musovski",
       "player_nationality":"USA",
       "position":"FW,MF",
-      "squad":"Seattle Sounders",
+      "squad":"Seattle Sounders FC",
       "player_age":28,
       "player_yob":1995,
       "nineties":5.7,
