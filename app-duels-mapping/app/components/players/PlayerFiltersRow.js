@@ -35,11 +35,10 @@ export default function PlayerFiltersRow({
   const theme = useTheme();
   const [showColumns, setShowColumns] = useState(false);
 
-  const filterCount = [
-    filters.position,
-    filters.squad,
-    filters.minMinutes,
-  ].filter(Boolean).length;
+  // position and squad are arrays, so the badge counts chosen values rather than
+  // active filters -- two clubs and a position reads as (3).
+  const filterCount =
+    filters.position.length + filters.squad.length + (filters.minMinutes ? 1 : 0);
 
   return (
     <Box display="flex" flexWrap="wrap" gap={1} alignItems="center">

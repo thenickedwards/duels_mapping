@@ -1,38 +1,59 @@
 "use client";
 
-import { Select, MenuItem, OutlinedInput, FormControl } from "@mui/material";
+import {
+  Select,
+  MenuItem,
+  OutlinedInput,
+  FormControl,
+  Checkbox,
+  ListItemText,
+} from "@mui/material";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useTheme } from "@mui/material/styles";
 import { inputStyle } from "../../styles/inputStyles";
 
-const SelectIcon = (iconProps) => <ArrowForwardIosIcon {...iconProps} />;
-
+/**
+ * Multi-select dropdown for the filter drawer.
+ *
+ * value is an array and onChange is handed an array, so a filter can hold several
+ * choices at once -- comparing two clubs, or defenders and midfielders together.
+ * An empty array means "no filter", which is why there is no explicit "All" option:
+ * clearing every checkbox is the same thing, and an "All" entry that had to be
+ * deselected alongside real choices reads as a fourth position.
+ *
+ * A plain string value is accepted and treated as a single selection, so a caller
+ * that has not been migrated still renders.
+ */
 export default function CustomSelect({
-  value,
+  value = [],
   onChange,
   options = [],
   placeholder = "Select an option",
-  showPlaceholder = true,
 }) {
   const theme = useTheme();
+  const selected = Array.isArray(value) ? value : value ? [value] : [];
 
   return (
     <FormControl fullWidth sx={{ mt: 1 }}>
       <Select
-        value={value ?? ""}
-        onChange={onChange}
+        multiple
+        value={selected}
+        onChange={(event) => {
+          // The native select hands back a comma-joined string on autofill
+          const next = event.target.value;
+          onChange(typeof next === "string" ? next.split(",") : next);
+        }}
         displayEmpty
         input={<OutlinedInput />}
         IconComponent={ArrowForwardIosIcon}
-        renderValue={(selected) => {
-          const selectedOption = options.find((opt) => opt.value === selected);
-          if (selectedOption) {
-            return selectedOption.label;
-          }
-          if (showPlaceholder) {
+        renderValue={(chosen) => {
+          if (!chosen.length) {
             return <span style={{ color: "#888" }}>{placeholder}</span>;
           }
-          return "";
+          return options
+            .filter((opt) => chosen.includes(opt.value))
+            .map((opt) => opt.label)
+            .join(", ");
         }}
         MenuProps={{
           PaperProps: {
@@ -72,6 +93,10 @@ export default function CustomSelect({
           "& .MuiSelect-select": {
             display: "flex",
             alignItems: "center",
+            // Several selections stay on one line rather than growing the control
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
           },
           // ▼ icon closed (down)
           "& .MuiSelect-icon": {
@@ -90,14 +115,33 @@ export default function CustomSelect({
           },
         })}
       >
-        {showPlaceholder && (
-          <MenuItem value="" disabled sx={{ display: "none" }}>
-            {placeholder}
-          </MenuItem>
-        )}
         {options.map((opt) => (
-          <MenuItem key={opt.value} value={opt.value}>
-            {opt.label}
+          <MenuItem key={opt.value} value={opt.value} dense>
+            <Checkbox
+              checked={selected.includes(opt.value)}
+              size="small"
+              sx={{
+                p: 0.5,
+                mr: 1,
+                color:
+                  theme.palette.mode === "dark"
+                    ? theme.palette.common.white
+                    : theme.palette.common.black,
+                "&.Mui-checked": {
+                  color:
+                    theme.palette.mode === "dark"
+                      ? theme.palette.common.white
+                      : theme.palette.common.black,
+                },
+              }}
+            />
+            <ListItemText
+              primary={opt.label}
+              primaryTypographyProps={{
+                fontFamily: "'Nunito Sans', sans-serif",
+                fontSize: "0.875rem",
+              }}
+            />
           </MenuItem>
         ))}
       </Select>
