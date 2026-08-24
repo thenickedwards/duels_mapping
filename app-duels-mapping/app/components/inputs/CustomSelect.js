@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Select,
-  MenuItem,
-  OutlinedInput,
-  FormControl,
-  Checkbox,
-  ListItemText,
-} from "@mui/material";
+import { Select, MenuItem, OutlinedInput, FormControl } from "@mui/material";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useTheme } from "@mui/material/styles";
 import { inputStyle } from "../../styles/inputStyles";
@@ -18,20 +11,36 @@ import { inputStyle } from "../../styles/inputStyles";
  * value is an array and onChange is handed an array, so a filter can hold several
  * choices at once -- comparing two clubs, or defenders and midfielders together.
  * An empty array means "no filter", which is why there is no explicit "All" option:
- * clearing every checkbox is the same thing, and an "All" entry that had to be
- * deselected alongside real choices reads as a fourth position.
+ * clearing every entry is the same thing, and an "All" row that had to be deselected
+ * alongside real choices reads as one more position.
  *
- * A plain string value is accepted and treated as a single selection, so a caller
- * that has not been migrated still renders.
+ * Selection is shown by colouring the row rather than by a checkbox, using the same
+ * accent the masthead uses -- limegreen on light, blue on dark.
+ *
+ * summarize is optional: given the selected values it may return a short label to show
+ * in place of a long comma-joined list, so the caller can name a combination that means
+ * something ("All outfield") without this component knowing what positions are.
+ *
+ * A plain string value is accepted and treated as a single selection, so a caller that
+ * has not been migrated still renders.
  */
 export default function CustomSelect({
   value = [],
   onChange,
   options = [],
   placeholder = "Select an option",
+  summarize,
 }) {
   const theme = useTheme();
   const selected = Array.isArray(value) ? value : value ? [value] : [];
+
+  const isDark = theme.palette.mode === "dark";
+  const accent = isDark
+    ? theme.palette.common.blue
+    : theme.palette.common.limegreen;
+  const onAccent = isDark
+    ? theme.palette.common.white
+    : theme.palette.common.black;
 
   return (
     <FormControl fullWidth sx={{ mt: 1 }}>
@@ -50,6 +59,8 @@ export default function CustomSelect({
           if (!chosen.length) {
             return <span style={{ color: "#888" }}>{placeholder}</span>;
           }
+          const summary = summarize?.(chosen);
+          if (summary) return summary;
           return options
             .filter((opt) => chosen.includes(opt.value))
             .map((opt) => opt.label)
@@ -63,14 +74,11 @@ export default function CustomSelect({
               width: 260,
               borderRadius: 0,
               boxShadow: "none",
-              backgroundColor:
-                theme.palette.mode === "dark"
-                  ? theme.palette.common.black
-                  : theme.palette.common.white,
+              backgroundColor: isDark
+                ? theme.palette.common.black
+                : theme.palette.common.white,
               border: `1px solid ${
-                theme.palette.mode === "dark"
-                  ? theme.palette.common.white
-                  : theme.palette.common.black
+                isDark ? theme.palette.common.white : theme.palette.common.black
               }`,
               fontFamily: "'Nunito Sans', sans-serif",
               fontSize: "0.875rem",
@@ -78,11 +86,19 @@ export default function CustomSelect({
                 fontFamily: "'Nunito Sans', sans-serif",
                 fontSize: "0.875rem",
               },
+              // Selection is carried entirely by colour here, so it has to survive
+              // hover -- an unselected row hovered must not look like a selected one.
               "& .MuiMenuItem-root.Mui-selected": {
-                backgroundColor:
-                  theme.palette.mode === "dark"
-                    ? "rgba(255,255,255,0.16)"
-                    : "rgba(25,118,210,0.12)",
+                backgroundColor: accent,
+                color: onAccent,
+                fontWeight: 700,
+              },
+              "& .MuiMenuItem-root.Mui-selected:hover": {
+                backgroundColor: accent,
+                color: onAccent,
+              },
+              "& .MuiMenuItem-root:hover": {
+                backgroundColor: isDark ? "#26262A" : "#f2f2f2",
               },
             },
           },
@@ -104,10 +120,9 @@ export default function CustomSelect({
             transition: "transform 0.2s ease",
             fontSize: "1.2rem",
             marginRight: "12px",
-            color:
-              theme.palette.mode === "dark"
-                ? theme.palette.common.white
-                : theme.palette.common.black,
+            color: isDark
+              ? theme.palette.common.white
+              : theme.palette.common.black,
           },
           // ▲ icon open (up)
           "& .MuiSelect-iconOpen": {
@@ -116,32 +131,8 @@ export default function CustomSelect({
         })}
       >
         {options.map((opt) => (
-          <MenuItem key={opt.value} value={opt.value} dense>
-            <Checkbox
-              checked={selected.includes(opt.value)}
-              size="small"
-              sx={{
-                p: 0.5,
-                mr: 1,
-                color:
-                  theme.palette.mode === "dark"
-                    ? theme.palette.common.white
-                    : theme.palette.common.black,
-                "&.Mui-checked": {
-                  color:
-                    theme.palette.mode === "dark"
-                      ? theme.palette.common.white
-                      : theme.palette.common.black,
-                },
-              }}
-            />
-            <ListItemText
-              primary={opt.label}
-              primaryTypographyProps={{
-                fontFamily: "'Nunito Sans', sans-serif",
-                fontSize: "0.875rem",
-              }}
-            />
+          <MenuItem key={opt.value} value={opt.value}>
+            {opt.label}
           </MenuItem>
         ))}
       </Select>
