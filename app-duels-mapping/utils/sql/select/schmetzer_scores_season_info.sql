@@ -1,6 +1,12 @@
-SELECT 
+SELECT
 	COUNT(player_name) as total_players,
-	COUNT(DISTINCT(schmetzer_rk)) as total_ranks,
+	-- The denominator for "#rank of N" in the player dialog, so it has to be counted
+	-- over the population the rank itself comes from: every player in the season, with
+	-- no minutes floor. Hence the subquery -- the WHERE below applies to the averages
+	-- only. Counting rows rather than DISTINCT schmetzer_rk, because ties share a rank
+	-- and skip the next ones, so distinct ranks is smaller than the field a player was
+	-- actually ranked against.
+	(SELECT COUNT(*) FROM "schmetzer_scores_{year}") as total_ranks,
 	MAX(aerial_duels_won) as adw_max,
 	AVG(aerial_duels_won) as adw_avg,
 	MAX(tackles_won) as tkw_max,

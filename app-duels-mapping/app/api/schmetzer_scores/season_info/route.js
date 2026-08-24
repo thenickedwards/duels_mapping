@@ -13,9 +13,11 @@ Example when hosted locally:
 http://localhost:3000/api/schmetzer_scores/season_info?season=2024
 Note: the season query parameter is required (no other parameters are accepted).
 
-The API response returned will be an array with one object containing the highest and average values for individual stats and the Schmetzer Score, a count of total players, and the distinct count of Schmetzer Score ranks for the requested season.
+The API response returned will be an array with one object containing the highest and average values for individual stats and the Schmetzer Score, a count of total players, and the size of the ranked field for the requested season.
 
-Only players with at least MIN_NINETIES_FOR_AVERAGES 90s (5 games' worth of minutes) are included, so a handful of cameo appearances cannot drag the league averages down. The SQLite template and the Supabase query below must apply the same floor -- see utils/request-context.js.
+Only players with at least MIN_NINETIES_FOR_AVERAGES 90s (5 games' worth of minutes) are included in the averages and in total_players, so a handful of cameo appearances cannot drag the league averages down. The SQLite template and the Supabase query below must apply the same floor -- see utils/request-context.js.
+
+total_ranks is the exception: it counts every player in the season, floor or not, because it is the denominator for "#rank of N" in the player dialog and schmetzer_rk is assigned over the whole season. Pairing a whole-season rank with a floored denominator produced "#6 of 471" out of a field of 852.
 */
 
 // Hold the db instance across requests
@@ -79,7 +81,7 @@ export async function GET(req) {
       // Load and interpolate the SQL with the requested season and the shared
       // averages floor, so this and the Supabase branch below cannot diverge.
       sql = sqlTemplate
-        .replace("{year}", season)
+        .replaceAll("{year}", season)
         .replaceAll("{min_nineties}", String(MIN_NINETIES_FOR_AVERAGES));
 
       const data = await db.all(sql);
@@ -110,7 +112,6 @@ export async function GET(req) {
         .select(
           `
           total_players:player_name.count(),
-          total_ranks:schmetzer_rk.count(),
           adw_max:aerial_duels_won.max(),
           adw_avg:aerial_duels_won.avg(),
           tkw_max:tackles_won.max(),
@@ -127,10 +128,22 @@ export async function GET(req) {
         )
         .gte("nineties", MIN_NINETIES_FOR_AVERAGES);
 
+      // Counted separately, without the minutes floor above, because it is the
+      // denominator for "#rank of N" and the rank comes from the whole season. PostgREST
+      // has no COUNT(DISTINCT), so the SQLite template counts rows too and the two
+      // branches agree -- see the comment in schmetzer_scores_season_info.sql.
+      const { count: totalRanks, error: countError } = await supabase
+        .from(table)
+        .select("id", { count: "exact", head: true });
+
       if (error) console.error(error);
+      if (countError) console.error(countError);
       if (data) {
         console.log("Querying Supabase table:", table);
         console.log("Sample record: ", data[0]);
+      }
+      if (data && totalRanks !== null && totalRanks !== undefined) {
+        for (const row of data) row.total_ranks = totalRanks;
       }
 
       return new Response(JSON.stringify(roundSmetzFields(data)), {
@@ -150,8 +163,8 @@ export async function GET(req) {
 /* Example response below:
 [
   {
-    total_players: 577,
-    total_ranks: 374,
+    total_players: 577,   // players past the averages floor, which the averages use
+    total_ranks: 800,     // every player ranked that season, the "#rank of N" denominator
     adw_max: 310,
     adw_avg: 19.150779896013866,
     tkw_max: 57,
