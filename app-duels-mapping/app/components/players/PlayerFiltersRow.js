@@ -9,6 +9,7 @@ import {
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faScaleUnbalanced,
   faSliders,
   faSquareCheck,
   faSquareMinus,
@@ -22,6 +23,8 @@ import ExportWhite from "../../../public/images/export-wh-icon.png";
 export default function PlayerFiltersRow({
   filterCount,
   onOpenFilterDrawer,
+  onOpenTuningDrawer,
+  tunedCount,
   columns,
   hiddenColumns,
   toggleColumnVisibility,
@@ -29,7 +32,7 @@ export default function PlayerFiltersRow({
   filteredRows,
   selectedYear,
   exportToCSV,
-  showFilterCount = true, // desktop: true, mobile: false
+  showCounts = true, // desktop: true, mobile: false
   baseButtonStyle,
 }) {
   const theme = useTheme();
@@ -47,7 +50,7 @@ export default function PlayerFiltersRow({
         sx={baseButtonStyle(theme)}
       >
         Filters
-        {showFilterCount && filterCount > 0 ? ` (${filterCount})` : ""}
+        {showCounts && filterCount > 0 ? ` (${filterCount})` : ""}
       </Button>
 
       {/* Columns Dropdown */}
@@ -207,6 +210,22 @@ export default function PlayerFiltersRow({
           )}
         </Box>
       </ClickAwayListener>
+
+      {/* Tuning */}
+      <Button
+        variant="outlined"
+        startIcon={
+          <FontAwesomeIcon
+            icon={faScaleUnbalanced}
+            style={{ fontSize: "15px" }}
+          />
+        }
+        onClick={onOpenTuningDrawer}
+        sx={baseButtonStyle(theme)}
+      >
+        Tuning
+        {showCounts && tunedCount > 0 ? ` (${tunedCount})` : ""}
+      </Button>
 
       {/* Export Button */}
       <Button
