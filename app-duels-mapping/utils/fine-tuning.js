@@ -1,45 +1,64 @@
-import dataVars from "@/public/duels_mapping_data/data_vars.json";
 import { MIN_NINETIES_FOR_AVERAGES } from "@/utils/request-context";
 
 /*
 Fine tuning of the Schmetzer Score.
 
-The warehouse scores and ranks every player at the weights in data_vars.json, and the
-API serves those figures. This module re-does that arithmetic in the browser so the
-Fine Tuning drawer can hand the user their own weights and have the leaderboard, the
-ranks, the value metric and the player dialog all move with them. Nothing here writes
-to the database -- a tuned view lasts until the page is reloaded.
+The warehouse scores and ranks every player at the weights below, and the API serves
+those figures. This module re-does that arithmetic in the browser so the Fine Tuning
+drawer can hand the user their own weights and have the leaderboard, the ranks, the
+value metric and the player dialog all move with them. Nothing here writes to the
+database -- a tuned view lasts until the page is reloaded.
 
-It is imported by client components, so it reads data_vars.json as a module rather
-than off disk. That keeps the weights, the abbreviations and the value-metric basis
-on the same single source of truth the ETL uses.
+// // Why these constants are copied rather than read from data_vars.json //
+
+public/duels_mapping_data is a git SUBMODULE, and the deployment does not fetch it --
+Vercel logs "Failed to fetch one or more git submodules" on every build. Nothing on
+the deployed path has ever minded, because the only other reader is
+db-utils.getDatabasePath(), which runs at request time and only in the local SQLite
+branch. Importing the JSON here made it a BUILD-time dependency for the first time,
+and the build failed to compile.
+
+So the five weights, their abbreviations and the value-metric basis are mirrored here
+in the same shape data_vars.json uses, to keep a diff against the upstream source
+trivial. Upstream is `schmetzer_score_points` and `salary` in that file, and the
+`dim_schmetzer_score_points` table it seeds. If a weight ever changes there, change it
+here and in the Methods page table, which quotes the same figures.
 */
 
-const POINTS = dataVars.schmetzer_score_points;
+const SCHMETZER_SCORE_POINTS = {
+  "aerial duels won": { point_value: 1, abbrev: "adw" },
+  "aerial duels lost": { point_value: -0.85, abbrev: "adl" },
+  "tackles won": { point_value: 1.5, abbrev: "tkwon" },
+  interceptions: { point_value: 0.9, abbrev: "inter" },
+  recoveries: { point_value: 0.25, abbrev: "recov" },
+};
 
-// Which salary figure the value metric divides by, and per how many dollars.
-const VALUE_METRIC_BASIS = dataVars.salary.value_metric_basis;
-const VALUE_PER_DOLLARS = dataVars.salary.value_per_dollars;
-const MIN_NINETIES_FOR_VALUE_RANK = dataVars.salary.min_nineties_for_value_rank;
+// Which salary figure the value metric divides by, per how many dollars, and the
+// minutes floor below which a player is scored but not given a value rank.
+const VALUE_METRIC_BASIS = "guaranteed_comp";
+const VALUE_PER_DOLLARS = 1000000;
+const MIN_NINETIES_FOR_VALUE_RANK = 5;
 
 const toTitleCase = (str) =>
   str.replace(/\b\w/g, (character) => character.toUpperCase());
 
 /*
-The five weighted statistics, in the order data_vars.json lists them -- which is the
+The five weighted statistics, in the order the source lists them -- which is the
 order the drawer shows them in.
 
 `stat` is the spaced name the weights are keyed under ("aerial duels won"), because
 that is how data_vars.json and dim_schmetzer_score_points spell it. `field` is the
 underscored column the same statistic arrives on in a player row.
 */
-export const SCHMETZER_STATS = Object.entries(POINTS).map(([stat, meta]) => ({
-  stat,
-  field: stat.replace(/ /g, "_"),
-  label: toTitleCase(stat),
-  abbrev: meta.abbrev,
-  defaultWeight: meta.point_value,
-}));
+export const SCHMETZER_STATS = Object.entries(SCHMETZER_SCORE_POINTS).map(
+  ([stat, meta]) => ({
+    stat,
+    field: stat.replace(/ /g, "_"),
+    label: toTitleCase(stat),
+    abbrev: meta.abbrev,
+    defaultWeight: meta.point_value,
+  }),
+);
 
 export const DEFAULT_SCHMETZER_WEIGHTS = Object.fromEntries(
   SCHMETZER_STATS.map(({ stat, defaultWeight }) => [stat, defaultWeight]),
@@ -80,7 +99,7 @@ const newConfig = {
   recoveries: 0,
 };
 Note: The newConfig variable is optional. If you don't pass a newConfig value to the
-function, the default values in data_vars.json are used.
+function, the standard weights above are used.
 
 The playerData variable should be similar but include the player_name and the player's
 raw stats. For example:
