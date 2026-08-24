@@ -20,7 +20,7 @@ import ExportBlack from "../../../public/images/export-icon.png";
 import ExportWhite from "../../../public/images/export-wh-icon.png";
 
 export default function PlayerFiltersRow({
-  filters,
+  filterCount,
   onOpenFilterDrawer,
   columns,
   hiddenColumns,
@@ -34,12 +34,6 @@ export default function PlayerFiltersRow({
 }) {
   const theme = useTheme();
   const [showColumns, setShowColumns] = useState(false);
-
-  const filterCount = [
-    filters.position,
-    filters.squad,
-    filters.minMinutes,
-  ].filter(Boolean).length;
 
   return (
     <Box display="flex" flexWrap="wrap" gap={1} alignItems="center">

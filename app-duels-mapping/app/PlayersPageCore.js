@@ -57,6 +57,28 @@ function removeAccents(str = "") {
 // Sentinel page size meaning "show every player in one page"
 const ALL_PLAYERS = -1;
 
+// Shared by the drawer dropdown and the chips, so a chip reads "Midfielder" rather than
+// the "MF" code stored on the row. These four are every position code the data holds --
+// every other value is a combination of them, e.g. "MF,FW".
+const POSITION_OPTIONS = [
+  { value: "FW", label: "Forward" },
+  { value: "MF", label: "Midfielder" },
+  { value: "DF", label: "Defender" },
+  { value: "GK", label: "Goalkeeper" },
+];
+
+// Goalkeepers are scored and ranked like everyone else, but they start deselected: a
+// keeper's Schmetzer Score is almost entirely recoveries (9,026 of them league-wide
+// against 104 tackles), so ranking them beside outfielders compares different jobs.
+// They are one click away in the dropdown rather than removed.
+const OUTFIELD_POSITIONS = ["FW", "MF", "DF"];
+
+// The outfield trio is the default view rather than a filter the user applied, so it
+// raises no chips and does not count towards the Filters badge. Any other selection does.
+const isDefaultPositions = (selected) =>
+  selected.length === OUTFIELD_POSITIONS.length &&
+  OUTFIELD_POSITIONS.every((code) => selected.includes(code));
+
 function isMissing(value) {
   return value === null || value === undefined || value === "";
 }
@@ -139,18 +161,17 @@ export default function PlayersPage() {
   const dropdownYears = ["2023", "2022", "2021", "2020", "2019", "2018"];
 
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  // position and squad hold arrays so several can be compared at once; an empty
+  // array means no filter. minMinutes stays a single value.
   const [filters, setFilters] = useState({
-    position: "",
-    squad: "",
+    position: OUTFIELD_POSITIONS,
+    squad: [],
     minMinutes: "",
   });
 
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [showColumns, setShowColumns] = useState(false);
-  const [hiddenColumns, setHiddenColumns] = useState([
-    "player_age",
-    "nineties",
-  ]);
+  const [hiddenColumns, setHiddenColumns] = useState([]);
   const [showSearch, setShowSearch] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -167,7 +188,8 @@ export default function PlayersPage() {
 
   const query = new URLSearchParams({ season: selectedYear.toString() });
 
-  if (filters.position) query.set("position", filters.position);
+  // Position is filtered client-side below: the API matches a single value, and this
+  // page already has every row for the season, so multi-select needs no round trip.
   if (filters.minMinutes) query.set("minMinutes", filters.minMinutes);
 
   const { data, error, isLoading } = useSWR(
@@ -216,6 +238,15 @@ export default function PlayersPage() {
       renderCell: (params) => <PlayerNameCell name={params.value} />,
     },
     {
+      field: "squad",
+      headerName: "Squad",
+      displayName: "Squad",
+      // Fits the longest standardized names ("New England Revolution",
+      // "Vancouver Whitecaps FC") alongside the badge without clipping
+      width: 240,
+      renderCell: (params) => <TeamBadgeCell squad={params.value} />,
+    },
+    {
       field: "player_age",
       headerName: "Age",
       displayName: "Age",
@@ -228,15 +259,6 @@ export default function PlayersPage() {
           </Box>
         );
       },
-    },
-    {
-      field: "squad",
-      headerName: "Squad",
-      displayName: "Squad",
-      // Fits the longest standardized names ("New England Revolution",
-      // "Vancouver Whitecaps FC") alongside the badge without clipping
-      width: 240,
-      renderCell: (params) => <TeamBadgeCell squad={params.value} />,
     },
     {
       field: "position",
@@ -274,26 +296,6 @@ export default function PlayersPage() {
         >
           <Typography fontSize="0.9rem">{params.value}</Typography>
         </Box>
-      ),
-    },
-    {
-      field: "guaranteed_comp",
-      headerName: "salary",
-      displayName: "Guaranteed Compensation",
-      width: 120,
-      headerAlign: "right",
-      renderCell: (params) => (
-        <RightAlignedCenterCell value={formatSalary(params.value)} align="right" />
-      ),
-    },
-    {
-      field: "schmetzer_score_per_million",
-      headerName: "smetz/$M",
-      displayName: "Schmetzer Score per $1M",
-      width: 120,
-      headerAlign: "right",
-      renderCell: (params) => (
-        <RightAlignedCenterCell value={formatValueMetric(params.value)} align="right" />
       ),
     },
     {
@@ -344,7 +346,41 @@ export default function PlayersPage() {
       headerAlign: "center",
       renderCell: (params) => <RightAlignedCenterCell value={params.value} />,
     },
+    {
+      field: "guaranteed_comp",
+      headerName: "salary",
+      displayName: "Salary (in Guaranteed Compensation)",
+      width: 120,
+      headerAlign: "right",
+      renderCell: (params) => (
+        <RightAlignedCenterCell
+          value={formatSalary(params.value)}
+          align="right"
+        />
+      ),
+    },
+    {
+      field: "schmetzer_score_per_million",
+      headerName: "smetz/$M",
+      displayName: "Schmetzer Score per $1M",
+      width: 120,
+      headerAlign: "right",
+      renderCell: (params) => (
+        <RightAlignedCenterCell
+          value={formatValueMetric(params.value)}
+          align="right"
+        />
+      ),
+    },
   ];
+
+  // Counts chosen values rather than active filters -- two clubs and a position reads
+  // as (3) -- and ignores the default outfield selection, which is the baseline view
+  // rather than something the user asked for. Must agree with the chip row below.
+  const activeFilterCount =
+    (isDefaultPositions(filters.position) ? 0 : filters.position.length) +
+    filters.squad.length +
+    (filters.minMinutes ? 1 : 0);
 
   const rawRows = Array.isArray(data)
     ? data
@@ -376,10 +412,22 @@ export default function PlayersPage() {
       playerNameNormalized.includes(normalizedSearch) ||
       squadNormalized.includes(normalizedSearch);
 
-    // Squad filter: if no squad selected, match all
-    const matchesSquad = !filters.squad || row.squad === filters.squad;
+    // Squad and position: an empty selection matches everything, otherwise the row
+    // has to match one of the chosen values.
+    const matchesSquad =
+      filters.squad.length === 0 || filters.squad.includes(row.squad);
 
-    return matchesSearch && matchesSquad;
+    // A row's position can list more than one code ("MF,FW"), so a player shows up
+    // under any of the positions they are listed at.
+    const rowPositions = (row.position || "")
+      .split(",")
+      .map((code) => code.trim())
+      .filter(Boolean);
+    const matchesPosition =
+      filters.position.length === 0 ||
+      filters.position.some((code) => rowPositions.includes(code));
+
+    return matchesSearch && matchesSquad && matchesPosition;
   });
 
   // SORTING
@@ -443,12 +491,6 @@ export default function PlayersPage() {
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     saveAs(blob, filename);
   }
-
-  const filterCount = [
-    filters.position,
-    filters.squad,
-    filters.minMinutes,
-  ].filter(Boolean).length;
 
   // CUSTOM ARROW ICON (for page size select)
   const CustomArrowIcon = () => (
@@ -564,7 +606,7 @@ export default function PlayersPage() {
 
                 {/* MOBILE: Filter / Columns / Export (no count) */}
                 <PlayerFiltersRow
-                  filters={filters}
+                  filterCount={activeFilterCount}
                   onOpenFilterDrawer={() => setFilterDrawerOpen(true)}
                   columns={columns}
                   hiddenColumns={hiddenColumns}
@@ -592,7 +634,7 @@ export default function PlayersPage() {
               <>
                 {/* DESKTOP: Left – Filter / Columns / Export (with count) */}
                 <PlayerFiltersRow
-                  filters={filters}
+                  filterCount={activeFilterCount}
                   onOpenFilterDrawer={() => setFilterDrawerOpen(true)}
                   columns={columns}
                   hiddenColumns={hiddenColumns}
@@ -647,18 +689,35 @@ export default function PlayersPage() {
 
           {/* Filter Chips Row */}
           <Box mt={1} display="flex" gap={1} flexWrap="wrap">
-            {filters.squad && (
+            {filters.squad.map((squad) => (
               <FilterChip
-                label={filters.squad}
-                onRemove={() => setFilters({ ...filters, squad: "" })}
+                key={squad}
+                label={squad}
+                onRemove={() =>
+                  setFilters({
+                    ...filters,
+                    squad: filters.squad.filter((s) => s !== squad),
+                  })
+                }
               />
-            )}
+            ))}
 
-            {filters.position && (
-              <FilterChip
-                label={filters.position}
-                onRemove={() => setFilters({ ...filters, position: "" })}
-              />
+            {(isDefaultPositions(filters.position) ? [] : filters.position).map(
+              (code) => (
+                <FilterChip
+                  key={code}
+                  label={
+                    POSITION_OPTIONS.find((opt) => opt.value === code)?.label ??
+                    code
+                  }
+                  onRemove={() =>
+                    setFilters({
+                      ...filters,
+                      position: filters.position.filter((p) => p !== code),
+                    })
+                  }
+                />
+              ),
             )}
 
             {filters.minMinutes && (
@@ -676,12 +735,18 @@ export default function PlayersPage() {
               />
             )}
 
-            {(filters.squad || filters.position || filters.minMinutes) && (
+            {(filters.squad.length > 0 ||
+              !isDefaultPositions(filters.position) ||
+              filters.minMinutes) && (
               <Box sx={{ px: "12px", alignContent: "center" }}>
                 <Button
                   variant="text"
                   onClick={() =>
-                    setFilters({ position: "", squad: "", minMinutes: "" })
+                    setFilters({
+                      position: OUTFIELD_POSITIONS,
+                      squad: [],
+                      minMinutes: "",
+                    })
                   }
                   sx={(theme) => textActionButtonStyle(theme)}
                 >
@@ -1031,16 +1096,17 @@ export default function PlayersPage() {
 
               <CustomSelect
                 value={filters.position}
-                onChange={(e) =>
-                  setFilters({ ...filters, position: e.target.value })
+                onChange={(value) =>
+                  setFilters({ ...filters, position: value })
                 }
-                showPlaceholder={false}
-                options={[
-                  { value: "", label: "All Positions" },
-                  { value: "FW", label: "Forward" },
-                  { value: "MF", label: "Midfielder" },
-                  { value: "DF", label: "Defender" },
-                ]}
+                placeholder="All Positions"
+                options={POSITION_OPTIONS}
+                summarize={(chosen) => {
+                  if (chosen.length === POSITION_OPTIONS.length)
+                    return "All Positions";
+                  if (isDefaultPositions(chosen)) return "All outfield";
+                  return null;
+                }}
               />
 
               {/* Squad */}
@@ -1073,7 +1139,11 @@ export default function PlayersPage() {
                 <Button
                   variant="outlined"
                   onClick={() =>
-                    setFilters({ position: "", squad: "", minMinutes: "" })
+                    setFilters({
+                      position: OUTFIELD_POSITIONS,
+                      squad: [],
+                      minMinutes: "",
+                    })
                   }
                   sx={(theme) => textActionButtonStyle(theme)}
                 >
