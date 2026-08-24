@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -19,6 +19,7 @@ import SchmetzerTrendChart from "../charts/SchmetzerTrendChart";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import { getPlayerPic } from "@/utils/get-player-pics";
+import { schmetzerScoreFrom } from "@/utils/fine-tuning";
 
 export default function PlayerDetailDialog({
   player,
@@ -26,11 +27,15 @@ export default function PlayerDetailDialog({
   onClose,
   seasonStats,
   season,
+  weights,
+  isTuned = false,
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [imgUrl, setImgUrl] = useState(null);
-  const [schmetzerHistory, setSchmetzerHistory] = useState([]);
+  // The seasons as served: raw counts and the published score, kept unconverted so
+  // custom weights can be applied to them below without a refetch.
+  const [seasonRows, setSeasonRows] = useState([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -42,12 +47,7 @@ export default function PlayerDetailDialog({
         .then((r) => r.json())
         .then((data) => {
           if (isMounted && Array.isArray(data[1])) {
-            setSchmetzerHistory(
-              data[1].map((item) => ({
-                year: String(item.season),
-                score: item.schmetzer_score,
-              })),
-            );
+            setSeasonRows(data[1]);
           }
         });
     }
@@ -69,6 +69,18 @@ export default function PlayerDetailDialog({
       isMounted = false;
     };
   }, [player]);
+
+  // Past seasons are stored at the published weights, so a tuned view has to re-score
+  // them from their raw counts -- otherwise the trend line ends on a figure that
+  // contradicts the score printed above it.
+  const schmetzerHistory = useMemo(
+    () =>
+      seasonRows.map((row) => ({
+        year: String(row.season),
+        score: isTuned ? schmetzerScoreFrom(weights, row) : row.schmetzer_score,
+      })),
+    [seasonRows, isTuned, weights],
+  );
 
   if (!player) return null;
 
@@ -192,6 +204,7 @@ export default function PlayerDetailDialog({
                 totalRanks={stats?.total_ranks}
                 guaranteedComp={player.guaranteed_comp}
                 scorePerMillion={player.schmetzer_score_per_million}
+                tuned={isTuned}
                 darkMode={theme.palette.mode === "dark"}
               />
             </Box>

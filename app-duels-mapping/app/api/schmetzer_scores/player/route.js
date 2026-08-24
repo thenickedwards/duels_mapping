@@ -141,7 +141,7 @@ export async function GET(req, verbose = 2) {
         await supabase
           .from("schmetzer_scores_all")
           .select(
-            `season, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk`,
+            `season, player_name, player_nationality, position, squad, player_age, player_yob, nineties, schmetzer_score, schmetzer_rk, aerial_duels_won, aerial_duels_lost, tackles_won, interceptions, recoveries`,
           )
           .ilike("id", `${playerNameNormalized}%`)
           .order("season", { ascending: true });

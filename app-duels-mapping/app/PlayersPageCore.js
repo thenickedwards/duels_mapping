@@ -47,8 +47,16 @@ import PlayerSearchField from "./components/inputs/PlayerSearchField";
 import PlayerFiltersRow from "./components/players/PlayerFiltersRow";
 import PlayerYearControls from "./components/players/PlayerYearControls";
 import SquadSelect from "./components/inputs/SquadSelect";
+import TuningDrawer from "./components/players/TuningDrawer";
 import { textActionButtonStyle } from "./styles/buttonStyles";
 import { formatSalary, formatValueMetric } from "@/utils/format-salary";
+import {
+  defaultWeightInputs,
+  parseWeightInputs,
+  retuneSeason,
+  retuneSeasonStats,
+  tunedWeightCount,
+} from "@/utils/fine-tuning";
 
 function removeAccents(str = "") {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -168,6 +176,17 @@ export default function PlayersPage() {
     squad: [],
     minMinutes: "",
   });
+
+  // FINE TUNING
+  // The drawer holds the raw strings the user typed so a half-entered "-0." survives
+  // the next keystroke; the weights the scoring uses are parsed off them. Deliberately
+  // component state and nothing more -- a tuned view is not written to the URL or to
+  // storage, so a refresh returns everyone to the published weights.
+  const [tuningDrawerOpen, setTuningDrawerOpen] = useState(false);
+  const [weightInputs, setWeightInputs] = useState(defaultWeightInputs);
+  const weights = useMemo(() => parseWeightInputs(weightInputs), [weightInputs]);
+  const tunedCount = tunedWeightCount(weights);
+  const isTuned = tunedCount > 0;
 
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [showColumns, setShowColumns] = useState(false);
@@ -390,7 +409,38 @@ export default function PlayersPage() {
         ? data.players
         : [];
 
-  const rows = rawRows.map((row, i) => ({ id: i, ...row }));
+  // The whole season re-scored and re-ranked at the user's weights. It runs off the
+  // unfiltered `players` fetch rather than `data`, because a rank is a season-wide
+  // standing: ranking whatever the grid is currently showing would renumber the league
+  // behind a minutes filter. Null while the weights are standard, so the untouched
+  // case does no work and keeps the figures the warehouse served.
+  const tunedSeason = useMemo(
+    () =>
+      isTuned && Array.isArray(players)
+        ? retuneSeason(weights, players)
+        : null,
+    [isTuned, weights, players],
+  );
+
+  const tunedById = useMemo(
+    () =>
+      tunedSeason ? new Map(tunedSeason.map((row) => [row.id, row])) : null,
+    [tunedSeason],
+  );
+
+  const rows = rawRows.map((row, i) => {
+    const base = { id: i, ...row };
+    const tuned = tunedById?.get(base.id);
+    return tuned ? { ...base, ...tuned } : base;
+  });
+
+  // The dialog plots a score against the league average and maximum, so those move
+  // with the weights too. Every other figure on seasonStats is a raw count.
+  const tunedSeasonStats = useMemo(
+    () =>
+      tunedSeason ? retuneSeasonStats(seasonStats, tunedSeason) : seasonStats,
+    [seasonStats, tunedSeason],
+  );
 
   // Wait for rows to exist before accessing load_datetime from first record
   const lastUpdatedDate = rows.length > 0 ? rows[0].load_datetime : null;
@@ -435,8 +485,16 @@ export default function PlayersPage() {
   // page alone. Sort the whole filtered set here and hand the grid the slice it should
   // show, with sortingMode="server" so it does not sort again on top.
   const sortedRows = useMemo(() => {
-    if (!sortModel.length) return filteredRows;
-    const { field, sort } = sortModel[0];
+    // With no sort of the user's own the API's own ordering stands -- except under
+    // custom weights, which invalidate it. Re-apply the order the API would have
+    // returned, or the rank column reads 1, 4, 2, 3 straight out of the drawer.
+    const model = sortModel.length
+      ? sortModel[0]
+      : isTuned
+        ? { field: "schmetzer_score", sort: "desc" }
+        : null;
+    if (!model) return filteredRows;
+    const { field, sort } = model;
     if (!field || !sort) return filteredRows;
     const direction = sort === "desc" ? -1 : 1;
     return [...filteredRows].sort((a, b) => {
@@ -451,7 +509,7 @@ export default function PlayersPage() {
       }
       return compareValues(aValue, bValue) * direction;
     });
-  }, [filteredRows, sortModel]);
+  }, [filteredRows, sortModel, isTuned]);
 
   const handleSortModelChange = (model) => {
     setSortModel(model);
@@ -608,6 +666,8 @@ export default function PlayersPage() {
                 <PlayerFiltersRow
                   filterCount={activeFilterCount}
                   onOpenFilterDrawer={() => setFilterDrawerOpen(true)}
+                  onOpenTuningDrawer={() => setTuningDrawerOpen(true)}
+                  tunedCount={tunedCount}
                   columns={columns}
                   hiddenColumns={hiddenColumns}
                   toggleColumnVisibility={toggleColumnVisibility}
@@ -615,7 +675,7 @@ export default function PlayersPage() {
                   filteredRows={sortedRows}
                   selectedYear={selectedYear}
                   exportToCSV={exportToCSV}
-                  showFilterCount={false}
+                  showCounts={false}
                   baseButtonStyle={baseButtonStyle}
                 />
 
@@ -636,6 +696,8 @@ export default function PlayersPage() {
                 <PlayerFiltersRow
                   filterCount={activeFilterCount}
                   onOpenFilterDrawer={() => setFilterDrawerOpen(true)}
+                  onOpenTuningDrawer={() => setTuningDrawerOpen(true)}
+                  tunedCount={tunedCount}
                   columns={columns}
                   hiddenColumns={hiddenColumns}
                   toggleColumnVisibility={toggleColumnVisibility}
@@ -643,7 +705,7 @@ export default function PlayersPage() {
                   filteredRows={sortedRows}
                   selectedYear={selectedYear}
                   exportToCSV={exportToCSV}
-                  showFilterCount={true}
+                  showCounts={true}
                   baseButtonStyle={baseButtonStyle}
                 />
 
@@ -1163,6 +1225,17 @@ export default function PlayersPage() {
             </Box>
           </Drawer>
 
+          {/* Fine Tuning Drawer */}
+          <TuningDrawer
+            open={tuningDrawerOpen}
+            onClose={() => setTuningDrawerOpen(false)}
+            weightInputs={weightInputs}
+            onChangeWeight={(stat, value) =>
+              setWeightInputs((prev) => ({ ...prev, [stat]: value }))
+            }
+            onReset={() => setWeightInputs(defaultWeightInputs())}
+          />
+
           {/* Player Detail Dialog */}
           <Dialog
             open={!!selectedPlayer}
@@ -1175,8 +1248,10 @@ export default function PlayersPage() {
                 player={selectedPlayer}
                 open={!!selectedPlayer}
                 onClose={() => setSelectedPlayer(null)}
-                seasonStats={seasonStats}
+                seasonStats={tunedSeasonStats}
                 season={selectedYear}
+                weights={weights}
+                isTuned={isTuned}
               />
             </DialogContent>
           </Dialog>
@@ -1189,7 +1264,7 @@ export default function PlayersPage() {
             currentYear={currentYear}
             selectedYear={selectedYear}
             updateSeason={updateSeason}
-            players={players || []}
+            players={tunedSeason || players || []}
             lastUpdated={lastUpdatedDate}
           />
         </Box>

@@ -174,7 +174,7 @@ export default function MethodsPage() {
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 700 }}>Stat</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }} align="right">
+                  <TableCell sx={{ fontWeight: 700, opacity: 0.6 }} align="right">
                     Initial Weight
                   </TableCell>
                   <TableCell sx={{ fontWeight: 700 }} align="right">
@@ -197,7 +197,6 @@ export default function MethodsPage() {
                       sx={{
                         fontVariantNumeric: "tabular-nums",
                         opacity: 0.6,
-                        textDecoration: changed ? "line-through" : "none",
                       }}
                     >
                       {initial}

@@ -29,6 +29,7 @@ export default function SchmetzerScoreBar({
   totalRanks,
   guaranteedComp,
   scorePerMillion,
+  tuned = false,
   darkMode = false,
 }) {
   const theme = useTheme();
@@ -58,6 +59,24 @@ export default function SchmetzerScoreBar({
       <Typography variant="h2" component="div" fontSize="1.6rem">
         Schmetzer Score
       </Typography>
+
+      {/* Every figure in this dialog -- the score, the rank, the league average and
+          max, the value metric and the trend -- is recalculated at the user's weights
+          while the Fine Tuning drawer is off its defaults. Say so, or the numbers read
+          as the published ones. */}
+      {tuned && (
+        <Typography
+          sx={{
+            fontFamily: "'Bebas Neue', sans-serif",
+            fontSize: "0.875rem",
+            letterSpacing: "0.05em",
+            color: theme.palette.common.blue,
+            mt: -0.5,
+          }}
+        >
+          Your Fine-Tuned Weights
+        </Typography>
+      )}
 
       <Typography
         fontFamily="'Bebas Neue', sans-serif"
