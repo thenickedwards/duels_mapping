@@ -556,9 +556,11 @@ For programmatic use as well as readability, a number of naming conventions have
 
 #### Database Keep-Alive 🐶
 
-The [supabase-watchdog](https://github.com/thenickedwards/supabase-watchdog) repo will uses GitHub Actions to automate keeping the tables in our database active. This automation ensures the database isn't paused, the deployed app remains active and available, and the project is not deleted by Supabase.
+Supabase pauses a free project after seven days with no database activity, which would take the deployed app down with it. [`app/api/keep-alive/route.js`](app-duels-mapping/app/api/keep-alive/route.js) prevents that: once a day it writes a row to the `keep-alive` table, counts the table, and deletes the oldest row past ten, keeping a small rolling log. The write matters -- a read-only ping is a weaker activity signal, and there are plenty of reports of those no longer counting.
 
-More details in the repo's README and [this issue](https://github.com/thenickedwards/duels_mapping/issues/48).
+[Vercel Cron](https://vercel.com/docs/cron-jobs) runs it on the schedule in [`vercel.json`](app-duels-mapping/vercel.json), and Vercel authenticates the call with `CRON_SECRET` so the public path can't be driven by anyone else. The route writes with `SUPABASE_SERVICE_ROLE_KEY` for the same reason the ETL sync does -- see [Supabase write access](#supabase-write-access) above. Both variables are set in the Vercel project, not in `.env`.
+
+This used to live in the [supabase-watchdog](https://github.com/thenickedwards/supabase-watchdog) repo, running on GitHub Actions. It stopped on 2026-07-16 without any failure, because GitHub disables scheduled workflows in a *public* repo after 60 days with no commits, and a finished utility repo does not get commits. Private repos are exempt, but that one is a fork and a fork cannot be made private. Hosting the schedule next to the app it protects removes the dependency on repo activity entirely. The watchdog still runs on demand if it is ever needed for another database. Background in [this issue](https://github.com/thenickedwards/duels_mapping/issues/48).
 
 ### Future Development
 
