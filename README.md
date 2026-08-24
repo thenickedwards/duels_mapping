@@ -97,7 +97,7 @@ _Note: you will need to adjust the path below as appropriate on your machine. I 
   - `source ./duels_mapping.sh salaries` OR `. ./duels_mapping.sh salaries`
   - The `pipeline_cur_MLSPA_salaries_to_schmetzer_scores_players.py` script will be run to load the newest release configured in `data_vars.json`.
   - To backfill every season of salary data instead, use `salaries-restore`.
-  - Note these pipelines read the `schmetzer_scores_YYYY` tables, so they run *after* the FBref pipelines have built them.
+  - Note these pipelines read the `schmetzer_scores_YYYY` tables, so they run _after_ the FBref pipelines have built them.
 
 - If you ever need to conduct a data restore, run the "restore" command from a terminal at the root of the project.
   - `source ./duels_mapping.sh restore` OR `. ./duels_mapping.sh restore`
@@ -252,11 +252,11 @@ Like the dim table above, its values are controlled by [data_vars.json](app-duel
 
 The table is keyed on `(club_alias, source)` rather than on the alias alone, because the two feeds share some spellings (`LAFC`, `Toronto FC`) while disagreeing on others.
 
-| Column Name | Data Type | Description                                                     |
-| ----------- | --------- | --------------------------------------------------------------- |
-| club_alias  | Text      | A club name exactly as one of the sources spells it              |
-| source      | Text      | `fbref` or `mlspa` -- which feed uses this spelling              |
-| squad       | Text      | The canonical squad name; NULL when the alias is not a club      |
+| Column Name | Data Type | Description                                                 |
+| ----------- | --------- | ----------------------------------------------------------- |
+| club_alias  | Text      | A club name exactly as one of the sources spells it         |
+| source      | Text      | `fbref` or `mlspa` -- which feed uses this spelling         |
+| squad       | Text      | The canonical squad name; NULL when the alias is not a club |
 
 `raw_FBref_mls_players_all_stats_misc` - The **raw table** for this workflow, this table serves as a first destination once the extracted data is sourced and parsed using Python and a Pandas Dataframe. In order to conserve on resources and keep the data as close to the original as possible very little in the way of transformation occurs (the only changes being as noted below).
 
@@ -354,13 +354,13 @@ In the source data a player may be listed twice if they played for multiple team
 
 These tables also carry the salary columns below, which are added by the MLSPA pipeline described in the next section rather than by the Schmetzer Score algorithm. They are `NULL` for any player the MLSPA release for that season did not list.
 
-| Column Name                 | Data Type | Description                                                            |
-| --------------------------- | --------- | ---------------------------------------------------------------------- |
-| base_salary                 | Real      | Annual base salary in USD                                              |
-| guaranteed_comp             | Real      | Annual average guaranteed compensation in USD                          |
-| salary_match_tier           | Text      | Which matching rule joined this player to their salary record          |
-| schmetzer_score_per_million | Real      | Schmetzer Score earned per $1M of guaranteed compensation              |
-| schmetzer_value_rk          | Integer   | Rank by the metric above, among players past the minutes floor         |
+| Column Name                 | Data Type | Description                                                    |
+| --------------------------- | --------- | -------------------------------------------------------------- |
+| base_salary                 | Real      | Annual base salary in USD                                      |
+| guaranteed_comp             | Real      | Annual average guaranteed compensation in USD                  |
+| salary_match_tier           | Text      | Which matching rule joined this player to their salary record  |
+| schmetzer_score_per_million | Real      | Schmetzer Score earned per $1M of guaranteed compensation      |
+| schmetzer_value_rk          | Integer   | Rank by the metric above, among players past the minutes floor |
 
 All pipelines are contained within the [app-duels-mapping/public/duels_mapping_data/etl](app-duels-mapping/public/duels_mapping_data/etl) directory. Again, this architecture supports for extendibility (as exampled by the upsert to the cloud database), allowing for the build out of additional pipelines, expansion of the project to include other leagues, and development of new composite metrics. The order of the tables as listed above documents the process and flow of the data.
 
@@ -370,7 +370,7 @@ A Schmetzer Score says how much contested possession a player won. It says nothi
 
 #### Where the data comes from
 
-The [MLS Players Association](https://mlsplayers.org/resources/salary-guide) publishes a league-wide salary guide a couple of times a season. It is the right source for this because the figures are **actually disclosed compensation**, not an estimate: every release carries each player's annual **base salary** and their **annual average guaranteed compensation** (base salary plus all signing and guaranteed bonuses, annualized over the term of the contract). Transfermarkt, the other name that comes up, publishes *market value* -- a useful number, but a crowd-sourced estimate of transfer worth rather than money a club committed, so it answers a different question.
+The [MLS Players Association](https://mlsplayers.org/resources/salary-guide) publishes a league-wide salary guide a couple of times a season. It is the right source for this because the figures are **actually disclosed compensation**, not an estimate: every release carries each player's annual **base salary** and their **annual average guaranteed compensation** (base salary plus all signing and guaranteed bonuses, annualized over the term of the contract). Transfermarkt, the other name that comes up, publishes _market value_ -- a useful number, but a crowd-sourced estimate of transfer worth rather than money a club committed, so it answers a different question.
 
 The catch is that the delivery format changed over time. 2024 onward is CSV; 2018 through 2023 is PDF. Neither is stable in shape -- the CSV headers drift year to year (`fname` became `First Name`, `club` became `Team Name` then `Club Name`) and the PDF column order moves around too. Rather than hardcode a layout per year, every release is described by an entry under `mlspa.salary_releases` in [data_vars.json](app-duels-mapping/public/duels_mapping_data/data_vars.json), and [`get_from_mlspa.py`](app-duels-mapping/public/duels_mapping_data/etl/dependencies/get_from_mlspa.py) reads them from that:
 
@@ -383,14 +383,14 @@ Neither source publishes an id the other shares, and they do not agree on names.
 
 [`match_players.py`](app-duels-mapping/public/duels_mapping_data/etl/dependencies/match_players.py) works from the strictest rule to the loosest, scoped to the club wherever it can be, and records which rule fired in `salary_match_tier` so any match can be audited later:
 
-| Tier                 | Rule                                                          |
-| -------------------- | ------------------------------------------------------------- |
-| `exact_name_club`    | Normalized name matches, same club                            |
-| `exact_name`         | Normalized name matches uniquely league-wide                  |
-| `token_subset_club`  | FBref's short name is a subset of the MLSPA's legal name      |
-| `surname_club`       | Surname matches uniquely within the club (catches nicknames)  |
-| `token_overlap_club` | A single shared name token within the club                    |
-| `fuzzy_club`         | Closest string match within the club, above a cutoff          |
+| Tier                 | Rule                                                         |
+| -------------------- | ------------------------------------------------------------ |
+| `exact_name_club`    | Normalized name matches, same club                           |
+| `exact_name`         | Normalized name matches uniquely league-wide                 |
+| `token_subset_club`  | FBref's short name is a subset of the MLSPA's legal name     |
+| `surname_club`       | Surname matches uniquely within the club (catches nicknames) |
+| `token_overlap_club` | A single shared name token within the club                   |
+| `fuzzy_club`         | Closest string match within the club, above a cutoff         |
 
 Across 2018-2025 this matches **91-97% of scored players per season**, and roughly 86% of all matches are the strictest tier. The players who go unmatched are overwhelmingly not a matching failure but a **snapshot limitation**: each season has one release, taken in the autumn, so a player who left the league mid-season was already gone when it was compiled. Those players show `—` in the dashboard rather than a guess.
 
@@ -402,7 +402,7 @@ The `create/` scripts build the SQLite side. Supabase is a separate database, so
 - It is safe to re-run; every statement is `IF NOT EXISTS`.
 - Skip it and the salary pipelines will complete their local work and then fail on upload with `PGRST204 - Could not find the 'base_salary' column ... in the schema cache`.
 
-An existing *local* database needs no manual step: the pipelines call `add_salary_columns_to_schmetzer_scores()`, which adds the columns in place. That matters because a full rebuild would drop the FBref raw and staging tables, and [as of January 2026](https://www.sports-reference.com/blog/2026/01/fbref-stathead-data-update/) that data can no longer be re-sourced.
+An existing _local_ database needs no manual step: the pipelines call `add_salary_columns_to_schmetzer_scores()`, which adds the columns in place. That matters because a full rebuild would drop the FBref raw and staging tables, and [as of January 2026](https://www.sports-reference.com/blog/2026/01/fbref-stathead-data-update/) that data can no longer be re-sourced.
 
 The weights dim table needs the same treatment. `insert_SQLite_to_Supabase()` carries `dim_schmetzer_score_points` alongside the score tables, so the cloud copy records which weights produced the scores sitting next to it:
 
@@ -424,9 +424,9 @@ The sync therefore authenticates with the **service role** key, which bypasses r
 
 Then run [`etl/sql/migrate/restrict_supabase_write_access.sql`](app-duels-mapping/public/duels_mapping_data/etl/sql/migrate/restrict_supabase_write_access.sql) in the Supabase SQL editor. It enables RLS on all ten tables with a read-only policy, leaving anon able to `SELECT` and nothing else. The script ends with a `SELECT` that reports the resulting state per table.
 
-**Order matters.** Add the key to `.env` *before* running that migration, or the next sync fails with `42501 - new row violates row-level security policy`. That is the same error the weights dim table produced when RLS was enabled on it ahead of the key.
+**Order matters.** Add the key to `.env` _before_ running that migration, or the next sync fails with `42501 - new row violates row-level security policy`. That is the same error the weights dim table produced when RLS was enabled on it ahead of the key.
 
-#### What is *not* synced, and why
+#### What is _not_ synced, and why
 
 Only the nine score tables and the weights dim table go to Supabase. The raw and staging tables stay local by design:
 
@@ -442,7 +442,7 @@ The one argument for syncing them is disaster recovery for data [that can no lon
 
 `schmetzer_value_rk` ranks players by that metric, but only those past the minutes floor (5 x 90s by default). Without the floor a single substitute appearance on a league-minimum contract would top the table on a handful of duels.
 
-Two things worth keeping in mind when reading it. It measures *contested possession* per dollar and nothing else, so a designated-player forward will always look poor on it -- Lionel Messi ranks near the bottom, which is a statement about what the Schmetzer Score counts, not about Messi. And clubs are not on a level field here: MLS roster rules mean a homegrown player on a league-minimum deal is doing the same work as a senior signing for a fraction of the cap hit, so the metric tends to reward clubs that develop and play their academy.
+Two things worth keeping in mind when reading it. It measures _contested possession_ per dollar and nothing else, so a designated-player forward will always look poor on it -- Lionel Messi ranks near the bottom, which is a statement about what the Schmetzer Score counts, not about Messi. And clubs are not on a level field here: MLS roster rules mean a homegrown player on a league-minimum deal is doing the same work as a senior signing for a fraction of the cap hit, so the metric tends to reward clubs that develop and play their academy.
 
 ### Squad Name Standardization
 
@@ -452,18 +452,18 @@ So squad names are standardized **on the way into staging** -- both `load_stg_FB
 
 The canonical set lives in `mls_squad_names` in [data_vars.json](app-duels-mapping/public/duels_mapping_data/data_vars.json):
 
-| | | |
-| --- | --- | --- |
-| Atlanta United | Houston Dynamo | Philadelphia Union |
-| Austin FC | Inter Miami CF | Portland Timbers |
-| CF Montreal | LA Galaxy | Real Salt Lake |
-| Charlotte FC | Los Angeles FC | San Diego FC |
-| Chicago Fire FC | Minnesota United | San Jose Earthquakes |
-| Colorado Rapids | Nashville SC | Seattle Sounders FC |
-| Columbus Crew | New England Revolution | Sporting Kansas City |
-| DC United | New York City FC | St. Louis City SC |
-| FC Cincinnati | New York Red Bulls | Toronto FC |
-| FC Dallas | Orlando City SC | Vancouver Whitecaps FC |
+|                 |                        |                        |
+| --------------- | ---------------------- | ---------------------- |
+| Atlanta United  | Houston Dynamo         | Philadelphia Union     |
+| Austin FC       | Inter Miami CF         | Portland Timbers       |
+| CF Montreal     | LA Galaxy              | Real Salt Lake         |
+| Charlotte FC    | Los Angeles FC         | San Diego FC           |
+| Chicago Fire FC | Minnesota United       | San Jose Earthquakes   |
+| Colorado Rapids | Nashville SC           | Seattle Sounders FC    |
+| Columbus Crew   | New England Revolution | Sporting Kansas City   |
+| DC United       | New York City FC       | St. Louis City SC      |
+| FC Cincinnati   | New York Red Bulls     | Toronto FC             |
+| FC Dallas       | Orlando City SC        | Vancouver Whitecaps FC |
 
 Three things follow from this that are worth knowing:
 
@@ -556,9 +556,11 @@ For programmatic use as well as readability, a number of naming conventions have
 
 #### Database Keep-Alive 🐶
 
-The [supabase-watchdog](https://github.com/thenickedwards/supabase-watchdog) repo will uses GitHub Actions to automate keeping the tables in our database active. This automation ensures the database isn't paused, the deployed app remains active and available, and the project is not deleted by Supabase.
+Supabase pauses a free project after seven days with no database activity, which would take the deployed app down with it. [`app/api/keep-alive/route.js`](app-duels-mapping/app/api/keep-alive/route.js) prevents that: once a day it writes a row to the `keep-alive` table, counts the table, and deletes the oldest row past ten, keeping a small rolling log. The write matters -- a read-only ping is a weaker activity signal, and there are plenty of reports of those no longer counting.
 
-More details in the repo's README and [this issue](https://github.com/thenickedwards/duels_mapping/issues/48).
+[Vercel Cron](https://vercel.com/docs/cron-jobs) runs it on the schedule in [`vercel.json`](app-duels-mapping/vercel.json), and Vercel authenticates the call with `CRON_SECRET` so the public path can't be driven by anyone else. That variable name is not a preference: Vercel looks for `CRON_SECRET` specifically and sends its value as an `Authorization` header when it invokes the cron. Under any other name no header is sent, the route rejects the call, and the keep-alive dies quietly -- Vercel neither retries a failed cron nor alerts on one. The route fails closed for the same reason, so a missing secret is a 401 rather than an open write endpoint. The route writes with `SUPABASE_SERVICE_ROLE_KEY` for the same reason the ETL sync does -- see [Supabase write access](#supabase-write-access) above. Both variables are set in the Vercel project. Local runs need them in `app-duels-mapping/.env`, since Next reads the app root rather than the repo root.
+
+This used to live in the [supabase-watchdog](https://github.com/thenickedwards/supabase-watchdog) repo, running on GitHub Actions. It stopped on 2026-07-16 without any failure, because GitHub disables scheduled workflows in a _public_ repo after 60 days with no commits, and a finished utility repo does not get commits. Private repos are exempt, but that one is a fork and a fork cannot be made private. Hosting the schedule next to the app it protects removes the dependency on repo activity entirely. The watchdog still runs on demand if it is ever needed for another database. Background in [this issue](https://github.com/thenickedwards/duels_mapping/issues/48).
 
 ### Future Development
 
