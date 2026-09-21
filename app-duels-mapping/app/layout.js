@@ -5,6 +5,7 @@ import NavBar from "./components/common/NavBar";
 import "./lib/fontawesome";
 import theme from "./theme";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 
 const bebasNeue = Bebas_Neue({
   weight: "400",
@@ -34,6 +35,7 @@ export default function RootLayout(props) {
             {children}
           </AppThemeProvider>
         </AppRouterCacheProvider>
+        <Analytics />
       </body>
     </html>
   );
