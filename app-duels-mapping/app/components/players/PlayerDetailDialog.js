@@ -49,6 +49,11 @@ export default function PlayerDetailDialog({
           if (isMounted && Array.isArray(data[1])) {
             setSeasonRows(data[1]);
           }
+        })
+        .catch((err) => {
+          // A dropped request (dev server restarting, offline) should leave the
+          // trend chart empty, not take down the page as an unhandled rejection.
+          console.warn("Failed to load player season history:", err);
         });
     }
     return () => {
@@ -63,6 +68,9 @@ export default function PlayerDetailDialog({
         if (isMounted && res?.imgThumbUrl) {
           setImgUrl(res.imgThumbUrl);
         }
+      })
+      .catch((err) => {
+        console.warn("Failed to load player headshot:", err);
       });
     }
     return () => {
