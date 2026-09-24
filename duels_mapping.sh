@@ -100,7 +100,7 @@ if [ "$action" = "start" ]; then
     activate_venv
     echo -e "Happy coding you beautiful and strong genius, you 🧑‍💻"
     run_nextjs_app
-    run_synclair
+    # run_synclair
     send_off
 
 ## synclair
