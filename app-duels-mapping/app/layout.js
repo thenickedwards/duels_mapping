@@ -4,6 +4,7 @@ import { Nunito_Sans, Bebas_Neue } from "next/font/google";
 import NavBar from "./components/common/NavBar";
 import "./lib/fontawesome";
 import theme from "./theme";
+import { SITE_DESCRIPTION } from "./lib/siteDescription";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 
@@ -20,8 +21,7 @@ const nunitoSans = Nunito_Sans({
 
 export const metadata = {
   title: "Duels Mapping",
-  description:
-    "Duels Mapping is an interactive dashboard that compares how possession is won or retained by MLS players using a custom-built composite metric. A player's aerial duels won, tackles won, interceptions, recoveries, and aerial duels lost are weighted using an algorithm, then players receive a Schmetzer Score and ranking.",
+  description: SITE_DESCRIPTION,
 };
 
 export default function RootLayout(props) {

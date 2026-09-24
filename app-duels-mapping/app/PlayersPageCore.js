@@ -43,6 +43,7 @@ import CustomSelect from "./components/inputs/CustomSelect";
 import PlayerNameCell from "./components/datagrid/PlayerNameCell";
 import TeamBadgeCell from "./components/datagrid/TeamBadgeCell";
 import LastUpdated from "./components/common/LastUpdated";
+import ToplineExplainer from "./components/common/ToplineExplainer";
 import PlayerSearchField from "./components/inputs/PlayerSearchField";
 import PlayerFiltersRow from "./components/players/PlayerFiltersRow";
 import PlayerYearControls from "./components/players/PlayerYearControls";
@@ -567,6 +568,7 @@ export default function PlayersPage() {
 
   return (
     <main style={{ padding: 24 }}>
+      <ToplineExplainer />
       {/* Home Page */}
       <Suspense fallback={<div>Loading...</div>}>
         <Tabs
