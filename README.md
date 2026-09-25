@@ -8,11 +8,15 @@
 
 Welcome to **_duels_mapping_**, a code repository which supports a new composite sports statistic: the **`Contested Possession Metric`** -- a method for rating a player's ability to win and/or keep possession. Since `Contested Possession Metric` is a bit of a mouthful, we've dubbed it the `Schmetzer Score`. Sounders supporters like myself have watched many-a press conferences where Coach Schmetzer will tap his pen on the table and reference his preferred statistic: _duels won_. In an effort to create a fuller picture of how possession is won/maintained, I have weighted aerial duels won, aerial duels lost, tackles won, interceptions, and recoveries using a custom algorithm to measure this skill by player and across the league.
 
-Since a player's contribution is only half of the story, Duels Mapping also carries publicly disclosed MLS salary data alongside the Schmetzer Score, so a player's work can be read against what their club committed to pay for it -- and so you can see which clubs are getting the most contested possession per dollar.
+**Bonus Features in a Bulleted List!**
+
+- **Salary Data via Second Pipeline** - As this app was originally designed to be proprietary club-specific software, understanding the cost for possession-based on-field value was addressed by the comparing the score against publicly disclosed salary data provided by the MLSPA. Now a user can get an idea of the bang (in contesting possession) for the buck (paid by the club)
+
+- **Fine-Tuning for User** - Don't like the statistical weights of the algorithim? Customize them! A Tuning button allows the user to re-weight each individual statistic. For example a user could zero out Recoveries to remove their influence or overweight another statistic Tackles or Aerial Duels Won.
 
 ### tl;dr
 
-The Duels Mapping repo powers the custom **Schmetzer Score** — a composite statistic for MLS players — by transforming raw FBref data through a lightweight, extensible SQLite-based ETL pipeline primarily written in Python, delivering that data to a Postgres database in the cloud and finally visualizing this data in an intuitive and interactive Next.js front end dashboard. A second pipeline pulls publicly disclosed MLSPA salary data alongside it, so every player's contribution can be read against what their club paid for it.
+The Duels Mapping repo powers the custom **Schmetzer Score** — a composite statistic for MLS players — by transforming raw FBref data through a lightweight, extensible SQLite-based ETL pipeline primarily written in Python, delivering that data to a Postgres database in the cloud and finally visualizing this data in an intuitive and interactive Next.js front end dashboard. A second pipeline pulls publicly disclosed MLSPA salary data alongside it, so every player's on-field contribution can be read against what their club paid for it.
 
 ### Update 03/2026
 
@@ -124,9 +128,11 @@ As you may have guessed football tactics have been a major driver in this projec
 
    This class handles and executes the ETL workflow, including extracting, parsing, loading, and transforming the data. Inspired by Apache Airflow DAGs, its modular methods make it easy to plug in additional pipelines and customize workflows.
 
-   `DataHandler` is the **superclass**. Everything every pipeline needs -- the `data_vars.json` configuration, the database connection, running a SQL script, listing the season tables, and the upload to Supabase -- lives on it. Anything specific to one data source belongs in a **subclass named for that source**, so adding a pipeline means adding a subclass rather than another method on a shared class. The first of these is [`MLSPADataHandler`](app-duels-mapping/public/duels_mapping_data/etl/mlspa_data_handler.py), which owns the salary workflow end to end.
+   Initially, the `DataHandler` stood alone, however as the project expanded and the 2nd ETL pipeline bringing in salary data was built, the decision was made to convert the `DataHandler` into a **superclass**. The idea being the superclass would contain everything every pipeline needs (using the `data_vars.json` configuration), including the database connection, running SQL scripts, listing the season tables, and the upload to Supabase.
 
-   The FBref methods still sit on `DataHandler` itself, which predates this split. They work as they always have and the existing pipelines are untouched; when they are next revisited they should move to an `FBrefDataHandler` subclass to match the pattern above.
+   Moving forward, anything specific to one data source/subject belongs in a **subclass named for that source**. Hence, we have the [`MLSPADataHandler`](app-duels-mapping/public/duels_mapping_data/etl/mlspa_data_handler.py) subclass, which owns the salary workflow end to end
+
+   The FBref methods are still in the original `DataHandler` itself (which now you know predates the split) and have been left in place in order to prevent me more headaches. Perhaps one day this will be revisited and we'll get an `FBrefDataHandler` subclass to match the pattern.
 
 ### Flow of Data
 
@@ -224,7 +230,7 @@ All tables are created using the SQL in the [app-duels-mapping/public/duels_mapp
 
 #### Weight Fine-Tuning
 
-These are not the weights the project launched with. In 2026 every weight was reviewed against the full database -- 5,876 player-seasons across 2018-2025 -- and four of the five changed.
+These are not the weights the project launched with. In 2026 weights were reviewed against the full database (5,876 player-seasons across 2018-2025) and changes can be seen below.
 
 | Stat              | Initial Weight | Fine-Tuned Weight |
 | ----------------- | -------------- | ----------------- |
@@ -234,7 +240,9 @@ These are not the weights the project launched with. In 2026 every weight was re
 | Interceptions     | +0.75          | **+0.9**          |
 | Recoveries        | +0.5           | **+0.25**         |
 
-The finding driving the change is that **a weight is not an influence**. Recoveries carried the smallest weight and the largest effect, purely on volume: 339,947 recoveries in the database against 66,056 tackles won. More than half of every point the score awarded was a recovery, and score-per-90 correlated 0.78 with recoveries against 0.26 with aerial duels won -- a metric named for duels was not primarily measuring duels. Cutting recoveries to +0.25 takes them from 55% of all points awarded to 32%, and from the largest single influence on the score to the smallest.
+##### Weight ≠ Influence
+
+Using the initial values, `recoveries` carried the smallest weight and the largest effect, purely on volume: 339,947 recoveries in the database vs 66,056 tackles won. More than half of every point the score awarded was a recovery, and score-per-90 correlated 0.78 with recoveries against 0.26 with aerial duels won -- a metric named for duels was not primarily measuring duels. Cutting recoveries to +0.25 takes them from 55% of all points awarded to 32%, and from the largest single influence on the score to the smallest.
 
 `tackles won` rises to +1.5 for the mirror-image reason. Tackles are both rarer and more tightly clustered than aerial duels (0.98 vs 1.25 per 90; standard deviations of 0.52 vs 0.99), so matching them at +1 gave them materially less pull on the ranking. Per-event parity would put the weight at 1.27 and fully equal influence at 1.89; +1.5 sits at the geometric middle of that range. The ceiling was deliberately avoided because tackles won is the least stable stat in the set -- its year-over-year correlation within position is 0.606 and falls a further 0.144 when a player changes clubs, the largest such drop of the five, indicating it travels with a team's defensive scheme.
 
@@ -370,9 +378,9 @@ A Schmetzer Score says how much contested possession a player won. It says nothi
 
 #### Where the data comes from
 
-The [MLS Players Association](https://mlsplayers.org/resources/salary-guide) publishes a league-wide salary guide a couple of times a season. It is the right source for this because the figures are **actually disclosed compensation**, not an estimate: every release carries each player's annual **base salary** and their **annual average guaranteed compensation** (base salary plus all signing and guaranteed bonuses, annualized over the term of the contract). Transfermarkt, the other name that comes up, publishes _market value_ -- a useful number, but a crowd-sourced estimate of transfer worth rather than money a club committed, so it answers a different question.
+The [MLS Players Association](https://mlsplayers.org/resources/salary-guide) publishes a league-wide salary guide a couple of times a season. These figures are disclosed compensation, not an estimate. Every release includes each player's annual base salary and their annual average guaranteed compensation (base salary plus all signing and guaranteed bonuses, annualized over the term of the contract). (Transfermarkt, the other name that comes up, publishes _market value_ -- a useful number, but a crowd-sourced estimate of transfer worth rather than money a club committed finances).
 
-The catch is that the delivery format changed over time. 2024 onward is CSV; 2018 through 2023 is PDF. Neither is stable in shape -- the CSV headers drift year to year (`fname` became `First Name`, `club` became `Team Name` then `Club Name`) and the PDF column order moves around too. Rather than hardcode a layout per year, every release is described by an entry under `mlspa.salary_releases` in [data_vars.json](app-duels-mapping/public/duels_mapping_data/data_vars.json), and [`get_from_mlspa.py`](app-duels-mapping/public/duels_mapping_data/etl/dependencies/get_from_mlspa.py) reads them from that:
+The delivery format changed over time. 2024 onward is CSV; 2018 through 2023 is PDF. Neither is stable in shape -- the CSV headers drift year to year (`fname` became `First Name`, `club` became `Team Name` then `Club Name`) and the PDF column order moves around too. Rather than hardcode a layout per year, every release is described by an entry under `mlspa.salary_releases` in [data_vars.json](app-duels-mapping/public/duels_mapping_data/data_vars.json), and [`get_from_mlspa.py`](app-duels-mapping/public/duels_mapping_data/etl/dependencies/get_from_mlspa.py) reads them from that:
 
 - **CSV releases** carry a `column_map` from the standard column to whatever that year's header happens to be.
 - **PDF releases** are parsed semantically instead of by pixel column. Every player row holds exactly two currency amounts, one club drawn from the crosswalk, and at most one position code; whatever survives that subtraction is the player's name, and the `name_order` in the config says which half is the surname. This survives the layout shifting year to year, and it fails loudly -- an unrecognised club name is reported rather than silently dropped.
@@ -568,10 +576,8 @@ The source data set only includes league games for Major League Soccer, however 
 
 As previously mentioned, the architecture of this data platform was designed with an eye toward future development and could be implemented for any league, team, or individual player. So long as the data is available, the data flow can be refactored following the nomenclature above.
 
-Now that salary sits alongside the Schmetzer Score, the obvious next step is a club-level view: roster payroll against total contested possession won, which would turn the per-player value metric into a front-office one. The salary architecture is also source-agnostic -- a `TransfermarktDataHandler` could sit next to `MLSPADataHandler` and add market valuation alongside disclosed compensation, letting you separate what a club pays a player from what the market thinks they are worth. Extending the MLSPA workflow to the spring release as well as the fall one would also close most of the coverage gap left by players who move mid-season.
-
 One possible avenue for future development could be creating a set of composite stats that also group and weight like statistics or stats that can be combined to target specific game actions, tactics, or game strategy. For example, a defensive contribution rating, chance creation rating, set piece efficiency, etc. Altogether these composite statistics can give us insights about how players can utilized in various roles and targeted match-ups.
 
 ### Shout Outs
 
-I have to start by thanking my front end partner in crime and bootcamp buddy, [Juanita Samborski](https://github.com/jsamborski310), for her incredible UX/UI and sleek, cool design scheme. The amazing folks at [FBref](https://fbref.com/en/) (the source data set for this project) and [Sports Reference](https://www.sports-reference.com/about.html) are doing God's work, democratizing sports data by making it publicly available. Thanks as well to the [MLS Players Association](https://mlsplayers.org/resources/salary-guide) for publishing the salary guide season after season -- transparency about what players actually earn is a public good, and this project would have nothing to say about value without it. Also instrumental as a guide and inspiration for getting this app off the ground, [Nathan Braun](https://github.com/nathanbraun) and his book [Learn to Code with Soccer](https://codesoccer.com/). Huge thanks to my buddy Kai Curtis who put me on it. More thanks in no particular order: Alan Graham, Jeff Pendleton, Bide Alabi, Henry Tremblay, Tyler Cox, Nathan Cox (no relation), and Jesse Smith. Thanks and love to Claudine Mboligikpelani Nako who makes the sun rise and set every day.
+I have to start by thanking my front end partner in crime and bootcamp buddy, [Juanita Samborski](https://github.com/jsamborski310), for her incredible UX/UI and sleek, cool design scheme. The amazing folks at [FBref](https://fbref.com/en/) (the source data set for this project) and [Sports Reference](https://www.sports-reference.com/about.html) are doing God's work, democratizing sports data by making it publicly available. Thanks as well to the [MLS Players Association](https://mlsplayers.org/resources/salary-guide) for publishing the salary guide season after season. Transparency arund compensation is a public good that helps all workers! Also instrumental as a guide and inspiration for getting this app off the ground, [Nathan Braun](https://github.com/nathanbraun) and his book [Learn to Code with Soccer](https://codesoccer.com/). Huge thanks to my buddy Kai Curtis who put me on it. More thanks in no particular order: Alan Graham, Jeff Pendleton, Bide Alabi, Henry Tremblay, Tyler Cox, Nathan Cox (no relation), and Jesse Smith. Thanks and love to Claudine Mboligikpelani Nako who makes the sun rise and set every day.
