@@ -342,9 +342,14 @@ export default function MethodsPage() {
             ETL pipelines could be pointed at a new data source in the future.
             This data could also be combined with field position to ascertain if
             a player tends to win or lose possession in specific zones on the
-            field or during certain patterns of play. We also have under
-            development fine tuning controls which would allow a user to
-            manipulate the default values which weight the Schmetzer Score.
+            field or during certain patterns of play.{" "}
+            <s>
+              We also have under development fine tuning controls which would
+              allow a user to manipulate the default values which weight the
+              Schmetzer Score.
+            </s>{" "}
+            This feature is live! Try fine tuning the weights of statistics
+            using the Tuning button.
           </Typography>
 
           <Typography variant="body1">
