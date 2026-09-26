@@ -10,9 +10,11 @@ Welcome to **_duels_mapping_**, a code repository which supports a new composite
 
 **Bonus Features in a Bulleted List!**
 
-- **Salary Data via Second Pipeline** - As this app was originally designed to be proprietary club-specific software, understanding the cost for possession-based on-field value was addressed by the comparing the score against publicly disclosed salary data provided by the MLSPA. Now a user can get an idea of the bang (in contesting possession) for the buck (paid by the club)
+- **Export to CSV** - Exactly what it sounds like.
 
-- **Fine-Tuning for User** - Don't like the statistical weights of the algorithim? Customize them! A Tuning button allows the user to re-weight each individual statistic. For example a user could zero out Recoveries to remove their influence or overweight another statistic Tackles or Aerial Duels Won.
+- **Salary Data via Second Pipeline** - As this app was originally designed to be proprietary club-specific software, understanding the cost for possession-based on-field value was addressed by the comparing the score against publicly disclosed salary data provided by the MLSPA. Now a user can get an idea of a player's possession "bang" (in contesting possession) for the "buck" (paid by the club).
+
+- **Fine-Tuning for User** - Don't like the statistical weights of the algorithm? Customize them! A Tuning button allows the user to re-weight each individual statistic. For example a user could zero out Recoveries to remove their influence or overweight another statistic Tackles or Aerial Duels Won. These updates can bee seen in real time, though nothing is written to the database. A user can also reset and restore the standard weights.
 
 ### tl;dr
 
@@ -130,9 +132,9 @@ As you may have guessed football tactics have been a major driver in this projec
 
    Initially, the `DataHandler` stood alone, however as the project expanded and the 2nd ETL pipeline bringing in salary data was built, the decision was made to convert the `DataHandler` into a **superclass**. The idea being the superclass would contain everything every pipeline needs (using the `data_vars.json` configuration), including the database connection, running SQL scripts, listing the season tables, and the upload to Supabase.
 
-   Moving forward, anything specific to one data source/subject belongs in a **subclass named for that source**. Hence, we have the [`MLSPADataHandler`](app-duels-mapping/public/duels_mapping_data/etl/mlspa_data_handler.py) subclass, which owns the salary workflow end to end
+   Moving forward, anything specific to one data source/subject belongs in a **subclass named for that source**. Hence, we have the [`MLSPADataHandler`](app-duels-mapping/public/duels_mapping_data/etl/mlspa_data_handler.py) subclass, which owns the salary workflow end to end.
 
-   The FBref methods are still in the original `DataHandler` itself (which now you know predates the split) and have been left in place in order to prevent me more headaches. Perhaps one day this will be revisited and we'll get an `FBrefDataHandler` subclass to match the pattern.
+   The FBref methods are still in the original `DataHandler` itself as, now you know, they predate the split. Perhaps one day this will be revisited and we'll get an `FBrefDataHandler` subclass to match the pattern but for now they have been left in place in an effort to spare me headaches.
 
 ### Flow of Data
 
@@ -242,15 +244,13 @@ These are not the weights the project launched with. In 2026 weights were review
 
 ##### Weight ≠ Influence
 
-Using the initial values, `recoveries` carried the smallest weight and the largest effect, purely on volume: 339,947 recoveries in the database vs 66,056 tackles won. More than half of every point the score awarded was a recovery, and score-per-90 correlated 0.78 with recoveries against 0.26 with aerial duels won -- a metric named for duels was not primarily measuring duels. Cutting recoveries to +0.25 takes them from 55% of all points awarded to 32%, and from the largest single influence on the score to the smallest.
+Using the initial values, `recoveries` carried the smallest weight and the largest effect, purely on volume: 339,947 recoveries in the database vs 66,056 tackles won. More than half of every point the score awarded was a recovery, and score-per-90 correlated 0.78 with recoveries against 0.26 with aerial duels won -- a metric named for duels was not primarily measuring duels. Cutting recoveries to +0.25 shifted that statistic from having the largest single influence on the score (from ~55% of all points awarded to 32%).
 
 `tackles won` rises to +1.5 for the mirror-image reason. Tackles are both rarer and more tightly clustered than aerial duels (0.98 vs 1.25 per 90; standard deviations of 0.52 vs 0.99), so matching them at +1 gave them materially less pull on the ranking. Per-event parity would put the weight at 1.27 and fully equal influence at 1.89; +1.5 sits at the geometric middle of that range. The ceiling was deliberately avoided because tackles won is the least stable stat in the set -- its year-over-year correlation within position is 0.606 and falls a further 0.144 when a player changes clubs, the largest such drop of the five, indicating it travels with a team's defensive scheme.
 
 `aerial duels lost` moves to -0.85. League-wide, aerial duels won and lost are the same number (85,314 vs 85,318) because every duel has one winner and one loser, so the two aerial weights do not set a value -- they set a **break-even win rate** of `k / (1 + k)`. At -0.75 that was 42.9%, well under what an ordinary contested player manages, so the aerial term was effectively paying for volume. At -0.85 it is 45.9%: correlation with raw duel volume drops from 0.395 to 0.287 while correlation with actual win rate reaches its plateau. The original design intent survives -- the median outfielder with real aerial volume wins 49.2%, so a genuine coin-flip still nets positive.
 
 `interceptions` rises to +0.9 on the strength of the secondary "keeps possession" criterion, while staying clearly below tackles because no opponent is beaten in a contest. The restraint is also empirical: interceptions are the most positional and least individually discriminating stat in the set, with 37.5% of variance explained by position alone and a within-position year-over-year reliability of 0.559, the lowest of the five.
-
-Two consequences worth knowing. Rankings move less than the weights suggest -- Spearman correlation with the previous ranking is 0.990, because a season total is driven first by minutes played, and only four or five names change in a given season's top 25. And because four of five values fell, **every score in the database is now lower**: the league mean drops roughly 16%. That is a rescale, not a regression, but any figure quoted from a previous run is stale.
 
 Retuning the weights is a `data_vars.json` edit plus `insert_dim_schmetzer_score_points()`, which upserts on `stat_name`. Do **not** reach for `create_tables()` to refresh the dim table -- it drops every table including the FBref raw and staging tables, which can no longer be re-sourced. The rebuild path after a weight change is: `insert_dim_schmetzer_score_points()`, then `insert_schmetzer_scores_players(seasons=...)` passing the seasons already in the database, then `update_schmetzer_scores_players_salaries()`, and finally `insert_schmetzer_scores_all_seasons()` -- the all-seasons table must be rebuilt **after** the salary update or it copies null salary columns.
 
@@ -378,7 +378,7 @@ A Schmetzer Score says how much contested possession a player won. It says nothi
 
 #### Where the data comes from
 
-The [MLS Players Association](https://mlsplayers.org/resources/salary-guide) publishes a league-wide salary guide a couple of times a season. These figures are disclosed compensation, not an estimate. Every release includes each player's annual base salary and their annual average guaranteed compensation (base salary plus all signing and guaranteed bonuses, annualized over the term of the contract). (Transfermarkt, the other name that comes up, publishes _market value_ -- a useful number, but a crowd-sourced estimate of transfer worth rather than money a club committed finances).
+The [MLS Players Association](https://mlsplayers.org/resources/salary-guide) regularly publishes a league-wide salary guide. These figures are disclosed compensation, not an estimate. Every release includes each player's annual base salary and their annual average guaranteed compensation (base salary plus all signing and guaranteed bonuses, annualized over the term of the contract). (Transfermarkt, the other name that comes up, publishes _market value_ -- a useful number, but a crowd-sourced estimate of transfer worth, not cold hard cash committed by a club.
 
 The delivery format changed over time. 2024 onward is CSV; 2018 through 2023 is PDF. Neither is stable in shape -- the CSV headers drift year to year (`fname` became `First Name`, `club` became `Team Name` then `Club Name`) and the PDF column order moves around too. Rather than hardcode a layout per year, every release is described by an entry under `mlspa.salary_releases` in [data_vars.json](app-duels-mapping/public/duels_mapping_data/data_vars.json), and [`get_from_mlspa.py`](app-duels-mapping/public/duels_mapping_data/etl/dependencies/get_from_mlspa.py) reads them from that:
 
@@ -400,7 +400,7 @@ Neither source publishes an id the other shares, and they do not agree on names.
 | `token_overlap_club` | A single shared name token within the club                   |
 | `fuzzy_club`         | Closest string match within the club, above a cutoff         |
 
-Across 2018-2025 this matches **91-97% of scored players per season**, and roughly 86% of all matches are the strictest tier. The players who go unmatched are overwhelmingly not a matching failure but a **snapshot limitation**: each season has one release, taken in the autumn, so a player who left the league mid-season was already gone when it was compiled. Those players show `—` in the dashboard rather than a guess.
+Across 2018-2025 this matches **91-97% of scored players per season**, and roughly 88% of all matches are the strictest tier. The players who go unmatched are overwhelmingly not a matching failure but a **snapshot limitation**: each season has one release, taken in the autumn, so a player who left the league mid-season was already gone when it was compiled. Those players show `—` in the dashboard rather than a guess.
 
 #### One-time Supabase migration
 
@@ -580,4 +580,4 @@ One possible avenue for future development could be creating a set of composite 
 
 ### Shout Outs
 
-I have to start by thanking my front end partner in crime and bootcamp buddy, [Juanita Samborski](https://github.com/jsamborski310), for her incredible UX/UI and sleek, cool design scheme. The amazing folks at [FBref](https://fbref.com/en/) (the source data set for this project) and [Sports Reference](https://www.sports-reference.com/about.html) are doing God's work, democratizing sports data by making it publicly available. Thanks as well to the [MLS Players Association](https://mlsplayers.org/resources/salary-guide) for publishing the salary guide season after season. Transparency arund compensation is a public good that helps all workers! Also instrumental as a guide and inspiration for getting this app off the ground, [Nathan Braun](https://github.com/nathanbraun) and his book [Learn to Code with Soccer](https://codesoccer.com/). Huge thanks to my buddy Kai Curtis who put me on it. More thanks in no particular order: Alan Graham, Jeff Pendleton, Bide Alabi, Henry Tremblay, Tyler Cox, Nathan Cox (no relation), and Jesse Smith. Thanks and love to Claudine Mboligikpelani Nako who makes the sun rise and set every day.
+I have to start by thanking my front end partner in crime and bootcamp buddy, [Juanita Samborski](https://github.com/jsamborski310), for her incredible UX/UI and sleek, cool design scheme. The amazing folks at [FBref](https://fbref.com/en/) (the source data set for this project) and [Sports Reference](https://www.sports-reference.com/about.html) are doing God's work, democratizing sports data by making it publicly available. Thanks as well to the [MLS Players Association](https://mlsplayers.org/resources/salary-guide) for publishing the salary guide season after season. Transparency around compensation is a public good that helps all workers! Also instrumental as a guide and inspiration for getting this app off the ground, [Nathan Braun](https://github.com/nathanbraun) and his book [Learn to Code with Soccer](https://codesoccer.com/). Huge thanks to my buddy Kai Curtis who put me on it. More thanks in no particular order: Alan Graham, Jeff Pendleton, Bide Alabi, Henry Tremblay, Tyler Cox, Nathan Cox (no relation), and Jesse Smith. Thanks and love to Claudine Mboligikpelani Nako who makes the sun rise and set every day.
