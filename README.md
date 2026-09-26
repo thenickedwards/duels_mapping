@@ -126,6 +126,8 @@ As you may have guessed football tactics have been a major driver in this projec
 1. [`data_vars.json`](app-duels-mapping/public/duels_mapping_data/data_vars.json)  
    This JSON file stores the values used to calculate the Schmetzer Score metric. The stats can be weighted differently to allow flexible experimentation and tuning of how each individual statistic influences the overall score. This access point supports extension to include more data sources, additional ETL pipelines, and the creation of new composite metrics built off other advanced sports statistics.
 
+   Beside it, [`data_vars_clubs_cw.json`](app-duels-mapping/public/duels_mapping_data/data_vars_clubs_cw.json) holds the club crosswalk -- the canonical MLS squad names and every source's spelling of them -- which `DataHandler` loads alongside it.
+
 2. [`DataHandler`](app-duels-mapping/public/duels_mapping_data/etl/data_handler.py)
 
    This class handles and executes the ETL workflow, including extracting, parsing, loading, and transforming the data. Inspired by Apache Airflow DAGs, its modular methods make it easy to plug in additional pipelines and customize workflows.
@@ -256,7 +258,7 @@ Retuning the weights is a `data_vars.json` edit plus `insert_dim_schmetzer_score
 
 `dim_mls_club_crosswalk` - The second **dim table**. Every source spells MLS clubs differently: FBref writes `Atlanta Utd` and `Vancouver W'caps`, the MLSPA writes `Atlanta United` and `Vancouver Whitecaps`, and both have renamed clubs over the years (`Montreal Impact` became `CF Montreal`). This table resolves any of those spellings to the one squad name the app displays, so a club reads identically whichever pipeline the row arrived through. See [Squad Name Standardization](#squad-name-standardization) below.
 
-Like the dim table above, its values are controlled by [data_vars.json](app-duels-mapping/public/duels_mapping_data/data_vars.json) -- `mls_squad_names` lists the canonical names and `fbref_squad_aliases` / `mlspa_club_aliases` map each source's spellings onto them -- and are inserted using Python after table creation. A `NULL` squad marks an MLSPA bucket that is not a club at all: `MLS Pool`, `Retired`, `Without a Club`.
+Its values are controlled by [data_vars_clubs_cw.json](app-duels-mapping/public/duels_mapping_data/data_vars_clubs_cw.json), which sits beside `data_vars.json` -- `mls_squad_names` lists the canonical names and `fbref_squad_aliases` / `mlspa_club_aliases` map each source's spellings onto them -- and are inserted using Python after table creation. A `NULL` squad marks an MLSPA bucket that is not a club at all: `MLS Pool`, `Retired`, `Without a Club`.
 
 The table is keyed on `(club_alias, source)` rather than on the alias alone, because the two feeds share some spellings (`LAFC`, `Toronto FC`) while disagreeing on others.
 
@@ -458,7 +460,7 @@ Each source names clubs its own way. FBref abbreviates (`Atlanta Utd`, `NE Revol
 
 So squad names are standardized **on the way into staging** -- both `load_stg_FBref_mls_players_all_stats_misc.sql` and `load_stg_MLSPA_mls_players_salaries.sql` resolve their source's spelling through `dim_mls_club_crosswalk`. Everything downstream (the season tables, `schmetzer_scores_all`, the API, the dashboard) inherits one name per club for free.
 
-The canonical set lives in `mls_squad_names` in [data_vars.json](app-duels-mapping/public/duels_mapping_data/data_vars.json):
+The canonical set lives in `mls_squad_names` in [data_vars_clubs_cw.json](app-duels-mapping/public/duels_mapping_data/data_vars_clubs_cw.json):
 
 |                 |                        |                        |
 | --------------- | ---------------------- | ---------------------- |
@@ -505,6 +507,7 @@ Below is an outline of the data environment. Initially, this project's goal was 
 │   ├── public
 │   │   ├── duels_mapping_data   # data environment (git submodule)
 │   │   │   ├── data_vars.json        # Config which controls algorithm scoring weights and stores data sources and destination tables
+│   │   │   ├── data_vars_clubs_cw.json  # Club crosswalk: canonical MLS squad names and each source's spellings of them
 │   │   │   ├── database
 │   │   │   │   └── mls_stats.db      # SQLite database
 │   │   │   ├── etl
