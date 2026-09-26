@@ -174,7 +174,10 @@ export default function MethodsPage() {
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 700 }}>Stat</TableCell>
-                  <TableCell sx={{ fontWeight: 700, opacity: 0.6 }} align="right">
+                  <TableCell
+                    sx={{ fontWeight: 700, opacity: 0.6 }}
+                    align="right"
+                  >
                     Initial Weight
                   </TableCell>
                   <TableCell sx={{ fontWeight: 700 }} align="right">
@@ -300,10 +303,10 @@ export default function MethodsPage() {
             that develop and play their academy.
           </Typography>
           <Typography variant="body1">
-            The MLSPA publishes one release per season, compiled in the autumn,
-            and it does not share a player id with our statistics source, so
-            players are matched by name within their club. Roughly 91&ndash;97%
-            of ranked players in a given season carry a salary. A player showing
+            The MLSPA publishes salary info each season and that data does not
+            share a player id with our statistics source, so players are matched
+            by name within their club. Roughly 91&ndash;97% of ranked players in
+            a given season carry a salary. A player showing
             &ldquo;&mdash;&rdquo; either left the league before the release was
             compiled or could not be matched with confidence; we show nothing
             rather than a guess.

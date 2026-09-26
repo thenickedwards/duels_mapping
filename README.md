@@ -254,7 +254,7 @@ Using the initial values, `recoveries` carried the smallest weight and the large
 
 Retuning the weights is a `data_vars.json` edit plus `insert_dim_schmetzer_score_points()`, which upserts on `stat_name`. Do **not** reach for `create_tables()` to refresh the dim table -- it drops every table including the FBref raw and staging tables, which can no longer be re-sourced. The rebuild path after a weight change is: `insert_dim_schmetzer_score_points()`, then `insert_schmetzer_scores_players(seasons=...)` passing the seasons already in the database, then `update_schmetzer_scores_players_salaries()`, and finally `insert_schmetzer_scores_all_seasons()` -- the all-seasons table must be rebuilt **after** the salary update or it copies null salary columns.
 
-`dim_mls_club_crosswalk` - The second **dim table**. Every source spells MLS clubs differently: FBref writes `Atlanta Utd` and `Vancouver W'caps`, the MLSPA writes `Atlanta United` and `Vancouver Whitecaps`, and both have renamed clubs over the years (`Montreal Impact` became `CF Montréal`). This table resolves any of those spellings to the one squad name the app displays, so a club reads identically whichever pipeline the row arrived through. See [Squad Name Standardization](#squad-name-standardization) below.
+`dim_mls_club_crosswalk` - The second **dim table**. Every source spells MLS clubs differently: FBref writes `Atlanta Utd` and `Vancouver W'caps`, the MLSPA writes `Atlanta United` and `Vancouver Whitecaps`, and both have renamed clubs over the years (`Montreal Impact` became `CF Montreal`). This table resolves any of those spellings to the one squad name the app displays, so a club reads identically whichever pipeline the row arrived through. See [Squad Name Standardization](#squad-name-standardization) below.
 
 Like the dim table above, its values are controlled by [data_vars.json](app-duels-mapping/public/duels_mapping_data/data_vars.json) -- `mls_squad_names` lists the canonical names and `fbref_squad_aliases` / `mlspa_club_aliases` map each source's spellings onto them -- and are inserted using Python after table creation. A `NULL` squad marks an MLSPA bucket that is not a club at all: `MLS Pool`, `Retired`, `Without a Club`.
 
@@ -400,7 +400,7 @@ Neither source publishes an id the other shares, and they do not agree on names.
 | `token_overlap_club` | A single shared name token within the club                   |
 | `fuzzy_club`         | Closest string match within the club, above a cutoff         |
 
-Across 2018-2025 this matches **91-97% of scored players per season**, and roughly 88% of all matches are the strictest tier. The players who go unmatched are overwhelmingly not a matching failure but a **snapshot limitation**: each season has one release, taken in the autumn, so a player who left the league mid-season was already gone when it was compiled. Those players show `—` in the dashboard rather than a guess.
+Across 2018-2025 this matches **91-97% of scored players per season**, and roughly 88% of all matches are the strictest tier. The players who go unmatched are overwhelmingly not a matching failure but a **snapshot limitation**: each season has one release in the autumn, so a player who left the league mid-season was already gone when it was compiled. Those players show `—` in the dashboard.
 
 #### One-time Supabase migration
 
