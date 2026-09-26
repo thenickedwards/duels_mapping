@@ -20,8 +20,8 @@ import {
 import { styled } from "@mui/material/styles";
 import { DataGrid } from "@mui/x-data-grid";
 import useSWR from "swr";
-import { useState, useMemo, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useMemo, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import PlayerComparison from "./components/comparisons/PlayerComparison";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
 import { saveAs } from "file-saver";
@@ -58,6 +58,15 @@ import {
   retuneSeasonStats,
   tunedWeightCount,
 } from "@/utils/fine-tuning";
+import {
+  DEFAULT_SEASON,
+  OUTFIELD_POSITIONS,
+  buildViewQuery,
+  describeView,
+  isDefaultPositions,
+  parseSeason,
+  parseViewParams,
+} from "@/utils/view-params";
 
 function removeAccents(str = "") {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -76,17 +85,16 @@ const POSITION_OPTIONS = [
   { value: "GK", label: "Goalkeeper" },
 ];
 
-// Goalkeepers are scored and ranked like everyone else, but they start deselected: a
-// keeper's Schmetzer Score is almost entirely recoveries (9,026 of them league-wide
-// against 104 tackles), so ranking them beside outfielders compares different jobs.
-// They are one click away in the dropdown rather than removed.
-const OUTFIELD_POSITIONS = ["FW", "MF", "DF"];
+// Goalkeepers are scored and ranked like everyone else, but they start deselected
+// (OUTFIELD_POSITIONS): a keeper's Schmetzer Score is almost entirely recoveries (9,026
+// of them league-wide against 104 tackles), so ranking them beside outfielders compares
+// different jobs. They are one click away in the dropdown rather than removed. The
+// outfield trio is the default view rather than a filter the user applied, so it raises
+// no chips and does not count towards the Filters badge. Any other selection does.
 
-// The outfield trio is the default view rather than a filter the user applied, so it
-// raises no chips and does not count towards the Filters badge. Any other selection does.
-const isDefaultPositions = (selected) =>
-  selected.length === OUTFIELD_POSITIONS.length &&
-  OUTFIELD_POSITIONS.every((code) => selected.includes(code));
+// How long the minutes box waits after the last keystroke before it updates the URL
+// (and with it the API query).
+const MINUTES_DEBOUNCE_MS = 300;
 
 function isMissing(value) {
   return value === null || value === undefined || value === "";
@@ -144,39 +152,58 @@ const StyledPagination = styled(Pagination)(({ theme }) => ({
 export default function PlayersPage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const router = useRouter();
   const searchParams = useSearchParams();
 
-  const tab = searchParams.get("tab") || "players";
+  // SHAREABLE VIEW
+  // Season, tab, filters and sort live in the query string and nowhere else, so a copied
+  // link reopens the same view and Back/Forward can never leave the grid out of step
+  // with the address bar. See utils/view-params.js for the format and validation.
+  const searchString = searchParams.toString();
+  const view = useMemo(
+    () => parseViewParams(new URLSearchParams(searchString)),
+    [searchString],
+  );
+  const { tab, season: selectedYear, sort } = view;
+  // position and squad hold arrays so several can be compared at once; an empty
+  // array means no filter. minMinutes stays a single value.
+  const filters = useMemo(
+    () => ({
+      position: view.position,
+      squad: view.squad,
+      minMinutes: view.minMinutes,
+    }),
+    [view],
+  );
+
+  // replaceState rather than router.replace: Next keeps useSearchParams in step with it,
+  // and it skips a server round trip for what is purely client-side state. Replace, not
+  // push, so a burst of filter clicks does not fill up the Back button.
+  const updateView = useCallback((changes) => {
+    const current = parseViewParams(new URLSearchParams(window.location.search));
+    const query = buildViewQuery({ ...current, ...changes });
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${query ? `?${query}` : ""}`,
+    );
+  }, []);
+
+  // generateMetadata titles the page a link opens on; keep the tab title in step as the
+  // view changes here, since replaceState never goes back to the server.
+  useEffect(() => {
+    document.title = searchString
+      ? `Duels Mapping | ${describeView(view)}`
+      : "Duels Mapping";
+  }, [view, searchString]);
 
   // DATA YEARS
 
   const currentYear = new Date().getFullYear();
 
-  // Update this when you add new data seasons
-  const maxYearWithData = 2025;
-
-  const seasonFromUrl = parseInt(
-    searchParams.get("season") || currentYear.toString(),
-    10,
-  );
-
-  // Prevent defaulting to a year with no data
-  const safeSeason = Math.min(seasonFromUrl, maxYearWithData);
-
-  const [selectedYear, setSelectedYear] = useState(safeSeason.toString());
-
   const hardcodedYears = ["2025", "2024"];
   const dropdownYears = ["2023", "2022", "2021", "2020", "2019", "2018"];
 
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
-  // position and squad hold arrays so several can be compared at once; an empty
-  // array means no filter. minMinutes stays a single value.
-  const [filters, setFilters] = useState({
-    position: OUTFIELD_POSITIONS,
-    squad: [],
-    minMinutes: "",
-  });
 
   // FINE TUNING
   // The drawer holds the raw strings the user typed so a half-entered "-0." survives
@@ -197,7 +224,36 @@ export default function PlayersPage() {
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [sortModel, setSortModel] = useState([]);
+  // A fresh array only when the sort itself changes, so the grid is not handed a new
+  // model on every render.
+  const sortModel = useMemo(() => (sort ? [sort] : []), [sort]);
+
+  // Any change to what is listed sends the user back to page 1 -- otherwise a shared
+  // link, or a narrower filter, can land on a page that no longer exists.
+  const setFilters = (next) => {
+    updateView(next);
+    if ("minMinutes" in next) setMinutesDraft(next.minMinutes);
+    setPage(1);
+  };
+
+  // The minutes box keeps its own draft so typing stays responsive, and only writes a
+  // whole number to the URL once the user pauses. It follows the URL whenever that
+  // changes underneath it (a chip removed, Clear All, a new link).
+  const [minutesDraft, setMinutesDraft] = useState(filters.minMinutes);
+  useEffect(() => setMinutesDraft(filters.minMinutes), [filters.minMinutes]);
+  // Anything but digits (or an empty box) leaves the last good value in place rather
+  // than wiping the filter over a typo.
+  useEffect(() => {
+    const trimmed = minutesDraft.trim();
+    if (trimmed && !/^\d+$/.test(trimmed)) return;
+    const cleaned = trimmed ? String(Number(trimmed) || "") : "";
+    if (cleaned === filters.minMinutes) return;
+    const timer = setTimeout(() => {
+      updateView({ minMinutes: cleaned });
+      setPage(1);
+    }, MINUTES_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [minutesDraft, filters.minMinutes, updateView]);
 
   const [selectOpen, setSelectOpen] = useState(false);
 
@@ -223,19 +279,14 @@ export default function PlayersPage() {
     fetcher,
   );
 
+  // Clamped like a URL value, so a caller passing the calendar year (Comparisons resets
+  // to it) lands on the newest season with data rather than an empty one.
   const updateSeason = (year) => {
-    const newParams = new URLSearchParams(searchParams.toString());
-    newParams.set("season", year);
-    router.replace(`?${newParams.toString()}`);
-
-    setSelectedYear(year);
+    updateView({ season: parseSeason(year) });
+    setPage(1);
   };
 
-  const handleTabChange = (_, newTab) => {
-    const newParams = new URLSearchParams(searchParams.toString());
-    newParams.set("tab", newTab);
-    router.replace(`?${newParams.toString()}`);
-  };
+  const handleTabChange = (_, newTab) => updateView({ tab: newTab });
 
   const toggleColumnVisibility = (field) => {
     setHiddenColumns((prev) =>
@@ -450,6 +501,17 @@ export default function PlayersPage() {
     new Set(rows.map((r) => r.squad).filter(Boolean)),
   ).sort((a, b) => a.localeCompare(b));
 
+  // A link can name a club that is not in its season -- one that joined later, or a
+  // hand-edited name. Drop those from the URL once the season's full list is in, rather
+  // than filtering down to an empty table. Checked against the unfiltered fetch so a
+  // minutes floor cannot knock out a club that is really there.
+  useEffect(() => {
+    if (!Array.isArray(players) || players.length === 0) return;
+    const known = new Set(players.map((r) => r.squad));
+    const valid = filters.squad.filter((name) => known.has(name));
+    if (valid.length !== filters.squad.length) updateView({ squad: valid });
+  }, [players, filters.squad, updateView]);
+
   const normalizedSearch = normalizeName(searchTerm);
 
   const filteredRows = rows.filter((row) => {
@@ -513,7 +575,7 @@ export default function PlayersPage() {
   }, [filteredRows, sortModel, isTuned]);
 
   const handleSortModelChange = (model) => {
-    setSortModel(model);
+    updateView({ sort: model[0]?.sort ? model[0] : null });
     // Re-sorting reorders the whole list, so send the user back to its top
     setPage(1);
   };
@@ -795,7 +857,7 @@ export default function PlayersPage() {
             {dropdownYears.includes(selectedYear) && (
               <FilterChip
                 label={selectedYear}
-                onRemove={() => updateSeason("2025")}
+                onRemove={() => updateSeason(DEFAULT_SEASON)}
               />
             )}
 
@@ -1190,10 +1252,8 @@ export default function PlayersPage() {
               </Typography>
               <TextField
                 fullWidth
-                value={filters.minMinutes}
-                onChange={(e) =>
-                  setFilters({ ...filters, minMinutes: e.target.value })
-                }
+                value={minutesDraft}
+                onChange={(e) => setMinutesDraft(e.target.value)}
                 placeholder="0"
                 sx={(theme) => inputStyle(theme)}
               />
