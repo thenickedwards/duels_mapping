@@ -47,7 +47,17 @@ export default function PlayerDetailDialog({
         .then((r) => r.json())
         .then((data) => {
           if (isMounted && Array.isArray(data[1])) {
-            setSeasonRows(data[1]);
+            // The route matches on name alone, and names repeat: 2022 has two Alan
+            // Francos (b. 1996 and 1998). Keep only this player's own seasons, or the
+            // trend line splices two careers together.
+            setSeasonRows(
+              data[1].filter(
+                (row) =>
+                  !player.player_yob ||
+                  !row.player_yob ||
+                  row.player_yob === player.player_yob,
+              ),
+            );
           }
         })
         .catch((err) => {
