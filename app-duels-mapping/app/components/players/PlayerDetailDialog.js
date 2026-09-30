@@ -16,6 +16,7 @@ import SchmetzerScoreBar from "../charts/SchmetzerScoreBar";
 import PlayerMetricsVerticalBarChart from "../charts/PlayerMetricsVerticalBarChart";
 import PlayerDuelsPieChart from "../charts/PlayerDuelsPieChart";
 import SchmetzerTrendChart from "../charts/SchmetzerTrendChart";
+import BallWinningDonutChart from "../charts/BallWinningDonutChart";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import { getPlayerPic } from "@/utils/get-player-pics";
@@ -250,6 +251,20 @@ export default function PlayerDetailDialog({
                 averages={seasonAverages}
                 maxes={seasonMaxes}
               />
+            </Box>
+          </Grid>
+
+          <Grid item size={{ xs: 12, sm: 6 }}>
+            <Box
+              p={4}
+              borderRadius={0}
+              height={"100%"}
+              sx={{
+                backgroundColor:
+                  theme.palette.mode === "dark" ? "#303034" : "#FAFAFA",
+              }}
+            >
+              <BallWinningDonutChart player={player} seasonStats={stats} />
             </Box>
           </Grid>
 

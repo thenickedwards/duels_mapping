@@ -18,7 +18,10 @@ SELECT
 	MAX(aerial_duels_lost) as adl_max,
 	AVG(aerial_duels_lost) as adl_avg,
 	MAX(schmetzer_score) as smetz_max,
-	AVG(schmetzer_score) as smetz_avg
+	AVG(schmetzer_score) as smetz_avg,
+	-- Over the same floored field as the stat averages, so avg(stat) / nineties_avg is
+	-- the league's pooled per-90 rate (total actions / total 90s) for that stat.
+	AVG(nineties) as nineties_avg
 FROM "schmetzer_scores_{year}"
 	-- Season averages exclude players below {min_nineties} 90s (see
 	-- utils/request-context.js). They are still scored and ranked on the
