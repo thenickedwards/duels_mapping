@@ -123,7 +123,8 @@ export async function GET(req) {
           adl_max:aerial_duels_lost.max(),
           adl_avg:aerial_duels_lost.avg(),
           smetz_max:schmetzer_score.max(),
-          smetz_avg:schmetzer_score.avg()
+          smetz_avg:schmetzer_score.avg(),
+          nineties_avg:nineties.avg()
           `,
         )
         .gte("nineties", MIN_NINETIES_FOR_AVERAGES);
@@ -177,6 +178,7 @@ export async function GET(req) {
     adl_avg: 19.084922010398614,
     smetz_max: 251.25,
     smetz_avg: 68.10745233968804,
+    nineties_avg: 16.2,
   },
 ];
 */

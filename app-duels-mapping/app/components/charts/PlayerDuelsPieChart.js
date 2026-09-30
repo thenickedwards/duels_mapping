@@ -5,6 +5,7 @@ import { Box, useTheme, Typography } from "@mui/material";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Pie } from "react-chartjs-2";
 import { baseChartTooltipOptions } from "./styles/chartTooltipOptions";
+import { ROUND_CHART_HEIGHT, ROUND_CHART_RADIUS } from "./styles/roundChartSize";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -60,9 +61,20 @@ export default function PlayerDuelsPieChart({ player }) {
         >
           Aerial Duels Won vs Lost
         </Typography>
+        <Typography
+          sx={{
+            fontFamily: "'Bebas Neue', sans-serif",
+            fontSize: "1.75rem",
+            fontWeight: 700,
+            lineHeight: 1,
+            color: adwColor,
+          }}
+        >
+          {player.aerial_duels_won_pct ?? 0}%
+        </Typography>
       </Box>
 
-      <Box sx={{ flexGrow: 1, position: "relative" }}>
+      <Box sx={{ height: ROUND_CHART_HEIGHT, position: "relative" }}>
         <Pie
           data={{
             labels,
@@ -73,6 +85,7 @@ export default function PlayerDuelsPieChart({ player }) {
                 backgroundColor: [adlBgColor, adwBgColor],
                 borderColor: [adlColor, adwColor],
                 borderWidth: 2,
+                radius: ROUND_CHART_RADIUS,
               },
             ],
           }}
@@ -100,23 +113,6 @@ export default function PlayerDuelsPieChart({ player }) {
             },
           }}
         />
-
-        <Typography
-          sx={{
-            position: "absolute",
-            top: "22%",
-            left: "16%",
-            transform: "translate(-50%, -50%)",
-            fontFamily: "'Bebas Neue', sans-serif",
-            fontSize: "1.75rem",
-            fontWeight: 700,
-            lineHeight: 1,
-            color: adwColor,
-            pointerEvents: "none",
-          }}
-        >
-          {player.aerial_duels_won_pct ?? 0}%
-        </Typography>
       </Box>
     </Box>
   );
