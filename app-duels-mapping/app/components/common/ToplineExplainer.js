@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { ButtonBase, ClickAwayListener, Typography } from "@mui/material";
+import { Box, ButtonBase, ClickAwayListener, Typography } from "@mui/material";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import {
-  SITE_DESCRIPTION,
+  SITE_BONUS_FEATURES,
   SITE_DESCRIPTION_PREVIEW,
+  SITE_DESCRIPTION_SUMMARY,
 } from "../../lib/siteDescription";
 
 export default function ToplineExplainer() {
@@ -13,6 +14,8 @@ export default function ToplineExplainer() {
   return (
     <ClickAwayListener onClickAway={() => setOpen(false)}>
       <ButtonBase
+        // A div, not a button, so the expanded text can hold a list
+        component="div"
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
         aria-label={open ? "Collapse description" : "Expand description"}
@@ -43,9 +46,23 @@ export default function ToplineExplainer() {
         />
         <Typography
           variant="body2"
+          component="div"
           sx={{ color: "inherit", fontStyle: open ? "normal" : "italic" }}
         >
-          {open ? SITE_DESCRIPTION : `${SITE_DESCRIPTION_PREVIEW}...`}
+          {open ? (
+            <>
+              {SITE_DESCRIPTION_PREVIEW}. {SITE_DESCRIPTION_SUMMARY}
+              <br />
+              Bonus Features:
+              <Box component="ul" sx={{ m: 0, pl: 3 }}>
+                {SITE_BONUS_FEATURES.map((feature) => (
+                  <li key={feature}>{feature}</li>
+                ))}
+              </Box>
+            </>
+          ) : (
+            `${SITE_DESCRIPTION_PREVIEW}...`
+          )}
         </Typography>
       </ButtonBase>
     </ClickAwayListener>
