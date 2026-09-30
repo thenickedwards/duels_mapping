@@ -47,6 +47,11 @@ export default function SchmetzerTrendChart({ history = [] }) {
   const isIncrease = diff >= 0;
   const color = isIncrease ? "limegreen" : "tomato";
 
+  // A single season has no trend: the change would read 0.0% and the line would be a
+  // lone point. The chart still renders underneath, blurred, so the card keeps its
+  // size. An empty history (still loading) is left alone rather than flagged.
+  const notEnoughData = history.length === 1;
+
   return (
     <Box>
       <Box
@@ -62,7 +67,12 @@ export default function SchmetzerTrendChart({ history = [] }) {
         >
           YOY SCHMETZER TREND
         </Typography>
-        <Box display="flex" alignItems="center" gap={1}>
+        <Box
+          display="flex"
+          alignItems="center"
+          gap={1}
+          visibility={notEnoughData ? "hidden" : "visible"}
+        >
           <Typography
             variant="caption"
             sx={{
@@ -109,74 +119,105 @@ export default function SchmetzerTrendChart({ history = [] }) {
         </Box>
       </Box>
 
-      <Line
-        data={{
-          labels,
-          datasets: [
-            {
-              label: "Score",
-              data: scores,
-              borderColor:
-                theme.palette.mode === "dark"
-                  ? theme.palette.common.white
-                  : theme.palette.common.black,
-              borderWidth: 2,
-              tension: 0.2,
-              pointRadius: 2.5,
-              pointHoverRadius: 10,
-              pointBackgroundColor:
-                theme.palette.mode === "dark"
-                  ? theme.palette.common.white
-                  : theme.palette.common.black,
-              pointHoverBackgroundColor: theme.palette.common.limegreen,
-              pointBorderColor:
-                theme.palette.mode === "dark"
-                  ? theme.palette.common.white
-                  : theme.palette.common.black,
-              pointBorderWidth: 0,
-              pointHoverBorderWidth: 2,
-            },
-          ],
-        }}
-        options={{
-          responsive: true,
-          interaction: {
-            mode: "nearest",
-            intersect: true,
-          },
-          onHover: (event, elements) => {
-            const canvas = event?.native?.target;
-            if (!canvas) return;
-            canvas.style.cursor = elements?.length ? "pointer" : "default";
-          },
-          plugins: {
-            legend: { display: false },
-            tooltip: baseChartTooltipOptions(theme),
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: { display: false, stepSize: 30 },
-              grid: {
-                display: true,
-                color: theme.palette.mode === "dark" ? "#444" : "#ccc",
-                drawBorder: false,
+      <Box position="relative">
+        <Box
+          aria-hidden={notEnoughData || undefined}
+          sx={
+            notEnoughData
+              ? { filter: "blur(4px)", opacity: 0.4, pointerEvents: "none" }
+              : undefined
+          }
+        >
+          <Line
+            data={{
+              labels,
+              datasets: [
+                {
+                  label: "Score",
+                  data: scores,
+                  borderColor:
+                    theme.palette.mode === "dark"
+                      ? theme.palette.common.white
+                      : theme.palette.common.black,
+                  borderWidth: 2,
+                  tension: 0.2,
+                  pointRadius: 2.5,
+                  pointHoverRadius: 10,
+                  pointBackgroundColor:
+                    theme.palette.mode === "dark"
+                      ? theme.palette.common.white
+                      : theme.palette.common.black,
+                  pointHoverBackgroundColor: theme.palette.common.limegreen,
+                  pointBorderColor:
+                    theme.palette.mode === "dark"
+                      ? theme.palette.common.white
+                      : theme.palette.common.black,
+                  pointBorderWidth: 0,
+                  pointHoverBorderWidth: 2,
+                },
+              ],
+            }}
+            options={{
+              responsive: true,
+              interaction: {
+                mode: "nearest",
+                intersect: true,
               },
-              border: { display: false },
-            },
-            x: {
-              ticks: {
-                display: true,
-                color: theme.palette.text.primary,
+              onHover: (event, elements) => {
+                const canvas = event?.native?.target;
+                if (!canvas) return;
+                canvas.style.cursor = elements?.length ? "pointer" : "default";
               },
-              grid: {
-                display: false,
-                drawBorder: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: baseChartTooltipOptions(theme),
               },
-            },
-          },
-        }}
-      />
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: { display: false, stepSize: 30 },
+                  grid: {
+                    display: true,
+                    color: theme.palette.mode === "dark" ? "#444" : "#ccc",
+                    drawBorder: false,
+                  },
+                  border: { display: false },
+                },
+                x: {
+                  ticks: {
+                    display: true,
+                    color: theme.palette.text.primary,
+                  },
+                  grid: {
+                    display: false,
+                    drawBorder: false,
+                  },
+                },
+              },
+            }}
+          />
+        </Box>
+
+        {notEnoughData && (
+          <Box
+            position="absolute"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            textAlign="center"
+            sx={{ inset: 0 }}
+          >
+            <Typography
+              sx={{
+                fontFamily: "'Bebas Neue', sans-serif",
+                fontSize: "1.5rem",
+              }}
+            >
+              Not enough data for YOY Trend
+            </Typography>
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 }
