@@ -11,7 +11,6 @@ import {
   Tooltip as ChartTooltip,
 } from "chart.js";
 import { getMuiChartTooltipSlotProps } from "./styles/chartTooltipOptions";
-import { formatSalary, formatValueMetric } from "@/utils/format-salary";
 
 ChartJS.register(
   CategoryScale,
@@ -27,8 +26,6 @@ export default function SchmetzerScoreBar({
   max,
   rank,
   totalRanks,
-  guaranteedComp,
-  scorePerMillion,
   tuned = false,
   darkMode = false,
 }) {
@@ -61,7 +58,7 @@ export default function SchmetzerScoreBar({
       </Typography>
 
       {/* Every figure in this dialog -- the score, the rank, the league average and
-          max, the value metric and the trend -- is recalculated at the user's weights
+          max, the value metric in the fact sheet and the trend -- is recalculated at the user's weights
           while the Fine Tuning drawer is off its defaults. Say so, or the numbers read
           as the published ones. */}
       {tuned && (
@@ -217,48 +214,6 @@ export default function SchmetzerScoreBar({
         </Box>
       </Box>
 
-      {/* What the club paid for that score. Divided off from the row above because
-          these come from the MLSPA rather than from the Schmetzer Score itself. */}
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="flex-start"
-        mt={2}
-        pt={2}
-        sx={{ borderTop: `1px solid ${theme.palette.divider}` }}
-      >
-        <Box textAlign="center">
-          <Tooltip
-            title="Annual average guaranteed compensation, per the MLSPA salary guide"
-            arrow
-            placement="top"
-            slotProps={tooltipSlotProps}
-          >
-            <Typography sx={{ ...statLabelStyle, cursor: "help" }}>
-              SALARY
-            </Typography>
-          </Tooltip>
-          <Typography sx={{ ...statLabelStyle, mt: 0.5 }}>
-            {formatSalary(guaranteedComp)}
-          </Typography>
-        </Box>
-
-        <Box textAlign="center">
-          <Tooltip
-            title="Schmetzer Score earned per $1M of guaranteed compensation"
-            arrow
-            placement="top"
-            slotProps={tooltipSlotProps}
-          >
-            <Typography sx={{ ...statLabelStyle, cursor: "help" }}>
-              SMETZ/$M
-            </Typography>
-          </Tooltip>
-          <Typography sx={{ ...statLabelStyle, mt: 0.5 }}>
-            {formatValueMetric(scorePerMillion)}
-          </Typography>
-        </Box>
-      </Box>
     </Box>
   );
 }

@@ -17,6 +17,7 @@ import PlayerMetricsVerticalBarChart from "../charts/PlayerMetricsVerticalBarCha
 import PlayerDuelsPieChart from "../charts/PlayerDuelsPieChart";
 import SchmetzerTrendChart from "../charts/SchmetzerTrendChart";
 import BallWinningDonutChart from "../charts/BallWinningDonutChart";
+import PlayerFactSheet from "./PlayerFactSheet";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import { getPlayerPic } from "@/utils/get-player-pics";
@@ -180,7 +181,7 @@ export default function PlayerDetailDialog({
                 {player.player_name}
               </Typography>
               <Typography>
-                {player.squad} • {player.position} • {player.player_age}
+                {player.squad} • {player.position?.replace(/,\s*/g, ", ")}
               </Typography>
             </Box>
           </Box>
@@ -215,14 +216,30 @@ export default function PlayerDetailDialog({
                   theme.palette.mode === "dark" ? "#303034" : "#FAFAFA",
               }}
             >
+              <PlayerFactSheet
+                player={player}
+                season={season}
+                seasonRows={seasonRows}
+              />
+            </Box>
+          </Grid>
+
+          <Grid item size={{ xs: 12, sm: 6 }}>
+            <Box
+              p={4}
+              borderRadius={0}
+              height={"100%"}
+              sx={{
+                backgroundColor:
+                  theme.palette.mode === "dark" ? "#303034" : "#FAFAFA",
+              }}
+            >
               <SchmetzerScoreBar
                 value={player.schmetzer_score}
                 average={seasonAverages.smetz_avg}
                 max={seasonMaxes.smetz_max}
                 rank={player.schmetzer_rk}
                 totalRanks={stats?.total_ranks}
-                guaranteedComp={player.guaranteed_comp}
-                scorePerMillion={player.schmetzer_score_per_million}
                 tuned={isTuned}
                 darkMode={theme.palette.mode === "dark"}
               />

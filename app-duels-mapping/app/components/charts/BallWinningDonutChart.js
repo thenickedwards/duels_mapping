@@ -35,6 +35,14 @@ const RING_ORDER = ["aerial_duels_won", "interceptions", "tackles_won"];
 
 const per90 = (value, nineties) => (nineties > 0 ? (value ?? 0) / nineties : 0);
 
+// The figure at the centre of the ring, and the season total behind it; the player
+// fact sheet shows both.
+export const turnoversWon = (player) =>
+  SEGMENTS.reduce((sum, segment) => sum + (player?.[segment.key] ?? 0), 0);
+
+export const turnoversWonPer90 = (player) =>
+  per90(turnoversWon(player), player?.nineties ?? 0);
+
 function createDiagonalPattern(color, background) {
   const size = 8;
   const canvas = document.createElement("canvas");
