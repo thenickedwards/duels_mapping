@@ -51,8 +51,12 @@ export default function ToplineExplainer() {
         >
           {open ? (
             <>
-              {SITE_DESCRIPTION_PREVIEW}. {SITE_DESCRIPTION_SUMMARY}
-              <br />
+              <Box component="p" sx={{ m: 0, mb: 1.5 }}>
+                {SITE_DESCRIPTION_PREVIEW}.
+              </Box>
+              <Box component="p" sx={{ m: 0, mb: 1.5 }}>
+                {SITE_DESCRIPTION_SUMMARY}
+              </Box>
               Bonus Features:
               <Box component="ul" sx={{ m: 0, pl: 3 }}>
                 {SITE_BONUS_FEATURES.map((feature) => (
