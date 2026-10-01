@@ -9,9 +9,14 @@ export function formatSalary(value) {
   return `$${Math.round(value).toLocaleString("en-US")}`;
 }
 
-// Schmetzer Score earned per $1M of guaranteed compensation: how much contested
-// possession the club bought with what it committed to the player.
-export function formatValueMetric(value) {
-  if (value == null) return NO_VALUE;
-  return value.toLocaleString("en-US");
+// Guaranteed compensation per Schmetzer point: what the club paid for each point of
+// contested possession, so lower is better. Derived here rather than stored, so it
+// follows the score under custom weights. Null without a salary on record, and for a
+// score of zero or below -- there is nothing bought to divide by, and a negative
+// cost would sort as the best value in the league.
+export function costPerSmetz(row) {
+  const comp = Number(row?.guaranteed_comp);
+  const score = Number(row?.schmetzer_score);
+  if (row?.guaranteed_comp == null || !(comp > 0) || !(score > 0)) return null;
+  return Math.round(comp / score);
 }

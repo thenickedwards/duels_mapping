@@ -284,10 +284,11 @@ export default function MethodsPage() {
             annualized over the term of the contract.
           </Typography>
           <Typography variant="body1">
-            The <strong>smetz/$M</strong> column divides a player&apos;s
-            Schmetzer Score by that compensation in millions of dollars: how
-            much contested possession a club bought with the money it committed
-            to that player. Players are ranked on it only once past the same
+            The <strong>$/smetz</strong> column divides that compensation by
+            the player&apos;s Schmetzer Score: what a club paid for each point
+            of contested possession, so lower is better. It is left blank for a
+            score of zero or below, where there is nothing bought to divide by.
+            Players are ranked on it only once past the same
             five 90s threshold used for season averages &mdash; without a floor,
             a single substitute appearance on a league-minimum contract would
             top the table on a handful of duels.

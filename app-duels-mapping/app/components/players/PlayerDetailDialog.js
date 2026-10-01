@@ -216,11 +216,7 @@ export default function PlayerDetailDialog({
                   theme.palette.mode === "dark" ? "#303034" : "#FAFAFA",
               }}
             >
-              <PlayerFactSheet
-                player={player}
-                season={season}
-                seasonRows={seasonRows}
-              />
+              <PlayerFactSheet player={player} season={season} />
             </Box>
           </Grid>
 
