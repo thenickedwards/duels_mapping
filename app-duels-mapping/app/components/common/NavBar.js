@@ -24,24 +24,34 @@ import { useColorMode } from "@/app/theme";
 import DarkMode from "../../../public/images/dark_mode.png";
 import LightMode from "../../../public/images/light_mode.png";
 import CloseIcon from "@mui/icons-material/Close";
+import ContactDialog from "./ContactDialog";
 
 const pages = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
-  { label: "Team", href: "/team" },
   { label: "Methods", href: "/methods" },
+  { label: "Team", href: "/team" },
+  // No page behind Contact: it opens ContactDialog instead of navigating.
+  { label: "Contact" },
 ];
 
 export default function NavBar() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
   const { mode, toggleColorMode } = useColorMode();
   const pathname = usePathname();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
+
+  // A page entry links to its route; one without an href opens the Contact dialog.
+  const navItemProps = (page) =>
+    page.href
+      ? { component: Link, href: page.href }
+      : { onClick: () => setContactOpen(true) };
 
   const drawer = (
     <Box
@@ -95,7 +105,7 @@ export default function NavBar() {
       </Box>
       <List>
         {pages.map((page) => (
-          <ListItemButton key={page.label} component={Link} href={page.href}>
+          <ListItemButton key={page.label} {...navItemProps(page)}>
             <ListItemText
               primary={page.label}
               slotProps={{
@@ -185,8 +195,7 @@ export default function NavBar() {
                   <Button
                     key={page.label}
                     color="inherit"
-                    component={Link}
-                    href={page.href}
+                    {...navItemProps(page)}
                     sx={{
                       fontSize: "1.25rem",
                       fontFamily: "'Bebas Neue', 'sans-serif'",
@@ -246,6 +255,8 @@ export default function NavBar() {
       >
         {drawer}
       </Drawer>
+
+      <ContactDialog open={contactOpen} onClose={() => setContactOpen(false)} />
     </>
   );
 }
