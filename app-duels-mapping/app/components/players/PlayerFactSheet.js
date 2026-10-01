@@ -1,9 +1,8 @@
 "use client";
 
 import { Box, Tooltip, Typography, useTheme } from "@mui/material";
-import { formatSalary, formatValueMetric } from "@/utils/format-salary";
+import { costPerSmetz, formatSalary } from "@/utils/format-salary";
 import { nationalityFlag } from "@/utils/nationality-flag";
-import { MAX_SEASON, MIN_SEASON } from "@/utils/view-params";
 import {
   turnoversWon,
   turnoversWonPer90,
@@ -12,7 +11,7 @@ import { getMuiChartTooltipSlotProps } from "../charts/styles/chartTooltipOption
 
 const NO_VALUE = "—";
 
-export default function PlayerFactSheet({ player, season, seasonRows = [] }) {
+export default function PlayerFactSheet({ player, season }) {
   const theme = useTheme();
   // Older FBref seasons record age as "years-days"; only the years are wanted.
   const age = player.player_age?.toString().split("-")[0];
@@ -22,23 +21,12 @@ export default function PlayerFactSheet({ player, season, seasonRows = [] }) {
   const nationality = player.player_nationality?.trim()
     ? `${player.player_nationality} ${nationalityFlag(player.player_nationality)}`.trim()
     : NO_VALUE;
-  // Every season this player appears in the data, not a full MLS career -- the data
-  // only reaches back to MIN_SEASON. Empty until the dialog's history fetch lands.
-  const seasonYears = seasonRows.map((row) => Number(row.season));
-  const seasons = seasonYears.length
-    ? `${seasonYears.length} (${Math.min(...seasonYears)}–${Math.max(...seasonYears)})`
-    : NO_VALUE;
   const hasNineties = player.nineties > 0;
 
   const facts = [
     { label: "Squad", value: player.squad || NO_VALUE },
     { label: "Nationality", value: nationality },
     { label: "Born", value: born },
-    {
-      label: "Seasons",
-      value: seasons,
-      tooltip: `Seasons this player appears in our data, which covers ${MIN_SEASON}–${MAX_SEASON}`,
-    },
     { label: `90s in ${season}`, value: player.nineties ?? NO_VALUE },
     {
       label: "Turnovers Won",
@@ -51,8 +39,10 @@ export default function PlayerFactSheet({ player, season, seasonRows = [] }) {
     },
     { label: "Salary", value: formatSalary(player.guaranteed_comp) },
     {
-      label: "SMETZ/$M",
-      value: formatValueMetric(player.schmetzer_score_per_million),
+      label: "$/Smetz",
+      value: formatSalary(costPerSmetz(player)),
+      tooltip:
+        "Guaranteed comp per Schmetzer point; lower is better. Blank for a score of zero or below",
     },
   ];
 
@@ -70,21 +60,33 @@ export default function PlayerFactSheet({ player, season, seasonRows = [] }) {
           </Box>
         );
         return (
-          <Typography key={label} lineHeight={1.4}>
-            {tooltip ? (
-              <Tooltip
-                title={tooltip}
-                arrow
-                placement="top"
-                slotProps={getMuiChartTooltipSlotProps(theme)}
-              >
-                {labelText}
-              </Tooltip>
-            ) : (
-              labelText
-            )}{" "}
-            {value}
-          </Typography>
+          // Label pinned left, value right, so each row reads across the card
+          // instead of bunching up against the labels.
+          <Box
+            key={label}
+            display="flex"
+            justifyContent="space-between"
+            alignItems="baseline"
+            gap={2}
+          >
+            <Typography lineHeight={1.4} flexShrink={0}>
+              {tooltip ? (
+                <Tooltip
+                  title={tooltip}
+                  arrow
+                  placement="top"
+                  slotProps={getMuiChartTooltipSlotProps(theme)}
+                >
+                  {labelText}
+                </Tooltip>
+              ) : (
+                labelText
+              )}
+            </Typography>
+            <Typography lineHeight={1.4} textAlign="right">
+              {value}
+            </Typography>
+          </Box>
         );
       })}
     </Box>

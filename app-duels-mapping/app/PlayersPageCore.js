@@ -50,7 +50,7 @@ import PlayerYearControls from "./components/players/PlayerYearControls";
 import SquadSelect from "./components/inputs/SquadSelect";
 import TuningDrawer from "./components/players/TuningDrawer";
 import { textActionButtonStyle } from "./styles/buttonStyles";
-import { formatSalary, formatValueMetric } from "@/utils/format-salary";
+import { costPerSmetz, formatSalary } from "@/utils/format-salary";
 import {
   defaultWeightInputs,
   parseWeightInputs,
@@ -431,14 +431,14 @@ export default function PlayersPage() {
       ),
     },
     {
-      field: "schmetzer_score_per_million",
-      headerName: "smetz/$M",
-      displayName: "Schmetzer Score per $1M",
+      field: "cost_per_smetz",
+      headerName: "$/smetz",
+      displayName: "Guaranteed Comp per Schmetzer Point",
       width: 120,
       headerAlign: "right",
       renderCell: (params) => (
         <RightAlignedCenterCell
-          value={formatValueMetric(params.value)}
+          value={formatSalary(params.value)}
           align="right"
         />
       ),
@@ -480,10 +480,13 @@ export default function PlayersPage() {
     [tunedSeason],
   );
 
+  // $/smetz is derived per row, after any re-scoring, so it sorts like a stored column
+  // and moves with custom weights.
   const rows = rawRows.map((row, i) => {
     const base = { id: i, ...row };
     const tuned = tunedById?.get(base.id);
-    return tuned ? { ...base, ...tuned } : base;
+    const merged = tuned ? { ...base, ...tuned } : base;
+    return { ...merged, cost_per_smetz: costPerSmetz(merged) };
   });
 
   // The dialog plots a score against the league average and maximum, so those move
