@@ -9,7 +9,7 @@ export const SITE_DESCRIPTION_SUMMARY =
 // Only the explainer shows these, as a bulleted list; link previews would truncate them.
 export const SITE_BONUS_FEATURES = [
   "Comparisons Tab - 1v1 player match-ups",
-  "Salary Data - club spending per player contribution to possession",
+  "Salary Data - clubs spending per ball won",
   "Tuning Button - customize stat weights",
 ];
 
