@@ -101,7 +101,7 @@ _Note: you will need to adjust the path below as appropriate on your machine. I 
 
 - If the MLSPA has published a new salary release, run the "salaries" command from a terminal at the root of the project.
   - `source ./duels_mapping.sh salaries` OR `. ./duels_mapping.sh salaries`
-  - The `pipeline_cur_MLSPA_salaries_to_schmetzer_scores_players.py` script will be run to load the newest release configured in `data_vars.json`.
+  - The `pipeline_cur_MLSPA_salaries_to_schmetzer_scores_players.py` script will be run to load the newest release configured in `dv_mlspa.json`.
   - To backfill every season of salary data instead, use `salaries-restore`.
   - Note these pipelines read the `schmetzer_scores_YYYY` tables, so they run _after_ the FBref pipelines have built them.
 
@@ -126,7 +126,7 @@ As you may have guessed football tactics have been a major driver in this projec
 1. [`data_vars.json`](app-duels-mapping/public/duels_mapping_data/data_vars.json)  
    This JSON file stores the values used to calculate the Schmetzer Score metric. The stats can be weighted differently to allow flexible experimentation and tuning of how each individual statistic influences the overall score. This access point supports extension to include more data sources, additional ETL pipelines, and the creation of new composite metrics built off other advanced sports statistics.
 
-   Beside it, [`data_vars_clubs_cw.json`](app-duels-mapping/public/duels_mapping_data/data_vars_clubs_cw.json) holds the club crosswalk -- the canonical MLS squad names and every source's spelling of them -- which `DataHandler` loads alongside it.
+   Beside it sit the source-specific `dv_` files. [`dv_clubs_cw.json`](app-duels-mapping/public/duels_mapping_data/dv_clubs_cw.json) holds the club crosswalk -- the canonical MLS squad names and every source's spelling of them -- which `DataHandler` loads alongside it. [`dv_mlspa.json`](app-duels-mapping/public/duels_mapping_data/dv_mlspa.json) holds the per-season MLSPA salary releases, whose layouts are too release-specific to share `data_vars.json`; only the `DH_MLSPA` subclass loads it.
 
 2. [`DataHandler`](app-duels-mapping/public/duels_mapping_data/etl/data_handler.py)
 
@@ -134,9 +134,9 @@ As you may have guessed football tactics have been a major driver in this projec
 
    Initially, the `DataHandler` stood alone, however as the project expanded and the 2nd ETL pipeline bringing in salary data was built, the decision was made to convert the `DataHandler` into a **superclass**. The idea being the superclass would contain everything every pipeline needs (using the `data_vars.json` configuration), including the database connection, running SQL scripts, listing the season tables, and the upload to Supabase.
 
-   Moving forward, anything specific to one data source/subject belongs in a **subclass named for that source**. Hence, we have the [`MLSPADataHandler`](app-duels-mapping/public/duels_mapping_data/etl/mlspa_data_handler.py) subclass, which owns the salary workflow end to end.
+   Moving forward, anything specific to one data source/subject belongs in a **subclass named for that source**, prefixed `DH_` (for data handler) and kept in a `dh_` module. Hence, we have the [`DH_MLSPA`](app-duels-mapping/public/duels_mapping_data/etl/dh_mlspa_salaries.py) subclass, which owns the salary workflow end to end.
 
-   The FBref methods are still in the original `DataHandler` itself as, now you know, they predate the split. Perhaps one day this will be revisited and we'll get an `FBrefDataHandler` subclass to match the pattern but for now they have been left in place in an effort to spare me headaches.
+   The FBref methods are still in the original `DataHandler` itself as, now you know, they predate the split. Perhaps one day this will be revisited and we'll get a `DH_FBref` subclass to match the pattern but for now they have been left in place in an effort to spare me headaches.
 
 ### Flow of Data
 
@@ -258,7 +258,7 @@ Retuning the weights is a `data_vars.json` edit plus `insert_dim_schmetzer_score
 
 `dim_mls_club_crosswalk` - The second **dim table**. Every source spells MLS clubs differently: FBref writes `Atlanta Utd` and `Vancouver W'caps`, the MLSPA writes `Atlanta United` and `Vancouver Whitecaps`, and both have renamed clubs over the years (`Montreal Impact` became `CF Montreal`). This table resolves any of those spellings to the one squad name the app displays, so a club reads identically whichever pipeline the row arrived through. See [Squad Name Standardization](#squad-name-standardization) below.
 
-Its values are controlled by [data_vars_clubs_cw.json](app-duels-mapping/public/duels_mapping_data/data_vars_clubs_cw.json), which sits beside `data_vars.json` -- `mls_squad_names` lists the canonical names and `fbref_squad_aliases` / `mlspa_club_aliases` map each source's spellings onto them -- and are inserted using Python after table creation. A `NULL` squad marks an MLSPA bucket that is not a club at all: `MLS Pool`, `Retired`, `Without a Club`.
+Its values are controlled by [dv_clubs_cw.json](app-duels-mapping/public/duels_mapping_data/dv_clubs_cw.json), which sits beside `data_vars.json` -- `mls_squad_names` lists the canonical names and `fbref_squad_aliases` / `mlspa_club_aliases` map each source's spellings onto them -- and are inserted using Python after table creation. A `NULL` squad marks an MLSPA bucket that is not a club at all: `MLS Pool`, `Retired`, `Without a Club`.
 
 The table is keyed on `(club_alias, source)` rather than on the alias alone, because the two feeds share some spellings (`LAFC`, `Toronto FC`) while disagreeing on others.
 
@@ -382,7 +382,7 @@ A Schmetzer Score says how much contested possession a player won. It says nothi
 
 The [MLS Players Association](https://mlsplayers.org/resources/salary-guide) regularly publishes a league-wide salary guide. These figures are disclosed compensation, not an estimate. Every release includes each player's annual base salary and their annual average guaranteed compensation (base salary plus all signing and guaranteed bonuses, annualized over the term of the contract). (Transfermarkt, the other name that comes up, publishes _market value_ -- a useful number, but a crowd-sourced estimate of transfer worth, not cold hard cash committed by a club.
 
-The delivery format changed over time. 2024 onward is CSV; 2018 through 2023 is PDF. Neither is stable in shape -- the CSV headers drift year to year (`fname` became `First Name`, `club` became `Team Name` then `Club Name`) and the PDF column order moves around too. Rather than hardcode a layout per year, every release is described by an entry under `mlspa.salary_releases` in [data_vars.json](app-duels-mapping/public/duels_mapping_data/data_vars.json), and [`get_from_mlspa.py`](app-duels-mapping/public/duels_mapping_data/etl/dependencies/get_from_mlspa.py) reads them from that:
+The delivery format changed over time. 2024 onward is CSV; 2018 through 2023 is PDF. Neither is stable in shape -- the CSV headers drift year to year (`fname` became `First Name`, `club` became `Team Name` then `Club Name`) and the PDF column order moves around too. Rather than hardcode a layout per year, every release is described by an entry under `salary_releases` in [dv_mlspa.json](app-duels-mapping/public/duels_mapping_data/dv_mlspa.json), and [`get_from_mlspa.py`](app-duels-mapping/public/duels_mapping_data/etl/dependencies/get_from_mlspa.py) reads them from that:
 
 - **CSV releases** carry a `column_map` from the standard column to whatever that year's header happens to be.
 - **PDF releases** are parsed semantically instead of by pixel column. Every player row holds exactly two currency amounts, one club drawn from the crosswalk, and at most one position code; whatever survives that subtraction is the player's name, and the `name_order` in the config says which half is the surname. This survives the layout shifting year to year, and it fails loudly -- an unrecognised club name is reported rather than silently dropped.
@@ -460,7 +460,7 @@ Each source names clubs its own way. FBref abbreviates (`Atlanta Utd`, `NE Revol
 
 So squad names are standardized **on the way into staging** -- both `load_stg_FBref_mls_players_all_stats_misc.sql` and `load_stg_MLSPA_mls_players_salaries.sql` resolve their source's spelling through `dim_mls_club_crosswalk`. Everything downstream (the season tables, `schmetzer_scores_all`, the API, the dashboard) inherits one name per club for free.
 
-The canonical set lives in `mls_squad_names` in [data_vars_clubs_cw.json](app-duels-mapping/public/duels_mapping_data/data_vars_clubs_cw.json):
+The canonical set lives in `mls_squad_names` in [dv_clubs_cw.json](app-duels-mapping/public/duels_mapping_data/dv_clubs_cw.json):
 
 |                 |                        |                        |
 | --------------- | ---------------------- | ---------------------- |
@@ -507,12 +507,13 @@ Below is an outline of the data environment. Initially, this project's goal was 
 │   ├── public
 │   │   ├── duels_mapping_data   # data environment (git submodule)
 │   │   │   ├── data_vars.json        # Config which controls algorithm scoring weights and stores data sources and destination tables
-│   │   │   ├── data_vars_clubs_cw.json  # Club crosswalk: canonical MLS squad names and each source's spellings of them
+│   │   │   ├── dv_clubs_cw.json      # Club crosswalk: canonical MLS squad names and each source's spellings of them
+│   │   │   ├── dv_mlspa.json         # MLSPA salary releases: per-season URL, format, and column/name layout
 │   │   │   ├── database
 │   │   │   │   └── mls_stats.db      # SQLite database
 │   │   │   ├── etl
 │   │   │   │   ├── data_handler.py        # Base ETL orchestration class (shared plumbing)
-│   │   │   │   ├── mlspa_data_handler.py  # DataHandler subclass owning the MLSPA salary workflow
+│   │   │   │   ├── dh_mlspa_salaries.py   # DataHandler subclass owning the MLSPA salary workflow
 │   │   │   │   ├── dependencies           # Modular functions to support ETL
 │   │   │   │   ├── pipeline_cur_FBref_misc_stats_to_schmetzer_scores_players.py    # Pipeline runner script to update current season data
 │   │   │   │   ├── pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players.py   # Pipeline runner script for all current and historical data
@@ -546,10 +547,10 @@ For programmatic use as well as readability, a number of naming conventions have
     - `pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players.py`
 - **Data Handlers**
   - `DataHandler` is the superclass and holds only what every pipeline needs
-  - Each data source gets its own subclass, named for that source
+  - Each data source gets its own subclass, named `DH_<SOURCE>` (prefix `DH_`, source keeps its own capitalization), in a module named `dh_<source>_<subject>.py`
   - Examples:
-    - `MLSPADataHandler`
-    - `FBrefDataHandler` (not yet split out -- see [Double Pivot](#double-pivot-recurring-data-drivers))
+    - `DH_MLSPA` in `dh_mlspa_salaries.py`
+    - `DH_FBref` (not yet split out -- see [Double Pivot](#double-pivot-recurring-data-drivers))
 - **Functions**
   - Loading functions begin with `insert_...`, followed by the name of the table
   - The word `historical` or `current` may be infixed between the two above when appropriate
