@@ -59,10 +59,12 @@ import {
   tunedWeightCount,
 } from "@/utils/fine-tuning";
 import {
-  DEFAULT_SEASON,
   OUTFIELD_POSITIONS,
+  archivedSeasons,
   buildViewQuery,
+  defaultSeason,
   describeView,
+  featuredSeasons,
   isDefaultPositions,
   parseSeason,
   parseViewParams,
@@ -198,10 +200,10 @@ export default function PlayersPage() {
 
   // DATA YEARS
 
-  const currentYear = new Date().getFullYear();
-
-  const hardcodedYears = ["2025", "2024"];
-  const dropdownYears = ["2023", "2022", "2021", "2020", "2019", "2018"];
+  // The latest season and the one before it get buttons; every older season is in the
+  // dropdown. Both follow the April 1 changeover in utils/view-params.js.
+  const hardcodedYears = featuredSeasons();
+  const dropdownYears = archivedSeasons();
 
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
 
@@ -860,7 +862,7 @@ export default function PlayersPage() {
             {dropdownYears.includes(selectedYear) && (
               <FilterChip
                 label={selectedYear}
-                onRemove={() => updateSeason(DEFAULT_SEASON)}
+                onRemove={() => updateSeason(defaultSeason())}
               />
             )}
 
@@ -1326,7 +1328,7 @@ export default function PlayersPage() {
       {tab === "comparisons" && (
         <Box mt={4}>
           <PlayerComparison
-            currentYear={currentYear}
+            currentYear={defaultSeason()}
             selectedYear={selectedYear}
             updateSeason={updateSeason}
             players={tunedSeason || players || []}

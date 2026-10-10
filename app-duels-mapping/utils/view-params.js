@@ -11,10 +11,40 @@
 // Fine-tuning weights are deliberately NOT part of this -- a shared link always shows
 // the published Schmetzer Score, never someone's custom ranking passed off as it.
 
-// Update these when you add new data seasons
-export const MAX_SEASON = 2025;
 export const MIN_SEASON = 2018;
-export const DEFAULT_SEASON = String(MAX_SEASON);
+
+// A new season only takes over once it has a few weeks of games behind it. MLS kicks off
+// in late February, so through the end of March the previous season stays the latest;
+// it changes over on April 1, not January 1.
+//
+// Holds for calendar-year seasons through 2026. 2027 brings a February-April sprint
+// season and then a July-May calendar, which this rule does not model -- update it by
+// hand for 2027 and again for 2028.
+const SEASON_CHANGEOVER_MONTH = 3; // April (Date months count from 0)
+
+// Functions rather than constants: a module loaded before April 1 would otherwise keep
+// last season as the latest for as long as the server process lives.
+export function latestSeason(today = new Date()) {
+  const year = today.getFullYear();
+  return today.getMonth() >= SEASON_CHANGEOVER_MONTH ? year : year - 1;
+}
+
+export const defaultSeason = () => String(latestSeason());
+
+// The season buttons: the latest season and the one before it.
+export function featuredSeasons() {
+  const latest = latestSeason();
+  return [String(latest), String(latest - 1)];
+}
+
+// Every older season, newest first, for the dropdown.
+export function archivedSeasons() {
+  const seasons = [];
+  for (let year = latestSeason() - 2; year >= MIN_SEASON; year--) {
+    seasons.push(String(year));
+  }
+  return seasons;
+}
 
 export const TABS = ["players", "comparisons"];
 const DEFAULT_TAB = "players";
@@ -63,10 +93,10 @@ function splitList(value) {
 export function parseSeason(value) {
   // Number(null) and Number("") are both 0, which would clamp up to MIN_SEASON.
   if (value === null || value === undefined || String(value).trim() === "")
-    return DEFAULT_SEASON;
+    return defaultSeason();
   const year = Number(value);
-  if (!Number.isInteger(year)) return DEFAULT_SEASON;
-  return String(Math.min(Math.max(year, MIN_SEASON), MAX_SEASON));
+  if (!Number.isInteger(year)) return defaultSeason();
+  return String(Math.min(Math.max(year, MIN_SEASON), latestSeason()));
 }
 
 // Sort is written "field" for ascending and "-field" for descending.
@@ -120,7 +150,7 @@ export function parseViewParams(params) {
 export function buildViewQuery(view) {
   const query = new URLSearchParams();
 
-  if (view.season && view.season !== DEFAULT_SEASON)
+  if (view.season && view.season !== defaultSeason())
     query.set("season", view.season);
   if (view.tab && view.tab !== DEFAULT_TAB) query.set("tab", view.tab);
 

@@ -134,8 +134,8 @@ elif [ "$action" = "setup" ]; then
 elif [ "$action" = "update" ]; then
     activate_venv
 
-    echo -e "\n🧬 Running ETL pipeline to update current season data..."
-    python "$SCRIPT_DIR/app-duels-mapping/public/duels_mapping_data/etl/pipeline_cur_FBref_misc_stats_to_schmetzer_scores_players.py" || {
+    echo -e "\n🧬 Running ETL pipeline to update current season data (WhoScored)..."
+    python "$SCRIPT_DIR/app-duels-mapping/public/duels_mapping_data/etl/pipeline_cur_WhoScored_misc_stats_to_schmetzer_scores_players.py" || {
         echo "❌ ETL pipeline execution failed."; return 1; }
 
     # run_nextjs_app
@@ -176,8 +176,10 @@ elif [ "$action" = "sync" ]; then
 elif [ "$action" = "restore" ]; then
     activate_venv
 
-    echo -e "\n🧬 Running ETL pipeline to backfill all historical season data..."
-    python "$SCRIPT_DIR/app-duels-mapping/public/duels_mapping_data/etl/pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players.py" || {
+    # FBref (2018-2025) can no longer be re-sourced and its pipelines are archived in
+    # etl/archived_pipes -- restore rebuilds the WhoScored seasons (2026 on) only
+    echo -e "\n🧬 Running ETL pipeline to backfill all WhoScored season data..."
+    python "$SCRIPT_DIR/app-duels-mapping/public/duels_mapping_data/etl/pipeline_hist_WhoScored_misc_stats_to_schmetzer_scores_players.py" || {
         echo -e "❌ ETL pipeline execution failed."; return 1; }
 
     # Salaries decorate the Schmetzer Score tables the pipeline above builds, so they follow it

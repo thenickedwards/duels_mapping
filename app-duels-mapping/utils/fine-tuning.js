@@ -34,7 +34,9 @@ const SCHMETZER_SCORE_POINTS = {
 };
 
 // Which salary figure the value metric divides by, per how many dollars, and the
-// minutes floor below which a player is scored but not given a value rank.
+// minutes floor below which a player is scored but not given a value rank. The
+// per-dollar figure is only ever derived here -- the pipeline stores the score and
+// salary but not their ratio -- so VALUE_PER_DOLLARS has no upstream counterpart.
 const VALUE_METRIC_BASIS = "guaranteed_comp";
 const VALUE_PER_DOLLARS = 1000000;
 const MIN_NINETIES_FOR_VALUE_RANK = 5;

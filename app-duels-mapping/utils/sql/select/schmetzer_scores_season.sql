@@ -24,7 +24,6 @@ SELECT
     -- recoveries_pts,
     base_salary,
     guaranteed_comp,
-    schmetzer_score_per_million,
     schmetzer_value_rk,
     load_datetime
 FROM "schmetzer_scores_{year}"
