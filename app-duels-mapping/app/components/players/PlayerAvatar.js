@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Avatar, Box, Typography, useTheme } from "@mui/material";
-import { getPlayerPic } from "../../../utils/get-player-pics";
+import { getPlayerPic } from "../../../utils/get-player-pics3";
 
 const PlayerAvatar = ({ player, side }) => {
   const theme = useTheme();
