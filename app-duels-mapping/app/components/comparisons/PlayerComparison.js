@@ -18,6 +18,7 @@ import FilterChip from "../../styles/FilterChip";
 import PlayerAvatar from "../players/PlayerAvatar";
 import LastUpdated from "../common/LastUpdated";
 import PlayerYearControls from "../players/PlayerYearControls";
+import { archivedSeasons, featuredSeasons } from "@/utils/view-params";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -199,8 +200,10 @@ export default function PlayerComparison({
   const limegreen = theme.palette.common.limegreen;
   const blue = theme.palette.common.blue;
 
-  // Dropdown years (2018-2023)
-  const previousYears = [2023, 2022, 2021, 2020, 2019, 2018];
+  // The latest season and the one before it get buttons; every older season is in the
+  // dropdown. Both follow the April 1 changeover in utils/view-params.js.
+  const featuredYears = featuredSeasons();
+  const previousYears = archivedSeasons();
 
   return (
     <Box
@@ -265,7 +268,7 @@ export default function PlayerComparison({
                       updateSeason(year);
                     }}
                     baseButtonStyle={baseButtonStyle}
-                    hardcodedYears={[2025, 2024]}
+                    hardcodedYears={featuredYears}
                     dropdownYears={previousYears}
                     onDropdownSelect={(yearOrNull) => {
                       // chip only for dropdown years, clear for hardcoded

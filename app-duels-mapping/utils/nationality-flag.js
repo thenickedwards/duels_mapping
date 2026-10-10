@@ -3,7 +3,7 @@
 // NL). Covers every code in the database; an unknown one simply gets no flag.
 const FIFA_TO_ISO = {
   ALB: "AL", ALG: "DZ", ANG: "AO", ARG: "AR", ARM: "AM", ATG: "AG", AUS: "AU",
-  AUT: "AT", BAN: "BD", BDI: "BI", BEL: "BE", BEN: "BJ", BFA: "BF", BIH: "BA",
+  AUT: "AT", AZE: "AZ", BAN: "BD", BDI: "BI", BEL: "BE", BEN: "BJ", BFA: "BF", BIH: "BA",
   BLZ: "BZ", BOL: "BO", BRA: "BR", BUL: "BG", CAN: "CA", CHI: "CL", CIV: "CI",
   CMR: "CM", COD: "CD", COL: "CO", CPV: "CV", CRC: "CR", CRO: "HR", CTA: "CF",
   CUB: "CU", CUW: "CW", CYP: "CY", CZE: "CZ", DEN: "DK", DOM: "DO", ECU: "EC",
@@ -12,7 +12,7 @@ const FIFA_TO_ISO = {
   GRN: "GD", GUA: "GT", GUI: "GN", GUM: "GU", GUY: "GY", HAI: "HT", HON: "HN",
   HUN: "HU", IDN: "ID", IRL: "IE", IRN: "IR", IRQ: "IQ", ISL: "IS", ISR: "IL",
   ITA: "IT", JAM: "JM", JPN: "JP", KEN: "KE", KOR: "KR", LBR: "LR", LBY: "LY",
-  LIE: "LI", LTU: "LT", LUX: "LU", MAD: "MG", MAR: "MA", MAS: "MY", MEX: "MX",
+  LIE: "LI", LTU: "LT", LUX: "LU", MAD: "MG", MAR: "MA", MAS: "MY", MDA: "MD", MEX: "MX",
   MLI: "ML", MNE: "ME", MTQ: "MQ", NED: "NL", NGA: "NG", NOR: "NO", NZL: "NZ",
   PAN: "PA", PAR: "PY", PER: "PE", PHI: "PH", PLE: "PS", POL: "PL", POR: "PT",
   PUR: "PR", ROU: "RO", RSA: "ZA", RUS: "RU", RWA: "RW", SEN: "SN", SEY: "SC",

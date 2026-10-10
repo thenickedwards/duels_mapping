@@ -24,6 +24,12 @@ The Duels Mapping repo powers the custom **Schmetzer Score** — a composite sta
 
 Unfortunately, as you may have already read [here](https://www.sports-reference.com/blog/2026/01/fbref-stathead-data-update/) or [here](https://www.nytimes.com/athletic/7002196/2026/01/28/fbref-opta-football-data-soccer-analytics/), the FBref advanced data this project relies on is no longer publicly available. In January 2026, Opta terminated Sports Reference's access to its data feeds, citing an alleged agreement violation ending free access to the advanced statistics that aspiring sports data analysts and soccer fans had come to love. As a result, further development beyond the 2025 season will not be possible until we find a new data source. In the meantime, Duels Mapping remains fully functional as a historical record, offering insights into player performance and league trends from 2018–2025.
 
+### Update 10/2026
+
+We found a new data source! [WhoScored](https://www.whoscored.com) carries the same Opta event feed FBref used to aggregate, published match by match. FBref's Player Miscellaneous Stats table was just a season sum of those events, so a new pipeline rebuilds it from each match's event stream. Checked against FBref's own 2025 regular season for Seattle, the five stats behind the Schmetzer Score (tackles won, interceptions, recoveries, aerial duels won and lost) match exactly for every player. FBref stays the source for 2018–2025; WhoScored takes over from 2026. See [WhoScored Data (2026 onward)](#whoscored-data-2026-onward).
+
+The pipeline is run by hand, never on a schedule.
+
 ## Table of Contents
 
 [Quick Setup](#quick-setup)  
@@ -32,6 +38,7 @@ Unfortunately, as you may have already read [here](https://www.sports-reference.
 [Double Pivot (Recurring Data Drivers)](#double-pivot-recurring-data-drivers)  
 [Flow of Data](#flow-of-data)  
 [Data Modeling & ETL Pipeline Development](#data-modeling--etl-pipeline-development)  
+[WhoScored Data (2026 onward)](#whoscored-data-2026-onward)  
 [Salary Data & The Schmetzer Value Metric](#salary-data--the-schmetzer-value-metric)  
 [Squad Name Standardization](#squad-name-standardization)  
 [File Structure & Directory Layout](#file-structure--directory-layout)  
@@ -88,7 +95,7 @@ _Note: you will need to adjust the path below as appropriate on your machine. I 
 - If the data for the current season needs to be updated, run the "update" command from a terminal at the root of the project.
   - `source ./duels_mapping.sh update` OR `. ./duels_mapping.sh update`
   - First the virtual environment will be activated.
-  - The `pipeline_cur_FBref_misc_stats_to_schmetzer_scores_players.py` script will be run to update the current season's data.
+  - The `pipeline_cur_WhoScored_misc_stats_to_schmetzer_scores_players.py` script will be run to update the current season's data. Only matches played since the last run are fetched; the rest come from cache.
   - Finally the terminal will navigate to the the Next.js app `cd app-duels-mapping`, run the `npm run dev` command, open a browser at <http://localhost:3000/api/schmetzer_scores/2025>, and send you on your way.
 
 - To start further development, run the "start" command from a terminal at the root of the project.
@@ -103,11 +110,11 @@ _Note: you will need to adjust the path below as appropriate on your machine. I 
   - `source ./duels_mapping.sh salaries` OR `. ./duels_mapping.sh salaries`
   - The `pipeline_cur_MLSPA_salaries_to_schmetzer_scores_players.py` script will be run to load the newest release configured in `dv_mlspa.json`.
   - To backfill every season of salary data instead, use `salaries-restore`.
-  - Note these pipelines read the `schmetzer_scores_YYYY` tables, so they run _after_ the FBref pipelines have built them.
+  - Note these pipelines read the `schmetzer_scores_YYYY` tables, so they run _after_ the misc stats pipelines have built them.
 
 - If you ever need to conduct a data restore, run the "restore" command from a terminal at the root of the project.
   - `source ./duels_mapping.sh restore` OR `. ./duels_mapping.sh restore`
-  - The `pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players.py` script will be run to backfill all data.
+  - The `pipeline_hist_WhoScored_misc_stats_to_schmetzer_scores_players.py` script will be run to backfill every WhoScored season (2026 onward). The FBref seasons (2018–2025) can no longer be re-sourced, so restore leaves them as they are.
   - The `pipeline_hist_MLSPA_salaries_to_schmetzer_scores_players.py` script then backfills every season of salary data on top of it.
   - Finally the terminal will navigate to the the Next.js app `cd app-duels-mapping`, run the `npm run dev` command, open a browser at <http://localhost:3000/api/schmetzer_scores/2025>, and send you on your way.
 
@@ -136,6 +143,8 @@ As you may have guessed football tactics have been a major driver in this projec
 
    Moving forward, anything specific to one data source/subject belongs in a **subclass named for that source**, prefixed `DH_` (for data handler) and kept in a `dh_` module. Hence, we have the [`DH_MLSPA`](app-duels-mapping/public/duels_mapping_data/etl/dh_mlspa_salaries.py) subclass, which owns the salary workflow end to end.
 
+   The [`DH_WhoScored`](app-duels-mapping/public/duels_mapping_data/etl/dh_whoscored_misc_stats.py) subclass followed, owning the misc stats workflow from 2026 on.
+
    The FBref methods are still in the original `DataHandler` itself as, now you know, they predate the split. Perhaps one day this will be revisited and we'll get a `DH_FBref` subclass to match the pattern but for now they have been left in place in an effort to spare me headaches.
 
 ### Flow of Data
@@ -156,7 +165,15 @@ flowchart TD
     A[Raw Data] e1@<--> PY
     PY e2@--> C[(raw_FBref_mls_players_all_stats_misc)]
     C e3@--> D[(stg_FBref_mls_players_all_stats_misc)]
-    D e4@--> ALGO[Schmetzer Score Algorithm Logic 🧮]
+    D e4@--> VIEW[(stg_mls_players_all_stats_misc)]
+    VIEW e14@--> ALGO[Schmetzer Score Algorithm Logic 🧮]
+
+    %% WhoScored pipeline (2026 onward)
+    W[WhoScored Match Feed 📡] e12@<--> PY
+    PY e13@--> WR[(raw_WhoScored_mls_players_match_stats)]
+    WR e15@--> WS[(stg_WhoScored_mls_players_all_stats_misc)]
+    WP[(dim_WhoScored_mls_players)] -.->|name, nationality, yob| WS
+    WS e16@--> VIEW
 
     %% Salary pipeline
     S[MLSPA Salary Guide 💰] e7@<--> PY
@@ -169,6 +186,7 @@ flowchart TD
     XWALK[(dim_mls_club_crosswalk)]
     XWALK -.->|standardize squad| D
     XWALK -.->|standardize squad| SS
+    XWALK -.->|standardize squad| WS
 
     %% SQLite group
     subgraph SQLITE [SQLite db 🗄️]
@@ -209,8 +227,8 @@ flowchart TD
     classDef dataNode fill:#3b5b83,stroke:#333,stroke-width:1px,color:#fff;
     classDef logicNode fill:#b6f18e,stroke:#333,stroke-width:1px,color:#000;
     classDef animate stroke-dasharray: 9,5,stroke-dashoffset: 900,animation: dash 25s linear infinite;
-    class e1,e2,e3,e4,e5,e6,e7,e8,e9,e10,e11 animate
-    class A,C,D,F,G,F2,G2,N,S,SR,SS,XWALK dataNode
+    class e1,e2,e3,e4,e5,e6,e7,e8,e9,e10,e11,e12,e13,e14,e15,e16 animate
+    class A,C,D,F,G,F2,G2,N,S,SR,SS,XWALK,W,WR,WS,WP,VIEW dataNode
     class PY,ALGO,SQLITE,SUPABASE,V,L,MATCH logicNode
     PY@{ shape: procs}
     ALGO@{ shape: procs}
@@ -328,6 +346,8 @@ The table is keyed on `(club_alias, source)` rather than on the alias alone, bec
 | aerial_duels_won_pct | Real      | Percent of aerial duels won (duels as percentage)                                              |
 | load_datetime        | Timestamp | Load timestamp with time zone (continued tracking of data reliability and ETL pipeline health) |
 
+`stg_mls_players_all_stats_misc` - A **view** reading both staging tables as one: FBref for 2018–2025 and `stg_WhoScored_mls_players_all_stats_misc` (same columns, plus WhoScored's `player_id`) from 2026. The Schmetzer Score scripts read this view, so a season scores the same way whatever its source. FBref takes precedence -- a WhoScored season is only read where FBref has none. The WhoScored tables are described in [WhoScored Data (2026 onward)](#whoscored-data-2026-onward).
+
 `schmetzer_scores_{season}` and `schmetzer_scores_all` - serve as the final destination tables, including point tabulations attributed to each individual statistic as well as the composite metric as scored and ranked by the algorithm, ready for reporting and visualization. The SQLite database serves as the "source of truth" and syncs these tables (as well as the dim table) to Supbase.
 
 In the source data a player may be listed twice if they played for multiple teams in a season (this could be the result a number of scenarios including contract terms, inter-league trades or loans within the league). In order to create one record per player, records are consolidated to the squad with which the player played more minutes (i.e. higher value in nineties.)
@@ -369,10 +389,50 @@ These tables also carry the salary columns below, which are added by the MLSPA p
 | base_salary                 | Real      | Annual base salary in USD                                      |
 | guaranteed_comp             | Real      | Annual average guaranteed compensation in USD                  |
 | salary_match_tier           | Text      | Which matching rule joined this player to their salary record  |
-| schmetzer_score_per_million | Real      | Schmetzer Score earned per $1M of guaranteed compensation      |
-| schmetzer_value_rk          | Integer   | Rank by the metric above, among players past the minutes floor |
+| schmetzer_value_rk          | Integer   | Rank by Schmetzer Score per dollar of guaranteed compensation, among players past the minutes floor |
 
 All pipelines are contained within the [app-duels-mapping/public/duels_mapping_data/etl](app-duels-mapping/public/duels_mapping_data/etl) directory. Again, this architecture supports for extendibility (as exampled by the upsert to the cloud database), allowing for the build out of additional pipelines, expansion of the project to include other leagues, and development of new composite metrics. The order of the tables as listed above documents the process and flow of the data.
+
+### WhoScored Data (2026 onward)
+
+FBref's tables were season sums of Opta events, and [WhoScored](https://www.whoscored.com) publishes the same Opta events match by match. So [`get_from_whoscored.py`](app-duels-mapping/public/duels_mapping_data/etl/dependencies/get_from_whoscored.py) tallies each player's events per match, and staging sums them per season into FBref's shape:
+
+| FBref column      | WhoScored event                                       |
+| ----------------- | ----------------------------------------------------- |
+| `tklw`            | `Tackle`, successful                                  |
+| `int`             | `Interception`                                        |
+| `recov`           | `BallRecovery`                                        |
+| `won` / `lost`    | `Aerial`, successful / unsuccessful                   |
+| `fls` / `fld`     | `Foul`, unsuccessful (committed) / successful (drawn) |
+| `off`             | `OffsideGiven`                                        |
+| `crs`             | `Pass` with the `Cross` qualifier (corners included)  |
+| `pkwon` / `pkcon` | `Foul` with the `Penalty` qualifier                   |
+| `og`              | `Goal` with the `OwnGoal` qualifier                   |
+| `90s`             | Regulation minutes ÷ 90 (stoppage time excluded)      |
+
+Like FBref, only the **regular season** is counted (no FBref season ever exceeds 34.0 nineties). Pages are fetched through [soccerdata](https://soccerdata.readthedocs.io/en/latest/datasources/WhoScored.html)'s WhoScored reader, which drives a browser, rate-limits itself and caches every page in `~/soccerdata`, so a finished match is only ever fetched once. Settings live in [`dv_whoscored.json`](app-duels-mapping/public/duels_mapping_data/dv_whoscored.json).
+
+**Validation.** Over Seattle's 2025 regular season, all 29 players matched FBref exactly on tackles won, interceptions, recoveries, aerial duels won and lost, fouls, offsides, penalties and own goals. Nineties matched for 28 of 29 (the other off by 0.1) and yellow cards for 27 of 29 (off by one).
+
+**Who's who.** WhoScored's match data has no nationality or birth year, but `player_yob` is part of every Schmetzer Score id and is how the app links a player across seasons. `dim_WhoScored_mls_players` resolves each WhoScored player id once:
+
+1. `fbref_name` -- the name matches an FBref player (ignoring accents, spacing and hyphens) whose birth year fits WhoScored's age. FBref's name, nationality and birth year carry over, so the player's history stays joined up.
+2. `fbref_profile` -- otherwise their WhoScored profile is fetched for a birth date; a unique FBref player with that birth year, surname and first initial still carries over (`Mark` → `Marky Delgado`).
+3. `whoscored_profile` -- a newcomer, named and dated from the profile. Nationality is converted to the FIFA trigram FBref used.
+
+`raw_WhoScored_mls_players_match_stats` - The **raw table**: one row per player per match, keyed on (`game_id`, `player_id`).
+
+`raw_WhoScored_mls_players_profiles` - Profile pages as fetched (nationality, birth date, positions), for newcomers only.
+
+`dim_WhoScored_mls_players` - The identity resolution above, one row per WhoScored player.
+
+`stg_WhoScored_mls_players_all_stats_misc` - The **staging table**, rebuilt a season at a time so totals keep up as the season goes. Positions are folded from WhoScored's per-match codes into FBref's `GK`/`DF`/`MF`/`FW`, adding a second when it covers at least a quarter of a player's starts (`MF,FW`).
+
+#### Retired FBref pipelines
+
+The FBref pipelines live on in [`etl/archived_pipes`](app-duels-mapping/public/duels_mapping_data/etl/archived_pipes) as a record, unmodified and no longer runnable from there. FBref now refuses automated requests outright.
+
+One fix rode along: FBref's staging load only ever inserts players it has not seen, so when 2025 was reloaded with the full regular season (2025-10-23), staging kept the early-August totals. `DataHandler.refresh_stg_FBref_mls_players_all_stats_misc(2025)` rebuilds the season from the intact raw table.
 
 ### Salary Data & The Schmetzer Value Metric
 
@@ -408,7 +468,7 @@ Across 2018-2025 this matches **91-97% of scored players per season**, and rough
 
 The `create/` scripts build the SQLite side. Supabase is a separate database, so the salary columns have to be added there once before the first sync:
 
-- Run [`etl/sql/migrate/add_salary_columns_supabase.sql`](app-duels-mapping/public/duels_mapping_data/etl/sql/migrate/add_salary_columns_supabase.sql) in the Supabase SQL editor.
+- Run [`etl/sql/z_supabase/add_salary_columns_supabase.sql`](app-duels-mapping/public/duels_mapping_data/etl/sql/z_supabase/add_salary_columns_supabase.sql) in the Supabase SQL editor.
 - It is safe to re-run; every statement is `IF NOT EXISTS`.
 - Skip it and the salary pipelines will complete their local work and then fail on upload with `PGRST204 - Could not find the 'base_salary' column ... in the schema cache`.
 
@@ -416,7 +476,7 @@ An existing _local_ database needs no manual step: the pipelines call `add_salar
 
 The weights dim table needs the same treatment. `insert_SQLite_to_Supabase()` carries `dim_schmetzer_score_points` alongside the score tables, so the cloud copy records which weights produced the scores sitting next to it:
 
-- Run [`etl/sql/migrate/create_dim_schmetzer_score_points_supabase.sql`](app-duels-mapping/public/duels_mapping_data/etl/sql/migrate/create_dim_schmetzer_score_points_supabase.sql) in the Supabase SQL editor.
+- Run [`etl/sql/z_supabase/create_dim_schmetzer_score_points_supabase.sql`](app-duels-mapping/public/duels_mapping_data/etl/sql/z_supabase/create_dim_schmetzer_score_points_supabase.sql) in the Supabase SQL editor.
 - Also safe to re-run; the table, RLS toggle, and read policy are all `IF NOT EXISTS`.
 - Skip it and the sync fails on its **last** step with `PGRST205 - Could not find the table 'public.dim_schmetzer_score_points' in the schema cache`. The score tables upload first precisely so a missing dim table cannot block the data the app serves.
 
@@ -432,7 +492,7 @@ The sync therefore authenticates with the **service role** key, which bypasses r
 - `resolve_supabase_write_credentials()` in [`etl/data_handler.py`](app-duels-mapping/public/duels_mapping_data/etl/data_handler.py) picks it up. Every pipeline calls `insert_SQLite_to_Supabase()` with no credential arguments, so the choice of key lives in one place rather than in five pipeline scripts.
 - Without it the sync falls back to the anon key and prints a warning, so a checkout that has not set it keeps working against tables that still allow anon writes.
 
-Then run [`etl/sql/migrate/restrict_supabase_write_access.sql`](app-duels-mapping/public/duels_mapping_data/etl/sql/migrate/restrict_supabase_write_access.sql) in the Supabase SQL editor. It enables RLS on all ten tables with a read-only policy, leaving anon able to `SELECT` and nothing else. The script ends with a `SELECT` that reports the resulting state per table.
+Then run [`etl/sql/z_supabase/restrict_supabase_write_access.sql`](app-duels-mapping/public/duels_mapping_data/etl/sql/z_supabase/restrict_supabase_write_access.sql) in the Supabase SQL editor. It enables RLS on all ten tables with a read-only policy, leaving anon able to `SELECT` and nothing else. The script ends with a `SELECT` that reports the resulting state per table.
 
 **Order matters.** Add the key to `.env` _before_ running that migration, or the next sync fails with `42501 - new row violates row-level security policy`. That is the same error the weights dim table produced when RLS was enabled on it ahead of the key.
 
@@ -448,7 +508,7 @@ The one argument for syncing them is disaster recovery for data [that can no lon
 
 #### The value metric
 
-`schmetzer_score_per_million` is the Schmetzer Score divided by guaranteed compensation in millions of dollars -- how much contested possession a club bought with the money it committed to that player. Which compensation figure to divide by, the dollar unit, and the minutes floor are all set under `salary` in `data_vars.json`.
+The value metric is the Schmetzer Score divided by guaranteed compensation -- how much contested possession a club bought with the money it committed to that player. The pipeline stores the score and the salary but not their ratio; the app derives the per-$1M figure itself (see `utils/fine-tuning.js`). Which compensation figure to divide by and the minutes floor are set under `salary` in `data_vars.json`.
 
 `schmetzer_value_rk` ranks players by that metric, but only those past the minutes floor (5 x 90s by default). Without the floor a single substitute appearance on a league-minimum contract would top the table on a handful of duels.
 
@@ -479,7 +539,7 @@ Three things follow from this that are worth knowing:
 
 - **`Montreal Impact` folds into `CF Montreal`.** The club was renamed after the 2020 season; keeping both names would split one club across two entries in the squad filter and in year-over-year player history. This also fixes a latent bug -- team badge filenames are derived from the squad name, and `montreal-impact.png` never existed, so 2018-2020 Montreal rows had been rendering a broken badge.
 - **Team badge filenames follow the canonical names.** `TeamBadgeCell` slugs the squad name to find its image in `app-duels-mapping/public/team-badges/`, so a new canonical name needs a matching file (`Seattle Sounders FC` → `seattle-sounders-fc.png`).
-- **The Schmetzer Score `id` embeds the squad slug**, so standardizing changes ids: `cristianroldan-1995-2024-seattlesounders-usa` became `cristianroldan-1995-2024-seattlesoundersfc-usa`. See the migration note below.
+- **The Schmetzer Score `id` embeds the squad slug**, so standardizing changes ids: `cristianroldan-1995-2024-seattlesounders-usa` became `cristianroldan-1995-2024-seattlesoundersfc-usa`. See the migration note below. (Since October 2026 the id is `name-birthyear-season-squad`, with no nationality suffix: no two players share a name and birth year at one club in one season.)
 
 #### Migrating a database built before standardization
 
@@ -492,7 +552,7 @@ data_handler.standardize_squad_names()          # staging + every schmetzer_scor
 
 It is idempotent: once a squad has been standardized its name is no longer a source alias, so a second run does nothing. Afterwards, re-run the salary match so it re-links against the new ids (`source ./duels_mapping.sh salaries`).
 
-Because the ids change, the Supabase copies need clearing once before the next sync, or every affected player will appear twice. Run [`etl/sql/migrate/reset_supabase_schmetzer_rows.sql`](app-duels-mapping/public/duels_mapping_data/etl/sql/migrate/reset_supabase_schmetzer_rows.sql) in the Supabase SQL editor, then `source ./duels_mapping.sh sync`. The SQLite database is the source of truth for these tables, so everything deleted comes straight back.
+Because the ids change, the Supabase copies need clearing once before the next sync, or every affected player will appear twice. Run [`etl/sql/z_supabase/reset_supabase_schmetzer_rows.sql`](app-duels-mapping/public/duels_mapping_data/etl/sql/z_supabase/reset_supabase_schmetzer_rows.sql) in the Supabase SQL editor, then `source ./duels_mapping.sh sync`. The SQLite database is the source of truth for these tables, so everything deleted comes straight back.
 
 ### File Structure & Directory Layout
 
@@ -509,21 +569,25 @@ Below is an outline of the data environment. Initially, this project's goal was 
 │   │   │   ├── data_vars.json        # Config which controls algorithm scoring weights and stores data sources and destination tables
 │   │   │   ├── dv_clubs_cw.json      # Club crosswalk: canonical MLS squad names and each source's spellings of them
 │   │   │   ├── dv_mlspa.json         # MLSPA salary releases: per-season URL, format, and column/name layout
+│   │   │   ├── dv_whoscored.json     # WhoScored settings: league, first season, cache, nationality codes
 │   │   │   ├── database
 │   │   │   │   └── mls_stats.db      # SQLite database
 │   │   │   ├── etl
 │   │   │   │   ├── data_handler.py        # Base ETL orchestration class (shared plumbing)
 │   │   │   │   ├── dh_mlspa_salaries.py   # DataHandler subclass owning the MLSPA salary workflow
+│   │   │   │   ├── dh_whoscored_misc_stats.py  # DataHandler subclass owning the WhoScored misc stats workflow (2026 on)
+│   │   │   │   ├── archived_pipes         # Retired pipelines kept for the record (FBref)
 │   │   │   │   ├── dependencies           # Modular functions to support ETL
-│   │   │   │   ├── pipeline_cur_FBref_misc_stats_to_schmetzer_scores_players.py    # Pipeline runner script to update current season data
-│   │   │   │   ├── pipeline_hist_FBref_misc_stats_to_schmetzer_scores_players.py   # Pipeline runner script for all current and historical data
+│   │   │   │   ├── pipeline_cur_WhoScored_misc_stats_to_schmetzer_scores_players.py    # Pipeline runner script to update current season data
+│   │   │   │   ├── pipeline_hist_WhoScored_misc_stats_to_schmetzer_scores_players.py   # Pipeline runner script for every WhoScored season
 │   │   │   │   ├── pipeline_cur_MLSPA_salaries_to_schmetzer_scores_players.py      # Pipeline runner script to load the newest salary release
 │   │   │   │   ├── pipeline_hist_MLSPA_salaries_to_schmetzer_scores_players.py     # Pipeline runner script to backfill all salary releases
 │   │   │   │   └── sql
 │   │   │   │       ├── create        # CREATE TABLE scripts (one per table)
-│   │   │   │       ├── migrate       # One-off schema/data changes for a database that already exists
+│   │   │   │       ├── migrate       # One-off schema/data changes for the local SQLite database
 │   │   │   │       ├── transform     # INSERT scripts for custom and one-off transformations (as needed)
-│   │   │   │       └── z_schmetzer_scores    # SQL scripts specific to loading tables with final statistical data for Schmetzer Scores
+│   │   │   │       ├── z_schmetzer_scores    # SQL scripts specific to loading tables with final statistical data for Schmetzer Scores
+│   │   │   │       └── z_supabase    # SQL to run by hand in the Supabase SQL editor (table setup, access, one-off migrations)
 │   │   ├── images    # images and other assets
 │   └── utils         # Modular functions to data delivery to front end
 ├── duels_mapping.sh
@@ -550,6 +614,7 @@ For programmatic use as well as readability, a number of naming conventions have
   - Each data source gets its own subclass, named `DH_<SOURCE>` (prefix `DH_`, source keeps its own capitalization), in a module named `dh_<source>_<subject>.py`
   - Examples:
     - `DH_MLSPA` in `dh_mlspa_salaries.py`
+    - `DH_WhoScored` in `dh_whoscored_misc_stats.py`
     - `DH_FBref` (not yet split out -- see [Double Pivot](#double-pivot-recurring-data-drivers))
 - **Functions**
   - Loading functions begin with `insert_...`, followed by the name of the table
