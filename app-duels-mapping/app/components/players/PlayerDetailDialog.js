@@ -20,7 +20,7 @@ import BallWinningDonutChart from "../charts/BallWinningDonutChart";
 import PlayerFactSheet from "./PlayerFactSheet";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
-import { getPlayerPic } from "@/utils/get-player-pics";
+import { getPlayerPic } from "@/utils/get-player-pics3";
 import { schmetzerScoreFrom } from "@/utils/fine-tuning";
 
 export default function PlayerDetailDialog({
