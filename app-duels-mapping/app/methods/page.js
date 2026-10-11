@@ -77,7 +77,7 @@ export default function MethodsPage() {
               “Contested Possession Metric”
             </span>{" "}
             — a composite statistic designed to reflect a player&apos;s in-game
-            contributions that either create turnovers or secure possession.
+            contributions that either win the ball or secure possession.
           </Typography>
           <Typography variant="body1">
             In homage to club legend Brian Schmetzer, we started with a stat he
@@ -113,7 +113,7 @@ export default function MethodsPage() {
             player gains possession of the ball after an opponent passes,
             crosses, or shoots before the ball can reach the intended target.
             While this game event is not a result of a direct physical challenge
-            for the ball, the player creates a turnover through positioning,
+            for the ball, the player wins the ball through positioning,
             reading game flow, and anticipating ball movement, as such
             interceptions are valued at +0.9. An intercepted ball is also the
             cleanest evidence of possession genuinely kept &mdash; the player
