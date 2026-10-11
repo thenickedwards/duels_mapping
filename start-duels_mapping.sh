@@ -3,28 +3,28 @@
 # this allows environment changes (like activating the virtual environment) to persist
 
 # To start the virtual environment for development and run the app:
-# >> source ./duels_mapping.sh start    OR  >> . ./duels_mapping.sh start
+# >> source ./start-duels_mapping.sh start    OR  >> . ./start-duels_mapping.sh start
 
 # To start the Syncalir hub for development and run the app:
-# >> source ./duels_mapping.sh synclair    OR  >> . ./duels_mapping.sh synclair
+# >> source ./start-duels_mapping.sh synclair    OR  >> . ./start-duels_mapping.sh synclair
 
 # To set up the data environment for the first time:
-# >> source ./duels_mapping.sh setup    OR  >> . ./duels_mapping.sh setup
+# >> source ./start-duels_mapping.sh setup    OR  >> . ./start-duels_mapping.sh setup
 
 # To update the data environment:
-# >> source ./duels_mapping.sh update    OR  >> . ./duels_mapping.sh update
+# >> source ./start-duels_mapping.sh update    OR  >> . ./start-duels_mapping.sh update
 
 # To load the current MLSPA salary release into the data environment:
-# >> source ./duels_mapping.sh salaries    OR  >> . ./duels_mapping.sh salaries
+# >> source ./start-duels_mapping.sh salaries    OR  >> . ./start-duels_mapping.sh salaries
 
 # To backfill every season of MLSPA salary data:
-# >> source ./duels_mapping.sh salaries-restore    OR  >> . ./duels_mapping.sh salaries-restore
+# >> source ./start-duels_mapping.sh salaries-restore    OR  >> . ./start-duels_mapping.sh salaries-restore
 
 # To sync the data environment (SQLite local to Postgres remote):
-# >> source ./duels_mapping.sh sync    OR  >> . ./duels_mapping.sh sync
+# >> source ./start-duels_mapping.sh sync    OR  >> . ./start-duels_mapping.sh sync
 
 # To restore the data environment:
-# >> source ./duels_mapping.sh restore    OR  >> . ./duels_mapping.sh restore
+# >> source ./start-duels_mapping.sh restore    OR  >> . ./start-duels_mapping.sh restore
 
 #####   #####   #####   #####   #####
 
@@ -91,7 +91,7 @@ send_off() {
 # Handle action argument
 ## If no argument
 if [ -z "$action" ]; then
-  echo "Usage: source ./duels_mapping.sh {start|stop|setup|update|salaries|salaries-restore|sync|restore}"
+  echo "Usage: source ./start-duels_mapping.sh {start|stop|setup|update|salaries|salaries-restore|sync|restore}"
   return 0
 fi
 
