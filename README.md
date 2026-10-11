@@ -69,7 +69,7 @@ You can review players raw stats as well as Schmetzer Score and a rank for that 
 
 ### Development Installation & Setup
 
-For convenience I've built out a bash script at the root of the project, [duels_mapping.sh](./duels_mapping.sh). There are instructions commented out near the top of the file and below is a quick summary. Before running, you'll need to build a .env file at the root of the project which contains information on your Python virtual environment and accessing Supabase. Only a few variables are needed. If you'd like to match my process, I typically name my virtual environment to match the repo and do the same in Supabase. Below is an example (with secure information as #####):
+For convenience I've built out a bash script at the root of the project, [start-duels_mapping.sh](./start-duels_mapping.sh). There are instructions commented out near the top of the file and below is a quick summary. Before running, you'll need to build a .env file at the root of the project which contains information on your Python virtual environment and accessing Supabase. Only a few variables are needed. If you'd like to match my process, I typically name my virtual environment to match the repo and do the same in Supabase. Below is an example (with secure information as #####):
 
 ```
 # # Python Virtual Environment
@@ -87,33 +87,33 @@ SUPABASE_ANON_KEY=#####
 _Note: you will need to adjust the path below as appropriate on your machine. I use [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/). You may need to adjust if you use [venv](https://docs.python.org/3/library/venv.html)._
 
 - If this is the first time you are using this app, run the "setup" command from a terminal at the root of the project. Bear in mind this will overwrite your databases (you will need to setup a database and tables in Supabase for the last step in the pipeline) and leverage your machine for computing (e.g. extracting data through a browser, utilizing the file system for SQLite, etc).
-  - `source ./duels_mapping.sh setup` OR `. ./duels_mapping.sh setup`
+  - `source ./start-duels_mapping.sh setup` OR `. ./start-duels_mapping.sh setup`
   - First the virtual environment will be activated.
   - Next the dependencies from the `requirements.txt` file will be installed.
   - Finally the terminal will navigate to the the Next.js app `cd app-duels-mapping`, run the `npm run dev` command, open a browser at <http://localhost:3000/api/schmetzer_scores/2025>, and send you on your way.
 
 - If the data for the current season needs to be updated, run the "update" command from a terminal at the root of the project.
-  - `source ./duels_mapping.sh update` OR `. ./duels_mapping.sh update`
+  - `source ./start-duels_mapping.sh update` OR `. ./start-duels_mapping.sh update`
   - First the virtual environment will be activated.
   - The `pipeline_cur_WhoScored_misc_stats_to_schmetzer_scores_players.py` script will be run to update the current season's data. Only matches played since the last run are fetched; the rest come from cache.
   - Finally the terminal will navigate to the the Next.js app `cd app-duels-mapping`, run the `npm run dev` command, open a browser at <http://localhost:3000/api/schmetzer_scores/2025>, and send you on your way.
 
 - To start further development, run the "start" command from a terminal at the root of the project.
-  - `source ./duels_mapping.sh start` OR `. ./duels_mapping.sh start`
+  - `source ./start-duels_mapping.sh start` OR `. ./start-duels_mapping.sh start`
   - This command will simply activate the virtual environment and send you on your way.
 
 - Similarly to deactivate the virtual environment, run the "stop" command from a terminal at the root of the project.
-  - `source ./duels_mapping.sh stop` OR `. ./duels_mapping.sh stop`
+  - `source ./start-duels_mapping.sh stop` OR `. ./start-duels_mapping.sh stop`
   - This command will simply deactivate the virtual environment and send you on your way.
 
 - If the MLSPA has published a new salary release, run the "salaries" command from a terminal at the root of the project.
-  - `source ./duels_mapping.sh salaries` OR `. ./duels_mapping.sh salaries`
+  - `source ./start-duels_mapping.sh salaries` OR `. ./start-duels_mapping.sh salaries`
   - The `pipeline_cur_MLSPA_salaries_to_schmetzer_scores_players.py` script will be run to load the newest release configured in `dv_mlspa.json`.
   - To backfill every season of salary data instead, use `salaries-restore`.
   - Note these pipelines read the `schmetzer_scores_YYYY` tables, so they run _after_ the misc stats pipelines have built them.
 
 - If you ever need to conduct a data restore, run the "restore" command from a terminal at the root of the project.
-  - `source ./duels_mapping.sh restore` OR `. ./duels_mapping.sh restore`
+  - `source ./start-duels_mapping.sh restore` OR `. ./start-duels_mapping.sh restore`
   - The `pipeline_hist_WhoScored_misc_stats_to_schmetzer_scores_players.py` script will be run to backfill every WhoScored season (2026 onward). The FBref seasons (2018–2025) can no longer be re-sourced, so restore leaves them as they are.
   - The `pipeline_hist_MLSPA_salaries_to_schmetzer_scores_players.py` script then backfills every season of salary data on top of it.
   - Finally the terminal will navigate to the the Next.js app `cd app-duels-mapping`, run the `npm run dev` command, open a browser at <http://localhost:3000/api/schmetzer_scores/2025>, and send you on your way.
@@ -550,9 +550,9 @@ data_handler.insert_dim_mls_club_crosswalk()   # crosswalk first
 data_handler.standardize_squad_names()          # staging + every schmetzer_scores table
 ```
 
-It is idempotent: once a squad has been standardized its name is no longer a source alias, so a second run does nothing. Afterwards, re-run the salary match so it re-links against the new ids (`source ./duels_mapping.sh salaries`).
+It is idempotent: once a squad has been standardized its name is no longer a source alias, so a second run does nothing. Afterwards, re-run the salary match so it re-links against the new ids (`source ./start-duels_mapping.sh salaries`).
 
-Because the ids change, the Supabase copies need clearing once before the next sync, or every affected player will appear twice. Run [`etl/sql/z_supabase/reset_supabase_schmetzer_rows.sql`](app-duels-mapping/public/duels_mapping_data/etl/sql/z_supabase/reset_supabase_schmetzer_rows.sql) in the Supabase SQL editor, then `source ./duels_mapping.sh sync`. The SQLite database is the source of truth for these tables, so everything deleted comes straight back.
+Because the ids change, the Supabase copies need clearing once before the next sync, or every affected player will appear twice. Run [`etl/sql/z_supabase/reset_supabase_schmetzer_rows.sql`](app-duels-mapping/public/duels_mapping_data/etl/sql/z_supabase/reset_supabase_schmetzer_rows.sql) in the Supabase SQL editor, then `source ./start-duels_mapping.sh sync`. The SQLite database is the source of truth for these tables, so everything deleted comes straight back.
 
 ### File Structure & Directory Layout
 
@@ -590,7 +590,7 @@ Below is an outline of the data environment. Initially, this project's goal was 
 │   │   │   │       └── z_supabase    # SQL to run by hand in the Supabase SQL editor (table setup, access, one-off migrations)
 │   │   ├── images    # images and other assets
 │   └── utils         # Modular functions to data delivery to front end
-├── duels_mapping.sh
+├── start-duels_mapping.sh
 ├── planning          # planning documents, wireframes, drafts, tests, POCs, etc
 ├── README.md         # ← You are here
 ├── requirements.txt  # pip requirements to install
