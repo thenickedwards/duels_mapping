@@ -75,8 +75,9 @@ export default function AboutPage() {
           </span>{" "}
           — a composite statistic using a custom algorithm to weight aerial
           duels won and lost, tackles won, interceptions, and recoveries in
-          order to reflect the in-game contribution of creating turnovers or
-          securing possession. Since “Contested Possession Metric” is a bit of a
+          order to reflect the in-game contribution of winning the ball,
+          creating turnovers, securing possession or denying opposition
+          possession. Since “Contested Possession Metric” is a bit of a
           mouthful, we have dubbed it the <em>Schmetzer Score</em>.
         </Typography>
         <Typography variant="body1" >

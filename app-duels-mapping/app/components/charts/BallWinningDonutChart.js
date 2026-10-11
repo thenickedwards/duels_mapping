@@ -12,16 +12,17 @@ import { MIN_NINETIES_FOR_AVERAGES } from "@/utils/request-context";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 /*
-Turnovers won per 90: tackles won, aerial duels won and interceptions.
+Balls won per 90: tackles won, aerial duels won and interceptions.
 
 The ring shows the player's mix (how they win the ball); the centre shows the volume
 against the league's pooled per-90 rate over the floored season field
 (avg(stat) / avg(nineties) == total actions / total 90s).
 
 Recoveries are left out on purpose: at ~3.8 of the league's ~6.5 per 90 they swamped
-the other three and hid the challenge-vs-read split. An aerial duel won is not always
-possession won (a headed clearance can land with the opponent) -- it is counted here as
-the player winning the ball, not as a guaranteed change of possession.
+the other three and hid the challenge-vs-read split. A ball won is not always possession
+won (a headed clearance can land with the opponent, a tackle can knock the ball out of
+play) -- it is counted here as the player winning the ball, not as a guaranteed change of
+possession.
 */
 
 const SEGMENTS = [
@@ -34,14 +35,6 @@ const SEGMENTS = [
 const RING_ORDER = ["aerial_duels_won", "interceptions", "tackles_won"];
 
 const per90 = (value, nineties) => (nineties > 0 ? (value ?? 0) / nineties : 0);
-
-// The figure at the centre of the ring, and the season total behind it; the player
-// fact sheet shows both.
-export const turnoversWon = (player) =>
-  SEGMENTS.reduce((sum, segment) => sum + (player?.[segment.key] ?? 0), 0);
-
-export const turnoversWonPer90 = (player) =>
-  per90(turnoversWon(player), player?.nineties ?? 0);
 
 function createDiagonalPattern(color, background) {
   const size = 8;
@@ -113,7 +106,7 @@ export default function BallWinningDonutChart({ player, seasonStats }) {
         component={"div"}
         sx={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "1.25rem" }}
       >
-        Turnovers Won / 90
+        Balls Won / 90
       </Typography>
 
       {nineties > 0 ? (

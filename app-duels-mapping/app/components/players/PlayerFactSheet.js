@@ -3,10 +3,7 @@
 import { Box, Tooltip, Typography, useTheme } from "@mui/material";
 import { costPerSmetz, formatSalary } from "@/utils/format-salary";
 import { nationalityFlag } from "@/utils/nationality-flag";
-import {
-  turnoversWon,
-  turnoversWonPer90,
-} from "../charts/BallWinningDonutChart";
+import { ballsWon, ballsWonPer90 } from "@/utils/balls-won";
 import { getMuiChartTooltipSlotProps } from "../charts/styles/chartTooltipOptions";
 
 const NO_VALUE = "—";
@@ -29,13 +26,13 @@ export default function PlayerFactSheet({ player, season }) {
     { label: "Born", value: born },
     { label: `90s in ${season}`, value: player.nineties ?? NO_VALUE },
     {
-      label: "Turnovers Won",
-      value: hasNineties ? turnoversWon(player) : NO_VALUE,
+      label: "Balls Won",
+      value: hasNineties ? ballsWon(player) : NO_VALUE,
       tooltip: "Tackles won, aerial duels won and interceptions",
     },
     {
-      label: "Turnovers Won / 90",
-      value: hasNineties ? turnoversWonPer90(player).toFixed(1) : NO_VALUE,
+      label: "Balls Won / 90",
+      value: hasNineties ? ballsWonPer90(player).toFixed(1) : NO_VALUE,
     },
     { label: "Salary", value: formatSalary(player.guaranteed_comp) },
     {

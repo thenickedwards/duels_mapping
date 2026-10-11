@@ -37,6 +37,7 @@ import FilterChip from "./styles/FilterChip";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import RightAlignedCenterCell from "./components/datagrid/RightAlignedCenterCell";
+import BelowFloorCell from "./components/datagrid/BelowFloorCell";
 import CustomColumnMenu from "./components/datagrid/CustomColumnMenu";
 import { inputStyle } from "./styles/inputStyles";
 import CustomSelect from "./components/inputs/CustomSelect";
@@ -50,7 +51,12 @@ import PlayerYearControls from "./components/players/PlayerYearControls";
 import SquadSelect from "./components/inputs/SquadSelect";
 import TuningDrawer from "./components/players/TuningDrawer";
 import { textActionButtonStyle } from "./styles/buttonStyles";
-import { costPerSmetz, formatSalary } from "@/utils/format-salary";
+import { ballsWon, ballsWonPer90AboveFloor } from "@/utils/balls-won";
+import {
+  costPerBallWon,
+  costPerSmetz,
+  formatSalary,
+} from "@/utils/format-salary";
 import {
   defaultWeightInputs,
   parseWeightInputs,
@@ -296,6 +302,8 @@ export default function PlayersPage() {
     );
   };
 
+  // The grid's header tooltip is the column's description, falling back to the short
+  // header; spell the stat out instead.
   const columns = [
     {
       field: "schmetzer_rk",
@@ -344,6 +352,7 @@ export default function PlayersPage() {
       field: "nineties",
       headerName: "90s",
       displayName: "90s",
+      description: "Minutes in 90s",
       width: 100,
       headerAlign: "center",
       renderCell: (params) => <RightAlignedCenterCell value={params.value} />,
@@ -420,6 +429,27 @@ export default function PlayersPage() {
       renderCell: (params) => <RightAlignedCenterCell value={params.value} />,
     },
     {
+      field: "balls_won",
+      headerName: "bw",
+      displayName: "Balls Won",
+      width: 100,
+      headerAlign: "center",
+      renderCell: (params) => <RightAlignedCenterCell value={params.value} />,
+    },
+    {
+      field: "balls_won_per90",
+      headerName: "bw/90",
+      displayName: "Balls Won / 90",
+      width: 100,
+      headerAlign: "center",
+      renderCell: (params) =>
+        params.value == null ? (
+          <BelowFloorCell nineties={params.row.nineties} />
+        ) : (
+          <RightAlignedCenterCell value={params.value.toFixed(1)} />
+        ),
+    },
+    {
       field: "guaranteed_comp",
       headerName: "salary",
       displayName: "Salary (in Guaranteed Compensation)",
@@ -445,7 +475,20 @@ export default function PlayersPage() {
         />
       ),
     },
-  ];
+    {
+      field: "cost_per_ball_won",
+      headerName: "$/bw",
+      displayName: "Guaranteed Comp per Ball Won",
+      width: 120,
+      headerAlign: "right",
+      renderCell: (params) => (
+        <RightAlignedCenterCell
+          value={formatSalary(params.value)}
+          align="right"
+        />
+      ),
+    },
+  ].map((column) => ({ description: column.displayName, ...column }));
 
   // Counts chosen values rather than active filters -- two clubs and a position reads
   // as (3) -- and ignores the default outfield selection, which is the baseline view
@@ -483,12 +526,19 @@ export default function PlayersPage() {
   );
 
   // $/smetz is derived per row, after any re-scoring, so it sorts like a stored column
-  // and moves with custom weights.
+  // and moves with custom weights. Balls won and $/bw are raw counts, untouched by
+  // the weights, but derived here too so they sort like stored columns.
   const rows = rawRows.map((row, i) => {
     const base = { id: i, ...row };
     const tuned = tunedById?.get(base.id);
     const merged = tuned ? { ...base, ...tuned } : base;
-    return { ...merged, cost_per_smetz: costPerSmetz(merged) };
+    return {
+      ...merged,
+      cost_per_smetz: costPerSmetz(merged),
+      balls_won: ballsWon(merged),
+      balls_won_per90: ballsWonPer90AboveFloor(merged),
+      cost_per_ball_won: costPerBallWon(merged),
+    };
   });
 
   // The dialog plots a score against the league average and maximum, so those move

@@ -9,6 +9,8 @@ export function formatSalary(value) {
   return `$${Math.round(value).toLocaleString("en-US")}`;
 }
 
+import { ballsWon } from "./balls-won";
+
 // Guaranteed compensation per Schmetzer point: what the club paid for each point of
 // contested possession, so lower is better. Derived here rather than stored, so it
 // follows the score under custom weights. Null without a salary on record, and for a
@@ -19,4 +21,13 @@ export function costPerSmetz(row) {
   const score = Number(row?.schmetzer_score);
   if (row?.guaranteed_comp == null || !(comp > 0) || !(score > 0)) return null;
   return Math.round(comp / score);
+}
+
+// Guaranteed compensation per ball won (tackles won, aerial duels won, interceptions).
+// Null without a salary on record or without a ball won to divide by.
+export function costPerBallWon(row) {
+  const comp = Number(row?.guaranteed_comp);
+  const won = ballsWon(row);
+  if (row?.guaranteed_comp == null || !(comp > 0) || !(won > 0)) return null;
+  return Math.round(comp / won);
 }
