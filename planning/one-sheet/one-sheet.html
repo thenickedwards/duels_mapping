@@ -67,14 +67,14 @@
   .card li:last-child { margin-bottom: 0; }
 
   /* Player card */
-  .drill { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: start; }
-  .drill-text { grid-column: span 2; }
+  .drill { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: stretch; }
+  .drill-text { grid-column: span 2; display: flex; flex-direction: column; }
   .shot { position: relative; }
   .shot img { display: block; width: 100%; }
   .pin { position: absolute; width: 17px; height: 17px; font-size: 10pt; line-height: 13px; border-radius: 50%; background: var(--lime); border: 1.5px solid var(--ink); font-family: "Bebas Neue", sans-serif; font-size: 11pt; line-height: 15px; text-align: center; }
   .drill .lead { margin: 0 0 6px; font-size: 9.6pt; }
-  .drill ol { list-style: none; margin: 0 0 0 7.5px; padding: 0; counter-reset: n; }
-  .drill li { counter-increment: n; position: relative; padding-left: 26px; margin-bottom: 6px; font-size: 9.4pt; line-height: 1.3; }
+  .drill ol { list-style: none; margin: 0 0 0 7.5px; padding: 2px 0 4px; counter-reset: n; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+  .drill li { counter-increment: n; position: relative; padding-left: 26px; margin-bottom: 0; font-size: 9.8pt; line-height: 1.3; }
   .drill li::before { content: counter(n); position: absolute; left: 0; top: 0; width: 17px; height: 17px; border-radius: 50%; background: var(--lime); border: 1.5px solid var(--ink); font-family: "Bebas Neue", sans-serif; font-size: 11pt; line-height: 15px; text-align: center; }
   .drill li b { font-weight: 800; }
   .drill li .d { color: var(--ink); }
@@ -94,6 +94,7 @@
   footer .ln { display: flex; align-items: baseline; }
   footer .ic { width: 1.5em; flex-shrink: 0; text-align: center; margin-right: 0.3em; line-height: 1; position: relative; top: 0.12em; }
   footer .links { text-align: right; }
+  footer .link-ic { height: 0.62em; width: auto; margin-right: 0.3em; vertical-align: 0.02em; }
   footer .url { font-family: "Bebas Neue", sans-serif; font-size: 17pt; color: var(--ink); text-decoration: none; letter-spacing: 0.03em; line-height: 1; }
   footer .src { font-size: 7.6pt; color: var(--muted); margin-top: 4px; }
 </style>
@@ -133,8 +134,8 @@
     <h3>Why is Duels Mapping useful?</h3>
     <div class="why">
       <div><b>Credit for the dirty work</b>Goals get headlines, but someone has to win the tackles and headers that keep the ball out of their own net and set up scorers to score.</div>
-      <div><b>Bang for your buck</b>MLSPA salary data alongside each score, showing club spend per ball&nbsp;won.</div>
-      <div><b>Nine seasons of data</b>Historical player data back to 2018, ranked and searchable. 30&nbsp;clubs,&nbsp;2,372&nbsp;players,&nbsp;and 6,752&nbsp;unique&nbsp;player&#8209;seasons.</div>
+      <div><b>Bang for your buck</b>MLSPA salary data alongside each score shows club spending per ball&nbsp;won.</div>
+      <div><b>Nine seasons of data</b>Historical data since 2018: ranked, searchable player data for 30&nbsp;clubs,&nbsp;2,372&nbsp;players,&nbsp;and 6,752&nbsp;unique&nbsp;player&#8209;seasons.</div>
     </div>
   </section>
 
@@ -161,8 +162,8 @@
         <div class="who">Stories &amp; talking points</div>
         <ul>
           <li>Pull a stat for a match preview: who wins the midfield battle?</li>
-          <li>Settle a debate: is your center back good in the air?</li>
-          <li>Follow a player&rsquo;s rise or decline across seasons</li>
+          <li>Backed by the numbers: is your center back good in the air?</li>
+          <li>Follow players&rsquo; rise or decline across seasons</li>
         </ul>
       </div>
     </div>
@@ -183,11 +184,11 @@
         <h3>Click a player to drill down</h3>
         <ol>
           <li><b>Fact sheet:</b> <span class="d">club, nationality, age, minutes, salary</span><span class="ben">Basic player info at a glance</span></li>
-          <li><b>Schmetzer Score:</b> <span class="d">the score and league rank</span><span class="ben">Understand player performance within the league</span></li>
+          <li><b>Schmetzer Score:</b> <span class="d">score and rank in the context of the league</span><span class="ben">Understand player performance within the league</span></li>
           <li><b>Player vs MLS:</b> <span class="d">each raw stat against league average and high</span><span class="ben">Assess a player&rsquo;s technical skills and deficits</span></li>
           <li><b>Balls won per 90:</b> <span class="d">tackles, aerials and interceptions per game</span><span class="ben">Anticipate balls won by a player for each match</span></li>
           <li><b>Aerial duels won vs lost:</b> <span class="d">the split and win rate</span><span class="ben">How likely a player is to win a header</span></li>
-          <li><b>Year-over-year trend:</b> <span class="d">score by season since 2018</span><span class="ben">Track improvement, regression or stagnation</span></li>
+          <li><b>Year-over-year trend:</b> <span class="d">score for each season played since 2018</span><span class="ben">Track improvement, regression or stagnation</span></li>
         </ol>
       </div>
     </div>
@@ -200,7 +201,7 @@
       <div class="ln contact"><span class="ic">&#x26A1;</span><span>If you&rsquo;d like to get in touch, email me at <a href="mailto:nickedwards.dev@gmail.com">nickedwards.dev@gmail.com</a></span></div>
     </div>
     <div class="links">
-      <a class="url" href="https://duels-mapping.vercel.app">duels-mapping.vercel.app</a>
+      <a class="url" href="https://duels-mapping.vercel.app"><svg class="link-ic" viewBox="0 0 640 512" aria-hidden="true"><path fill="currentColor" d="M579.8 267.7c56.5-56.5 56.5-148 0-204.5c-50-50-128.8-56.5-186.3-15.4l-1.6 1.1c-14.4 10.3-17.7 30.3-7.4 44.6s30.3 17.7 44.6 7.4l1.6-1.1c32.1-22.9 76-19.3 103.8 8.6c31.5 31.5 31.5 82.5 0 114L422.3 334.8c-31.5 31.5-82.5 31.5-114 0c-27.9-27.9-31.5-71.8-8.6-103.8l1.1-1.6c10.3-14.4 6.9-34.4-7.4-44.6s-34.4-6.9-44.6 7.4l-1.1 1.6C206.5 251.2 213 330 263 380c56.5 56.5 148 56.5 204.5 0L579.8 267.7zM60.2 244.3c-56.5 56.5-56.5 148 0 204.5c50 50 128.8 56.5 186.3 15.4l1.6-1.1c14.4-10.3 17.7-30.3 7.4-44.6s-30.3-17.7-44.6-7.4l-1.6 1.1c-32.1 22.9-76 19.3-103.8-8.6C74 372 74 321 105.5 289.5L217.7 177.2c31.5-31.5 82.5-31.5 114 0c27.9 27.9 31.5 71.8 8.6 103.9l-1.1 1.6c-10.3 14.4-6.9 34.4 7.4 44.6s34.4 6.9 44.6-7.4l1.1-1.6C433.5 260.8 427 182 377 132c-56.5-56.5-148-56.5-204.5 0L60.2 244.3z"/></svg>duels-mapping.vercel.app</a>
     </div>
   </footer>
 
