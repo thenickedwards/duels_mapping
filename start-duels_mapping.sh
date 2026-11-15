@@ -31,7 +31,9 @@
 # Load environment variables
 source .env 
 echo -e "Loading \033[3m$VENV_NAME\033[0m environment variables..."
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# BASH_SOURCE is empty under zsh, where a sourced script's path is in $0 instead. cd's output is
+# discarded so a chpwd hook (or CDPATH) printing on directory change can't leak into SCRIPT_DIR
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" >/dev/null 2>&1 && pwd)"
 
 action="$1"
 
