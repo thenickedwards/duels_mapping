@@ -19,7 +19,7 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; background: #fff; color: var(--ink); }
   body { font-family: "Nunito Sans", sans-serif; font-size: 10.3pt; line-height: 1.38; }
-  .page { width: 8.5in; height: 11in; padding: 0.34in 0.55in 0.34in; display: flex; flex-direction: column; overflow: hidden; }
+  .page { width: 8.5in; height: 11in; padding: 0.34in 0.55in 0.3in; display: flex; flex-direction: column; overflow: hidden; }
   a { color: inherit; }
   h1, h2, h3 { font-family: "Bebas Neue", sans-serif; font-weight: 400; letter-spacing: 0.02em; margin: 0; }
 
@@ -31,14 +31,15 @@
   .brand h1 { font-size: 39pt; line-height: 0.95; white-space: nowrap; }
   .brand h1 span { background: linear-gradient(transparent 55%, var(--lime) 55%); padding: 0 2px; }
   .tagline { font-size: 15pt; font-weight: 800; margin-top: 7px; line-height: 1.2; }
-  .sub { color: #333; margin-top: 10px; text-align: left; }
+  .sub { color: #333; margin-top: 6px; text-align: left; }
   .sub b { color: var(--ink); }
+  .soon { font-size: 8.4pt; color: var(--muted); margin-top: -3px; text-align: right; padding-right: 10px; }
   .qr { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; text-decoration: none; }
   .qr img { width: 1.1in; height: 1.1in; display: block; border: 6px solid #fff; outline: 2px solid var(--ink); }
   .qr .cap { font-size: 7.1pt; font-weight: 700; letter-spacing: -0.01em; margin-top: 6px; color: #1a66c9; text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
 
   /* Score strip */
-  .score { margin-top: 0.11in; background: var(--blue); color: #fff; padding: 11px 16px; display: grid; grid-template-columns: 1.95fr 2fr; gap: 14px; align-items: center; }
+  .score { margin-top: 0.09in; background: var(--blue); color: #fff; padding: 9px 16px; display: grid; grid-template-columns: 2.35fr 2fr; gap: 14px; align-items: center; }
   .score h2 { font-size: 20pt; line-height: 1; }
   .score p { margin: 4px 0 0; font-size: 9.3pt; opacity: 0.92; }
   .weights { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; text-align: center; }
@@ -77,7 +78,7 @@
   .drill li::before { content: counter(n); position: absolute; left: 0; top: 0; width: 17px; height: 17px; border-radius: 50%; background: var(--lime); border: 1.5px solid var(--ink); font-family: "Bebas Neue", sans-serif; font-size: 11pt; line-height: 15px; text-align: center; }
   .drill li b { font-weight: 800; }
   .drill li .d { color: var(--ink); }
-  .drill li .ben { color: var(--ink); font-style: italic; font-weight: 600; display: block; padding-left: 14px; }
+  .drill li .ben { color: var(--ink); font-style: italic; font-weight: 600; display: block; padding-left: 22px; }
   .drill li .ben::before { content: "\2192"; color: var(--blue); font-weight: 800; font-style: normal; margin-right: 5px; }
 
   /* Footer */
@@ -104,7 +105,8 @@
     <img class="art" src="tackle.png" alt="">
     <div class="brand"><div class="brand-inner">
       <h1>What is <span>Duels Mapping</span>?</h1>
-      <div class="sub"><b>Duels Mapping measures how soccer players win the ball.</b> Every MLS player is scored and ranked using stats related to contesting possession of the ball.</div>
+      <div class="sub"><b>Duels Mapping measures how soccer players win the ball.</b> Every player in MLS* is scored and ranked using stats related to contesting possession of the ball.</div>
+      <div class="soon">* More leagues coming soon!</div>
     </div></div>
     <a class="qr" href="https://duels-mapping.vercel.app">
       <img src="qr.svg" alt="QR code linking to duels-mapping.vercel.app">
@@ -115,7 +117,7 @@
   <div class="score">
     <div>
       <h2>The Schmetzer Score</h2>
-      <p>Five ball-winning stats are weighted and combined into one composite metric. (Named for Sounders coach Brian Schmetzer and his favorite stat: duels won.)</p>
+      <p>Five ball-winning stats are weighted and combined into one composite metric. (Named for Sounders coach Brian Schmetzer, whose favorite stat to open post-game pressers is duels won.)</p>
     </div>
     <div class="weights">
       <div class="w"><b>+1.5</b><span>Tackle won</span></div>
@@ -130,9 +132,9 @@
   <section>
     <h3>Why is Duels Mapping useful?</h3>
     <div class="why">
-      <div><b>Credit for the dirty work</b>Goals get headlines, but someone has to win the tackles and duels that keep the ball out of their own net and set up scorers to score.</div>
+      <div><b>Credit for the dirty work</b>Goals get headlines, but someone has to win the tackles and headers that keep the ball out of their own net and set up scorers to score.</div>
       <div><b>Bang for your buck</b>MLSPA salary data alongside each score, showing club spend per ball&nbsp;won.</div>
-      <div><b>Nine seasons deep</b>Historical player data tracked back to 2018, ranked and searchable. 30&nbsp;clubs,&nbsp;2,372&nbsp;players,&nbsp;and 6,752&nbsp;unique&nbsp;player&#8209;seasons.</div>
+      <div><b>Nine seasons of data</b>Historical player data back to 2018, ranked and searchable. 30&nbsp;clubs,&nbsp;2,372&nbsp;players,&nbsp;and 6,752&nbsp;unique&nbsp;player&#8209;seasons.</div>
     </div>
   </section>
 
@@ -142,15 +144,15 @@
       <div class="card">
         <div class="who">Tactics &amp; strategy</div>
         <ul>
-          <li>Compare two players before a key 1v1 matchup</li>
+          <li>Compare two players to prep for 1v1 matchups in-game</li>
           <li>Exploit opponent weaknesses on set pieces and in the run of play</li>
-          <li>Find players who win the ball back to start counter-attacks</li>
+          <li>Pinpoint players who break up attacks and trigger counters</li>
         </ul>
       </div>
       <div class="card">
         <div class="who">The business of soccer</div>
         <ul>
-          <li>Sort by cost per ball won to spot undervalued players</li>
+          <li>Sort by cost per ball won to uncover undervalued players</li>
           <li>Identify breakout youngsters and veterans who have lost a step</li>
           <li>Filter by position, age and minutes to build a scouting shortlist</li>
         </ul>
@@ -159,7 +161,7 @@
         <div class="who">Stories &amp; talking points</div>
         <ul>
           <li>Pull a stat for a match preview: who wins the midfield battle?</li>
-          <li>Settle the debate: is your center back actually good in the air?</li>
+          <li>Settle a debate: is your center back good in the air?</li>
           <li>Follow a player&rsquo;s rise or decline across seasons</li>
         </ul>
       </div>
@@ -170,21 +172,21 @@
     <div class="drill">
       <div class="shot">
         <img src="player-card.png" alt="Cristian Roldan's player card on Duels Mapping">
-        <div class="pin" style="left:44.7%;top:5.9%">1</div>
-        <div class="pin" style="left:93.3%;top:5.9%">2</div>
-        <div class="pin" style="left:44.7%;top:33.8%">3</div>
-        <div class="pin" style="left:93.3%;top:33.8%">4</div>
-        <div class="pin" style="left:44.7%;top:70.1%">5</div>
-        <div class="pin" style="left:93.3%;top:70.1%">6</div>
+        <div class="pin" style="left:-1.45%;top:5.9%">1</div>
+        <div class="pin" style="left:47.3%;top:5.9%">2</div>
+        <div class="pin" style="left:-1.45%;top:33.8%">3</div>
+        <div class="pin" style="left:47.3%;top:33.8%">4</div>
+        <div class="pin" style="left:-1.45%;top:70.1%">5</div>
+        <div class="pin" style="left:47.3%;top:70.1%">6</div>
       </div>
       <div class="drill-text">
         <h3>Click a player to drill down</h3>
         <ol>
           <li><b>Fact sheet:</b> <span class="d">club, nationality, age, minutes, salary</span><span class="ben">Basic player info at a glance</span></li>
-          <li><b>Schmetzer Score:</b> <span class="d">the score and league rank</span><span class="ben">See where a player stands against the rest of MLS</span></li>
-          <li><b>Player vs MLS:</b> <span class="d">each raw stat against league average and high</span><span class="ben">Spot exactly what a player does well</span></li>
-          <li><b>Balls won per 90:</b> <span class="d">tackles, aerials and interceptions per game</span><span class="ben">How many balls to expect a player to win each match</span></li>
-          <li><b>Aerial duels won vs lost:</b> <span class="d">the split and win rate</span><span class="ben">How likely they are to win a header</span></li>
+          <li><b>Schmetzer Score:</b> <span class="d">the score and league rank</span><span class="ben">Understand player performance within the league</span></li>
+          <li><b>Player vs MLS:</b> <span class="d">each raw stat against league average and high</span><span class="ben">Assess a player&rsquo;s technical skills and deficits</span></li>
+          <li><b>Balls won per 90:</b> <span class="d">tackles, aerials and interceptions per game</span><span class="ben">Anticipate balls won by a player for each match</span></li>
+          <li><b>Aerial duels won vs lost:</b> <span class="d">the split and win rate</span><span class="ben">How likely a player is to win a header</span></li>
           <li><b>Year-over-year trend:</b> <span class="d">score by season since 2018</span><span class="ben">Track improvement, regression or stagnation</span></li>
         </ol>
       </div>
