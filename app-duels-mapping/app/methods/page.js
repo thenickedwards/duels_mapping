@@ -161,6 +161,115 @@ export default function MethodsPage() {
         </Box>
         <Box my={"60px"} sx={{ "& > *:not(:last-child)": { mb: 2 } }}>
           <Typography variant="h2" fontSize={"1.25rem"}>
+            What Makes a Good Score?
+          </Typography>
+          <Typography variant="body1">
+            A Schmetzer Score has no ceiling &mdash; there is no limit to the
+            tackles or duels a player can win &mdash; so a number on its own
+            can be hard to place. The table below is a rule of thumb for a
+            full season: 50 is about average, 75 is good, 100 is very good and
+            150 is elite.
+          </Typography>
+          <TableContainer sx={{ overflowX: "auto", my: 3 }}>
+            <Table size="small" aria-label="Schmetzer Score guide">
+              <TableHead>
+                <TableRow>
+                  {[
+                    "Score",
+                    "Level",
+                    "Players per Season",
+                    "Score / 90",
+                    "Balls Won",
+                    "Balls Won / 90",
+                  ].map((heading, index) => (
+                    <TableCell
+                      key={heading}
+                      align={index > 1 ? "right" : "left"}
+                      sx={{ fontWeight: 700, whiteSpace: "nowrap" }}
+                    >
+                      {heading}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {[
+                  ["150+", "Elite (top 2%)", "10–15", "5–6.5", "120+", "4–5"],
+                  [
+                    "125–150",
+                    "Excellent (top 6%)",
+                    "~25",
+                    "4.5–5.5",
+                    "100–120",
+                    "3.5–4.5",
+                  ],
+                  [
+                    "100–125",
+                    "Very good (top 14%)",
+                    "~50",
+                    "4–5",
+                    "80–100",
+                    "3–4",
+                  ],
+                  [
+                    "75–100",
+                    "Good (top 25%)",
+                    "~80",
+                    "3.5–4.5",
+                    "60–80",
+                    "2.5–4",
+                  ],
+                  [
+                    "50–75",
+                    "Above average",
+                    "~120",
+                    "2.5–4.5",
+                    "40–60",
+                    "2–3.5",
+                  ],
+                  ["25–50", "Below average", "~160", "2–4", "25–40", "2–3.5"],
+                  ["<25", "Low (bottom 25%)", "~155", "<2", "<20", "<2.5"],
+                ].map((row) => (
+                  <TableRow key={row[0]}>
+                    {row.map((value, index) => (
+                      <TableCell
+                        key={index}
+                        align={index > 1 ? "right" : "left"}
+                        sx={{
+                          fontVariantNumeric: "tabular-nums",
+                          whiteSpace: "nowrap",
+                          fontWeight: index === 0 ? 700 : 400,
+                        }}
+                      >
+                        {value}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <Typography variant="body1">
+            The ranges are approximate. They are drawn from the 2024 through
+            2026 seasons and count only players past the five 90s threshold,
+            roughly 600 a season. Balls won is tackles won, aerial duels won
+            and interceptions together. The per 90 columns overlap between
+            levels because the levels are set on season totals: a level mixes
+            players who won the ball at a high rate in fewer minutes with
+            steadier players who featured all year.
+          </Typography>
+          <Typography variant="body1">
+            Two things move a score besides ability. Minutes are the first
+            &mdash; a low total often means a player did not feature much, and
+            the per 90 column is the fairer read for them and for a season
+            still in progress. Position is the second: defenders and
+            midfielders do most of the ball-winning, so a typical regular
+            scores around 68 as a defender, 56 as a midfielder, 24 as a
+            forward and 13 as a goalkeeper.
+          </Typography>
+        </Box>
+        <Box my={"60px"} sx={{ "& > *:not(:last-child)": { mb: 2 } }}>
+          <Typography variant="h2" fontSize={"1.25rem"}>
             Fine-Tuning the Weights
           </Typography>
           <Typography variant="body1">
