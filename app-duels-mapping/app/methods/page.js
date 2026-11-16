@@ -164,11 +164,12 @@ export default function MethodsPage() {
             What Makes a Good Score?
           </Typography>
           <Typography variant="body1">
-            A Schmetzer Score has no ceiling &mdash; there is no limit to the
-            tackles or duels a player can win &mdash; so a number on its own
-            can be hard to place. The table below is a rule of thumb for a
-            full season: 50 is about average, 75 is good, 100 is very good and
-            150 is elite.
+            Like goals or saves, there is no limit to the tackles or duels a
+            player can win, so there is no ceiling to a player&apos;s Schmetzer
+            Score. And while a ranking helps, on its own as a single number it
+            can be hard to place. The table below offers a good rule of thumb
+            for a full season: 50 is about average, 75 is good, 100 is very
+            good and 150 is elite, i.e. top 10-15 players in the league.
           </Typography>
           <TableContainer sx={{ overflowX: "auto", my: 3 }}>
             <Table size="small" aria-label="Schmetzer Score guide">
@@ -249,24 +250,6 @@ export default function MethodsPage() {
               </TableBody>
             </Table>
           </TableContainer>
-          <Typography variant="body1">
-            The ranges are approximate. They are drawn from the 2024 through
-            2026 seasons and count only players past the five 90s threshold,
-            roughly 600 a season. Balls won is tackles won, aerial duels won
-            and interceptions together. The per 90 columns overlap between
-            levels because the levels are set on season totals: a level mixes
-            players who won the ball at a high rate in fewer minutes with
-            steadier players who featured all year.
-          </Typography>
-          <Typography variant="body1">
-            Two things move a score besides ability. Minutes are the first
-            &mdash; a low total often means a player did not feature much, and
-            the per 90 column is the fairer read for them and for a season
-            still in progress. Position is the second: defenders and
-            midfielders do most of the ball-winning, so a typical regular
-            scores around 68 as a defender, 56 as a midfielder, 24 as a
-            forward and 13 as a goalkeeper.
-          </Typography>
         </Box>
         <Box my={"60px"} sx={{ "& > *:not(:last-child)": { mb: 2 } }}>
           <Typography variant="h2" fontSize={"1.25rem"}>
